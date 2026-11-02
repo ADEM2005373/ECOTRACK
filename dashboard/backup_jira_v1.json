@@ -1,0 +1,1114 @@
+{
+  "apiVersion": "v2",
+  "command": "jira.workitem.query",
+  "request": {
+    "jql": "project = SCRUM",
+    "site": "ouerhaniadem0805.atlassian.net"
+  },
+  "data": {
+    "issues": [
+      {
+        "id": "10095",
+        "key": "SCRUM-32",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10095",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-32",
+        "summary": "[TASK-04][Dispatch & Push] Endpoints Dispatch T2 et Notifications Push",
+        "status": {
+          "id": "10000",
+          "name": "À faire",
+          "statusCategory": {
+            "key": "new",
+            "name": "A faire"
+          }
+        },
+        "issueType": {
+          "id": "10003",
+          "name": "Tâche"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:b33b67c3-4eb2-4b0a-97e9-d4f327a3a578",
+          "displayName": "Ahmed Salah"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-10-16T15:36:49.529+0100",
+        "updated": "2026-10-16T15:36:49.596+0100"
+      },
+      {
+        "id": "10094",
+        "key": "SCRUM-31",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10094",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-31",
+        "summary": "[US-08][IA Gateway] Passerelle Node-FastAPI et Prévisualisation IA",
+        "status": {
+          "id": "10000",
+          "name": "À faire",
+          "statusCategory": {
+            "key": "new",
+            "name": "A faire"
+          }
+        },
+        "issueType": {
+          "id": "10003",
+          "name": "Tâche"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:a46cf953-3fbb-417c-b408-549124322ead",
+          "displayName": "Hiba Dhouib"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-10-16T15:36:30.672+0100",
+        "updated": "2026-10-16T15:38:41.970+0100"
+      },
+      {
+        "id": "10093",
+        "key": "SCRUM-30",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10093",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-30",
+        "summary": "[TASK-03][Geo & Carte] Carte Interactive Mobile et Requêtes 2dsphere",
+        "status": {
+          "id": "10000",
+          "name": "À faire",
+          "statusCategory": {
+            "key": "new",
+            "name": "A faire"
+          }
+        },
+        "issueType": {
+          "id": "10003",
+          "name": "Tâche"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:b33b67c3-4eb2-4b0a-97e9-d4f327a3a578",
+          "displayName": "Ahmed Salah"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-10-16T15:36:17.028+0100",
+        "updated": "2026-10-16T15:36:17.113+0100"
+      },
+      {
+        "id": "10092",
+        "key": "SCRUM-29",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10092",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-29",
+        "summary": "[US-02][Admin & Audit] Gestion des Utilisateurs, Rôles et AuditLogs",
+        "status": {
+          "id": "10000",
+          "name": "À faire",
+          "statusCategory": {
+            "key": "new",
+            "name": "A faire"
+          }
+        },
+        "issueType": {
+          "id": "10003",
+          "name": "Tâche"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-10-16T15:36:09.863+0100",
+        "updated": "2026-10-16T15:38:02.502+0100"
+      },
+      {
+        "id": "10091",
+        "key": "SCRUM-28",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10091",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-28",
+        "summary": "[TASK-02][Workflow & Interventions] Schéma Interventions et Moteur de Transitions T1-T4",
+        "status": {
+          "id": "10000",
+          "name": "À faire",
+          "statusCategory": {
+            "key": "new",
+            "name": "A faire"
+          }
+        },
+        "issueType": {
+          "id": "10003",
+          "name": "Tâche"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:4d6a91b9-fc55-4efc-9bb7-b57c98cc5be3",
+          "displayName": "sarahsou2016"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-10-16T15:29:51.944+0100",
+        "updated": "2026-10-16T15:30:58.674+0100"
+      },
+      {
+        "id": "10090",
+        "key": "SCRUM-27",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10090",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-27",
+        "summary": "[TASK-01][FastAPI & Catégories] Squelette FastAPI, Inférence /v1/classify et CRUD Catégories",
+        "status": {
+          "id": "10000",
+          "name": "À faire",
+          "statusCategory": {
+            "key": "new",
+            "name": "A faire"
+          }
+        },
+        "issueType": {
+          "id": "10003",
+          "name": "Tâche"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:a46cf953-3fbb-417c-b408-549124322ead",
+          "displayName": "Hiba Dhouib"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-10-16T15:29:23.860+0100",
+        "updated": "2026-10-16T15:29:43.141+0100"
+      },
+      {
+        "id": "10089",
+        "key": "SCRUM-26",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10089",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-26",
+        "summary": "[US-03][Reports & Upload] API POST /reports, Purge EXIF et Capture Photo Citoyen",
+        "status": {
+          "id": "10003",
+          "name": "Terminé(e)",
+          "statusCategory": {
+            "key": "done",
+            "name": "Terminé"
+          }
+        },
+        "issueType": {
+          "id": "10003",
+          "name": "Tâche"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:b33b67c3-4eb2-4b0a-97e9-d4f327a3a578",
+          "displayName": "Ahmed Salah"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-10-16T15:27:54.896+0100",
+        "updated": "2026-10-19T14:54:44.150+0100"
+      },
+      {
+        "id": "10088",
+        "key": "SCRUM-25",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10088",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-25",
+        "summary": "[US-01][Auth & RBAC] Collection Users, API JWT/Refresh et Middlewares RBAC",
+        "status": {
+          "id": "10000",
+          "name": "À faire",
+          "statusCategory": {
+            "key": "new",
+            "name": "A faire"
+          }
+        },
+        "issueType": {
+          "id": "10003",
+          "name": "Tâche"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-10-14T11:42:20.596+0100",
+        "updated": "2026-10-22T14:40:04.771+0100"
+      },
+      {
+        "id": "10087",
+        "key": "SCRUM-24",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10087",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-24",
+        "summary": "Macro-Sprint 5 : Intégration Bout-en-Bout, QA, Performance & Déploiement",
+        "status": {
+          "id": "10000",
+          "name": "À faire",
+          "statusCategory": {
+            "key": "new",
+            "name": "A faire"
+          }
+        },
+        "issueType": {
+          "id": "10001",
+          "name": "Epic"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-10-14T11:23:39.434+0100",
+        "updated": "2026-10-14T11:29:11.693+0100"
+      },
+      {
+        "id": "10086",
+        "key": "SCRUM-23",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10086",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-23",
+        "summary": "Macro-Sprint 4 : Applications Mobiles Citoyen & Ouvrier Terrain (Expo)",
+        "status": {
+          "id": "10000",
+          "name": "À faire",
+          "statusCategory": {
+            "key": "new",
+            "name": "A faire"
+          }
+        },
+        "issueType": {
+          "id": "10001",
+          "name": "Epic"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-10-14T11:23:31.580+0100",
+        "updated": "2026-10-14T11:28:07.646+0100"
+      },
+      {
+        "id": "10085",
+        "key": "SCRUM-22",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10085",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-22",
+        "summary": "Macro-Sprint 3 : Microservice IA, Qualification & Dashboard Admin/Analytics",
+        "status": {
+          "id": "10000",
+          "name": "À faire",
+          "statusCategory": {
+            "key": "new",
+            "name": "A faire"
+          }
+        },
+        "issueType": {
+          "id": "10001",
+          "name": "Epic"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:a46cf953-3fbb-417c-b408-549124322ead",
+          "displayName": "Hiba Dhouib"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-10-14T11:23:23.406+0100",
+        "updated": "2026-10-21T09:12:35.543+0100"
+      },
+      {
+        "id": "10084",
+        "key": "SCRUM-21",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10084",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-21",
+        "summary": "Macro-Sprint 2 : Core Backend, Signalement & Géolocalisation (Geo-Map)",
+        "status": {
+          "id": "10000",
+          "name": "À faire",
+          "statusCategory": {
+            "key": "new",
+            "name": "A faire"
+          }
+        },
+        "issueType": {
+          "id": "10001",
+          "name": "Epic"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:b33b67c3-4eb2-4b0a-97e9-d4f327a3a578",
+          "displayName": "Ahmed Salah"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-10-14T11:23:15.161+0100",
+        "updated": "2026-10-21T09:12:18.912+0100"
+      },
+      {
+        "id": "10083",
+        "key": "SCRUM-20",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10083",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-20",
+        "summary": "Macro-Sprint 1 : Fondations, Architecture, Sécurité & Auth (RBAC)",
+        "status": {
+          "id": "10000",
+          "name": "À faire",
+          "statusCategory": {
+            "key": "new",
+            "name": "A faire"
+          }
+        },
+        "issueType": {
+          "id": "10001",
+          "name": "Epic"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-10-14T11:23:06.771+0100",
+        "updated": "2026-10-21T09:12:02.639+0100"
+      },
+      {
+        "id": "10050",
+        "key": "SCRUM-19",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10050",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-19",
+        "summary": "Créer le Repo GitHub ecotrack-ia, initialiser le projet Python/FastAPI et le README.",
+        "status": {
+          "id": "10000",
+          "name": "À faire",
+          "statusCategory": {
+            "key": "new",
+            "name": "A faire"
+          }
+        },
+        "issueType": {
+          "id": "10002",
+          "name": "Subtask"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:a46cf953-3fbb-417c-b408-549124322ead",
+          "displayName": "Hiba Dhouib"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-09-21T11:16:07.262+0100",
+        "updated": "2026-10-21T08:56:35.146+0100"
+      },
+      {
+        "id": "10049",
+        "key": "SCRUM-18",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10049",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-18",
+        "summary": "Créer le Repo GitHub ecotrack-api, initialiser Node.js/Express, et connecter Mongoose.",
+        "status": {
+          "id": "10000",
+          "name": "À faire",
+          "statusCategory": {
+            "key": "new",
+            "name": "A faire"
+          }
+        },
+        "issueType": {
+          "id": "10002",
+          "name": "Subtask"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-09-21T11:15:32.473+0100",
+        "updated": "2026-10-21T08:56:44.622+0100"
+      },
+      {
+        "id": "10048",
+        "key": "SCRUM-17",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10048",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-17",
+        "summary": "Créer le Repo GitHub ecotrack-web, initialiser React (Vite/CRA) et installer TailwindCSS ou MUI.",
+        "status": {
+          "id": "10000",
+          "name": "À faire",
+          "statusCategory": {
+            "key": "new",
+            "name": "A faire"
+          }
+        },
+        "issueType": {
+          "id": "10002",
+          "name": "Subtask"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:4d6a91b9-fc55-4efc-9bb7-b57c98cc5be3",
+          "displayName": "sarahsou2016"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-09-21T11:15:17.973+0100",
+        "updated": "2026-10-21T08:56:54.122+0100"
+      },
+      {
+        "id": "10047",
+        "key": "SCRUM-16",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10047",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-16",
+        "summary": "CCréer le Repo GitHub ecotrack-mobile, initialiser le projet avec Expo et configurer le README.",
+        "status": {
+          "id": "10000",
+          "name": "À faire",
+          "statusCategory": {
+            "key": "new",
+            "name": "A faire"
+          }
+        },
+        "issueType": {
+          "id": "10002",
+          "name": "Subtask"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:b33b67c3-4eb2-4b0a-97e9-d4f327a3a578",
+          "displayName": "Ahmed Salah"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-09-21T11:15:05.144+0100",
+        "updated": "2026-09-21T11:16:49.564+0100"
+      },
+      {
+        "id": "10046",
+        "key": "SCRUM-15",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10046",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-15",
+        "summary": "Tâche 3 : [DevOps] Configurer les dépôts GitHub et l'environnement (Jours 13 à 15)",
+        "status": {
+          "id": "10003",
+          "name": "Terminé(e)",
+          "statusCategory": {
+            "key": "done",
+            "name": "Terminé"
+          }
+        },
+        "issueType": {
+          "id": "10003",
+          "name": "Tâche"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-09-21T11:14:32.882+0100",
+        "updated": "2026-10-21T08:57:05.529+0100"
+      },
+      {
+        "id": "10045",
+        "key": "SCRUM-14",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10045",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-14",
+        "summary": "[Web] Maquetter la vue \"Carte Interactive (Leaflet)\" avec les filtres. -",
+        "status": {
+          "id": "10003",
+          "name": "Terminé(e)",
+          "statusCategory": {
+            "key": "done",
+            "name": "Terminé"
+          }
+        },
+        "issueType": {
+          "id": "10002",
+          "name": "Subtask"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-09-21T11:13:51.269+0100",
+        "updated": "2026-10-14T08:49:05.811+0100"
+      },
+      {
+        "id": "10044",
+        "key": "SCRUM-13",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10044",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-13",
+        "summary": "[Web] Maquetter le Dashboard Mairie (Statistiques globales).",
+        "status": {
+          "id": "10003",
+          "name": "Terminé(e)",
+          "statusCategory": {
+            "key": "done",
+            "name": "Terminé"
+          }
+        },
+        "issueType": {
+          "id": "10002",
+          "name": "Subtask"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:b33b67c3-4eb2-4b0a-97e9-d4f327a3a578",
+          "displayName": "Ahmed Salah"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-09-21T11:13:33.838+0100",
+        "updated": "2026-10-14T08:49:03.166+0100"
+      },
+      {
+        "id": "10043",
+        "key": "SCRUM-12",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10043",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-12",
+        "summary": "[Mobile] Maquetter l'écran \"Liste des missions de l'intervenant\".",
+        "status": {
+          "id": "10003",
+          "name": "Terminé(e)",
+          "statusCategory": {
+            "key": "done",
+            "name": "Terminé"
+          }
+        },
+        "issueType": {
+          "id": "10002",
+          "name": "Subtask"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:4d6a91b9-fc55-4efc-9bb7-b57c98cc5be3",
+          "displayName": "sarahsou2016"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-09-21T11:13:11.489+0100",
+        "updated": "2026-10-14T08:49:00.308+0100"
+      },
+      {
+        "id": "10042",
+        "key": "SCRUM-11",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10042",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-11",
+        "summary": "[Mobile] Maquetter l'écran \"Login\" et l'écran \"Prendre une photo (GPS/Caméra)\".",
+        "status": {
+          "id": "10003",
+          "name": "Terminé(e)",
+          "statusCategory": {
+            "key": "done",
+            "name": "Terminé"
+          }
+        },
+        "issueType": {
+          "id": "10002",
+          "name": "Subtask"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:a46cf953-3fbb-417c-b408-549124322ead",
+          "displayName": "Hiba Dhouib"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-09-21T11:12:39.999+0100",
+        "updated": "2026-10-14T08:48:54.773+0100"
+      },
+      {
+        "id": "10041",
+        "key": "SCRUM-10",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10041",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-10",
+        "summary": "Tâche 2 : [UI/UX] Créer les maquettes Figma (Jours 9 à 12)",
+        "status": {
+          "id": "10003",
+          "name": "Terminé(e)",
+          "statusCategory": {
+            "key": "done",
+            "name": "Terminé"
+          }
+        },
+        "issueType": {
+          "id": "10003",
+          "name": "Tâche"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:4d6a91b9-fc55-4efc-9bb7-b57c98cc5be3",
+          "displayName": "sarahsou2016"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-09-21T11:09:46.889+0100",
+        "updated": "2026-10-21T09:09:01.663+0100"
+      },
+      {
+        "id": "10040",
+        "key": "SCRUM-9",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10040",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-9",
+        "summary": "Finaliser les schémas JSON (MongoDB) pour Users et Incidents.",
+        "status": {
+          "id": "10003",
+          "name": "Terminé(e)",
+          "statusCategory": {
+            "key": "done",
+            "name": "Terminé"
+          }
+        },
+        "issueType": {
+          "id": "10002",
+          "name": "Subtask"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-09-21T11:07:26.950+0100",
+        "updated": "2026-10-07T23:07:46.890+0100"
+      },
+      {
+        "id": "10039",
+        "key": "SCRUM-8",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10039",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-8",
+        "summary": "Créer le diagramme de Classes global du système. ",
+        "status": {
+          "id": "10003",
+          "name": "Terminé(e)",
+          "statusCategory": {
+            "key": "done",
+            "name": "Terminé"
+          }
+        },
+        "issueType": {
+          "id": "10002",
+          "name": "Subtask"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:a46cf953-3fbb-417c-b408-549124322ead",
+          "displayName": "Hiba Dhouib"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-09-21T11:06:56.634+0100",
+        "updated": "2026-10-07T23:18:03.806+0100"
+      },
+      {
+        "id": "10038",
+        "key": "SCRUM-7",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10038",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-7",
+        "summary": "Dessiner le diagramme de Séquence du \"Signalement d'un incident avec IA\".",
+        "status": {
+          "id": "10003",
+          "name": "Terminé(e)",
+          "statusCategory": {
+            "key": "done",
+            "name": "Terminé"
+          }
+        },
+        "issueType": {
+          "id": "10002",
+          "name": "Subtask"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:4d6a91b9-fc55-4efc-9bb7-b57c98cc5be3",
+          "displayName": "sarahsou2016"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-09-21T11:06:10.079+0100",
+        "updated": "2026-10-21T09:08:11.385+0100"
+      },
+      {
+        "id": "10037",
+        "key": "SCRUM-6",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10037",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-6",
+        "summary": "Dessiner le diagramme de Cas d'Utilisation (Acteurs : Citoyen, Intervenant, Mairie, IA)",
+        "status": {
+          "id": "10003",
+          "name": "Terminé(e)",
+          "statusCategory": {
+            "key": "done",
+            "name": "Terminé"
+          }
+        },
+        "issueType": {
+          "id": "10002",
+          "name": "Subtask"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:b33b67c3-4eb2-4b0a-97e9-d4f327a3a578",
+          "displayName": "Ahmed Salah"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-09-21T11:04:33.880+0100",
+        "updated": "2026-10-10T08:50:46.145+0100"
+      },
+      {
+        "id": "10036",
+        "key": "SCRUM-5",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10036",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-5",
+        "summary": "Tâche 1 : [UML] Réaliser la Modélisation du Système (Jours 4 à 8)",
+        "status": {
+          "id": "10003",
+          "name": "Terminé(e)",
+          "statusCategory": {
+            "key": "done",
+            "name": "Terminé"
+          }
+        },
+        "issueType": {
+          "id": "10003",
+          "name": "Tâche"
+        },
+        "priority": {
+          "id": "3",
+          "name": "Medium"
+        },
+        "assignee": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-09-21T11:00:27.490+0100",
+        "updated": "2026-10-21T09:09:43.630+0100"
+      },
+      {
+        "id": "10003",
+        "key": "SCRUM-4",
+        "self": "https://api.atlassian.com/ex/jira/ec668a5b-c655-41e4-8216-ce3cdeb7e908/rest/api/3/issue/10003",
+        "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-4",
+        "summary": "Sous-tâche 2.1",
+        "status": {
+          "id": "10000",
+          "name": "À faire",
+          "statusCategory": {
+            "key": "new",
+            "name": "A faire"
+          }
+        },
+        "issueType": {
+          "id": "10002",
+          "name": "Subtask"
+        },
+        "assignee": {
+          "accountId": "712020:4d6a91b9-fc55-4efc-9bb7-b57c98cc5be3",
+          "displayName": "sarahsou2016"
+        },
+        "reporter": {
+          "accountId": "712020:63bd0ac7-17c2-4b0a-849d-67d08d240ec6",
+          "displayName": "Adem Ouerhani"
+        },
+        "project": {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "ECOTRACK"
+        },
+        "created": "2026-09-20T18:48:11.775+0100",
+        "updated": "2026-10-21T08:57:22.236+0100"
+      }
+    ]
+  },
+  "meta": {
+    "resourceClass": "entity",
+    "sourceMode": "native",
+    "resourceType": "jira.workitem",
+    "backend": "agg",
+    "meta": {
+      "resourceClass": "entity",
+      "sourceMode": "rest",
+      "apiVersion": "rest-v3",
+      "resourceType": "jira.workitem"
+    }
+  }
+}

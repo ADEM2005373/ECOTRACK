@@ -1,0 +1,10 @@
+{
+  "ecotrack-dashboard-launcher": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "powershell -ExecutionPolicy Bypass -File .agents/scripts/launch-dashboard.ps1"
+      }
+    ]
+  }
+}

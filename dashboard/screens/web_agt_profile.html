@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECOTRACK - WEB_AGT_04_PROFILE (Profil Agent Territorial)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            brand: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            ecodark: '#102c35',
+            ecoactive: '#1b4449',
+            ecoborder: '#355259',
+            ecomuted: '#aec5cb',
+            ecomain: '#059669',
+            ecogreen: '#047857',
+            ecolight: '#6ee7b7',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+    .font-brand { font-family: 'Plus Jakarta Sans', sans-serif; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="h-full antialiased text-slate-800">
+  <div class="flex h-screen w-full overflow-hidden" data-node-id="17:WEB_AGT_PROFILE" data-name="WEB_AGT_04_PROFILE">
+    
+    <!-- ==================== SIDEBAR AGENT (224px) ==================== -->
+    <aside class="bg-ecodark w-[224px] h-full flex flex-col justify-between shrink-0 select-none pb-5 pt-7 px-4 border-r border-[#163a45]">
+      
+      <!-- Top Group: Logo & Nav -->
+      <div class="flex flex-col gap-6">
+        <!-- Logo Brand -->
+        <div class="flex items-center gap-2.5 px-2">
+          <div class="bg-ecomain w-[34px] h-[34px] rounded-[9px] flex items-center justify-center shrink-0 shadow-sm">
+            <i data-lucide="leaf" class="w-5 h-5 text-white"></i>
+          </div>
+          <div class="flex flex-col leading-tight">
+            <span class="font-brand font-bold text-[18px] text-white tracking-tight">ECOTRACK</span>
+            <span class="text-ecomuted text-[10px] tracking-[2px] font-normal uppercase">CONSOLE V2</span>
+          </div>
+        </div>
+
+        <!-- Territoire Badge -->
+        <div class="bg-ecoactive rounded-[8px] p-3 flex flex-col gap-1 border border-ecoborder/30">
+          <span class="text-white text-[13px] font-semibold">Ville de Lyon</span>
+          <span class="text-ecomuted text-[11px] leading-tight">Services de proximité · 9 arr.</span>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="flex flex-col gap-1">
+          <div class="text-ecomuted text-[10px] font-semibold tracking-[1.2px] uppercase px-3 py-1">
+            05 / OPÉRATIONS AGENT
+          </div>
+
+          <a href="#" class="flex items-center gap-2.5 h-10 px-3 rounded-lg text-ecomuted hover:bg-ecoactive/60 transition-colors text-[12px]">
+            <i data-lucide="inbox" class="w-4 h-4 shrink-0"></i>
+            <span class="flex-1">Boîte de réception</span>
+            <span class="text-ecolight text-[11px] font-semibold">24</span>
+          </a>
+
+          <a href="#" class="flex items-center gap-2.5 h-10 px-3 rounded-lg text-ecomuted hover:bg-ecoactive/60 transition-colors text-[12px]">
+            <i data-lucide="map" class="w-4 h-4 shrink-0"></i>
+            <span class="flex-1">Carte opérationnelle</span>
+          </a>
+
+          <div class="text-ecomuted text-[10px] font-semibold tracking-[1.2px] uppercase px-3 pt-4 pb-1">
+            ESPACE PERSONNEL
+          </div>
+
+          <!-- Active Page Link: Mon Profil -->
+          <a href="#" class="flex items-center gap-2.5 h-10 px-3 rounded-lg bg-ecoactive text-white text-[12px] font-semibold shadow-sm border border-ecoborder/40">
+            <i data-lucide="user-check" class="w-4 h-4 text-ecolight shrink-0"></i>
+            <span class="flex-1">Mon Profil</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-ecolight"></span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Bottom Group: Assistance & Profile Footer -->
+      <div class="flex flex-col gap-3 pt-2">
+        <a href="#" class="flex items-center gap-2.5 px-3 py-2 text-ecomuted hover:text-white transition-colors text-[12px]">
+          <i data-lucide="help-circle" class="w-4 h-4"></i>
+          <span>Centre d’aide</span>
+        </a>
+
+        <!-- Profile Card -->
+        <div class="border-t border-ecoborder pt-3 flex items-center justify-between px-1">
+          <div class="flex items-center gap-2.5 overflow-hidden">
+            <div class="bg-ecoborder text-white font-semibold text-[11px] w-[34px] h-[34px] rounded-full flex items-center justify-center shrink-0 ring-2 ring-emerald-500/50">
+              CD
+            </div>
+            <div class="flex flex-col truncate">
+              <span class="text-white font-semibold text-[12px] truncate">Camille Durand</span>
+              <span class="text-ecomuted text-[10px] truncate">Agent de tri</span>
+            </div>
+          </div>
+          <button title="Déconnexion" class="text-ecomuted hover:text-rose-400 p-1 rounded transition-colors">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ==================== MAIN WORKSPACE ==================== -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-[#f8fafc]">
+      
+      <!-- Top Navigation Bar (72px) -->
+      <header class="h-[72px] bg-white border-b border-slate-200 px-8 flex items-center justify-between shrink-0">
+        <!-- Breadcrumb -->
+        <div class="flex items-center gap-2.5 text-[12px]">
+          <span class="text-slate-500 hover:text-slate-700 cursor-pointer">Opérations Agent</span>
+          <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+          <span class="font-semibold text-slate-900">Mon Profil</span>
+          <span class="ml-2 px-2 py-0.5 text-[10px] font-semibold bg-cyan-50 text-cyan-800 border border-cyan-200 rounded-full">
+            Agent Qualifié
+          </span>
+        </div>
+
+        <!-- Right Tools -->
+        <div class="flex items-center gap-5">
+          <div class="text-[12px] text-slate-500 font-medium flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span>Lundi 2 novembre 2026</span>
+          </div>
+
+          <div class="h-4 w-px bg-slate-200"></div>
+
+          <!-- Notification Bell -->
+          <button class="relative w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors">
+            <i data-lucide="bell" class="w-5 h-5"></i>
+            <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-600 ring-2 ring-white"></span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Scrollable Content Area -->
+      <div class="flex-1 overflow-y-auto p-8 space-y-6">
+        
+        <!-- Header Banner & Agent Identity -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-teal-600 to-cyan-600"></div>
+          
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-1">
+            <div class="flex items-start sm:items-center gap-5">
+              <!-- Big Avatar -->
+              <div class="relative">
+                <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#102c35] to-[#235863] text-white flex items-center justify-center font-bold text-2xl shadow-md border-2 border-white">
+                  CD
+                </div>
+                <div class="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-1 border-2 border-white shadow-sm" title="Agent en service">
+                  <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+                </div>
+              </div>
+
+              <!-- Identity Details -->
+              <div class="space-y-1">
+                <div class="flex items-center gap-3 flex-wrap">
+                  <h1 class="text-xl font-bold text-slate-900">Camille Durand</h1>
+                  <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-cyan-100 text-cyan-800 border border-cyan-200 flex items-center gap-1">
+                    <i data-lucide="check-circle" class="w-3 h-3"></i> Agent de Qualification & Tri
+                  </span>
+                  <span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-slate-600">
+                    Matricule: AGT-69003-CD
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500">Centre de Tri Métropolitain · Pôle Est (3e, 7e, 8e arr.)</p>
+                <div class="flex items-center gap-4 text-xs text-slate-600 pt-1">
+                  <span class="flex items-center gap-1"><i data-lucide="mail" class="w-3.5 h-3.5 text-slate-400"></i> camille.durand@lyon.fr</span>
+                  <span class="flex items-center gap-1"><i data-lucide="phone" class="w-3.5 h-3.5 text-slate-400"></i> +33 4 72 10 30 84</span>
+                  <span class="flex items-center gap-1 text-emerald-700 font-medium"><i data-lucide="wifi" class="w-3.5 h-3.5"></i> Poste connecté</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Action Buttons -->
+            <div class="flex items-center gap-2 self-start md:self-auto">
+              <button class="px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors flex items-center gap-1.5 shadow-sm shadow-emerald-600/20">
+                <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                Enregistrer les préférences
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 KPI Performance Cards for Agent -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div class="p-2.5 rounded-lg bg-emerald-50 text-emerald-700">
+              <i data-lucide="check-square" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="text-[11px] font-medium text-slate-500 uppercase">Qualifiés ce mois</span>
+              <div class="text-lg font-bold text-slate-900">412 <span class="text-xs font-normal text-emerald-600">+12%</span></div>
+            </div>
+          </div>
+
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div class="p-2.5 rounded-lg bg-teal-50 text-teal-700">
+              <i data-lucide="sparkles" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="text-[11px] font-medium text-slate-500 uppercase">Accord avec l'IA</span>
+              <div class="text-lg font-bold text-slate-900">94.2% <span class="text-xs font-normal text-slate-400">Très élevé</span></div>
+            </div>
+          </div>
+
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div class="p-2.5 rounded-lg bg-amber-50 text-amber-700">
+              <i data-lucide="timer" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="text-[11px] font-medium text-slate-500 uppercase">Temps moyen / ticket</span>
+              <div class="text-lg font-bold text-slate-900">1m 45s <span class="text-xs font-normal text-slate-400">Objectif &lt; 3m</span></div>
+            </div>
+          </div>
+
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div class="p-2.5 rounded-lg bg-cyan-50 text-cyan-700">
+              <i data-lucide="truck" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="text-[11px] font-medium text-slate-500 uppercase">Assignations Brigades</span>
+              <div class="text-lg font-bold text-slate-900">388 <span class="text-xs font-normal text-emerald-600">94%</span></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 2 Columns Layout: Form & Territorial Scope -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Col 1 & 2: Agent Information & Operational Preferences -->
+          <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Section: Informations Agent -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+              <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                  <div class="p-1.5 rounded-md bg-cyan-50 text-cyan-700">
+                    <i data-lucide="id-card" class="w-4 h-4"></i>
+                  </div>
+                  <h2 class="font-semibold text-sm text-slate-900">Informations Professionnelles de l'Agent</h2>
+                </div>
+                <span class="text-[11px] text-slate-400">Centre Métropolitain Est</span>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-medium text-slate-700 mb-1">Prénom</label>
+                  <input type="text" value="Camille" class="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50/50">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-slate-700 mb-1">Nom</label>
+                  <input type="text" value="Durand" class="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50/50">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-slate-700 mb-1">Courriel de service</label>
+                  <div class="relative">
+                    <input type="email" value="camille.durand@lyon.fr" class="w-full text-xs px-3 py-2 pl-9 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50/50">
+                    <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5"></i>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-slate-700 mb-1">Téléphone de vacation</label>
+                  <div class="relative">
+                    <input type="tel" value="+33 4 72 10 30 84" class="w-full text-xs px-3 py-2 pl-9 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50/50">
+                    <i data-lucide="phone" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5"></i>
+                  </div>
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-xs font-medium text-slate-700 mb-1">Pôle opérationnel de rattachement</label>
+                  <input type="text" value="Centre de Tri et Supervision des Incidents Urbains - Lyon Métropole" class="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50/50">
+                </div>
+              </div>
+            </div>
+
+            <!-- Section: Préférences de Travail au Quotidien -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+              <div class="flex items-center gap-2 pb-4 mb-4 border-b border-slate-100">
+                <div class="p-1.5 rounded-md bg-emerald-50 text-emerald-700">
+                  <i data-lucide="sliders" class="w-4 h-4"></i>
+                </div>
+                <h2 class="font-semibold text-sm text-slate-900">Préférences de Qualification & Ergonomie</h2>
+              </div>
+
+              <div class="space-y-3">
+                <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors">
+                  <input type="checkbox" checked class="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4">
+                  <div class="text-xs">
+                    <span class="font-medium text-slate-800">Alerte sonore pour signalements critiques (Gravité Haute)</span>
+                    <p class="text-slate-500 mt-0.5">Émet un signal sonore immédiat lors de l'arrivée d'un incident urgent (danger voie publique).</p>
+                  </div>
+                </label>
+
+                <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors">
+                  <input type="checkbox" checked class="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4">
+                  <div class="text-xs">
+                    <span class="font-medium text-slate-800">Affichage automatique de la prédiction IA</span>
+                    <p class="text-slate-500 mt-0.5">Pré-sélectionne la catégorie suggérée par le modèle de vision avec son indice de confiance.</p>
+                  </div>
+                </label>
+
+                <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors">
+                  <input type="checkbox" checked class="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4">
+                  <div class="text-xs">
+                    <span class="font-medium text-slate-800">Centrage automatique sur la carte opérationnelle</span>
+                    <p class="text-slate-500 mt-0.5">Zoom automatique sur la position GPS exacte du signalement lors de l'ouverture du dossier.</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Col 3: Territorial Scope & Service Details -->
+          <div class="space-y-6">
+            
+            <!-- Périmètre Territorial Assigné -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+              <div class="flex items-center gap-2 pb-4 mb-4 border-b border-slate-100">
+                <div class="p-1.5 rounded-md bg-emerald-50 text-emerald-700">
+                  <i data-lucide="map-pin" class="w-4 h-4"></i>
+                </div>
+                <h2 class="font-semibold text-sm text-slate-900">Secteur Territorial Assigné</h2>
+              </div>
+
+              <div class="space-y-3">
+                <div class="p-3 bg-emerald-50/70 rounded-lg border border-emerald-100">
+                  <span class="text-xs font-semibold text-emerald-900 block">Secteur Opérationnel</span>
+                  <span class="text-xs font-bold text-emerald-700 block mt-0.5">Zone Est · Lyon Rive Gauche</span>
+                  <span class="text-[11px] text-emerald-800 mt-1 block">3e, 7e et 8e Arrondissements</span>
+                </div>
+
+                <div class="pt-2 space-y-2">
+                  <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Catégories d'incidents traitées</span>
+                  
+                  <div class="flex items-center justify-between text-xs p-2 rounded bg-slate-50">
+                    <span class="text-slate-700 font-medium">Dépôts sauvages & Encombrants</span>
+                    <span class="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-semibold">Prioritaire</span>
+                  </div>
+                  <div class="flex items-center justify-between text-xs p-2 rounded bg-slate-50">
+                    <span class="text-slate-700 font-medium">Débordements de corbeilles</span>
+                    <span class="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-semibold">Standard</span>
+                  </div>
+                  <div class="flex items-center justify-between text-xs p-2 rounded bg-slate-50">
+                    <span class="text-slate-700 font-medium">Voirie & Dégradations</span>
+                    <span class="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-semibold">Standard</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Horaires & Rotation de Vacation -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+              <div class="flex items-center gap-2 pb-4 mb-4 border-b border-slate-100">
+                <div class="p-1.5 rounded-md bg-slate-100 text-slate-700">
+                  <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+                </div>
+                <h2 class="font-semibold text-sm text-slate-900">Horaires de Vacation</h2>
+              </div>
+
+              <div class="space-y-3 text-xs">
+                <div class="flex items-center justify-between p-2.5 rounded-lg border border-slate-100">
+                  <span class="text-slate-600">Équipe active</span>
+                  <span class="font-semibold text-slate-900">Brigade du Matin</span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-lg border border-slate-100">
+                  <span class="text-slate-600">Plage horaire</span>
+                  <span class="font-semibold text-slate-900">06h30 — 14h30</span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-lg border border-slate-100">
+                  <span class="text-slate-600">Superviseur de garde</span>
+                  <span class="font-semibold text-emerald-700">Marc Bernard (Admin)</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

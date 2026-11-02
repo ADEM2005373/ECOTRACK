@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECOTRACK - Power BI Supervision & Jira Analytics</title>
+  <style>
+    :root {
+      --bg-main: #0b0f19;
+      --bg-card: #131b2e;
+      --bg-card-hover: #1c2742;
+      --border: #23314f;
+      --border-light: #334469;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.25);
+      --accent: #818cf8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #0ea5e9;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      padding: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Layout */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      background: rgba(19, 27, 46, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 28px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-badge {
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      color: #0b0f19;
+      font-weight: 800;
+      font-size: 18px;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.35);
+    }
+
+    .brand-text h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid var(--border);
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+      color: #ffffff;
+      border: none;
+      box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 4px 14px rgba(14, 165, 233, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-main);
+    }
+    .btn-secondary:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-light);
+    }
+
+    /* Tabs Navigation */
+    .tabs-bar {
+      display: flex;
+      gap: 6px;
+      background: #0f1627;
+      padding: 6px 28px;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .tab-btn.active {
+      color: #ffffff;
+      background: var(--bg-card);
+      border-bottom: 2px solid var(--primary);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    /* Main Content Area */
+    main {
+      padding: 24px 28px;
+      flex: 1;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* KPI Row */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-light);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+    }
+
+    .kpi-card.progress::before { background: var(--primary); }
+    .kpi-card.done::before { background: var(--success); }
+    .kpi-card.pending::before { background: var(--warning); }
+    .kpi-card.warning::before { background: var(--danger); }
+    .kpi-card.team::before { background: var(--accent); }
+
+    .kpi-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .kpi-value {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: #ffffff;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .kpi-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: #1e293b;
+      border-radius: 999px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #0ea5e9, #10b981);
+      transition: width 0.8s ease;
+    }
+
+    /* Grid Sections */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 12px;
+    }
+
+    .panel-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .panel-title span.icon {
+      font-size: 18px;
+    }
+
+    /* Macro-Sprints Roadmap */
+    .sprint-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sprint-item {
+      background: #0d1424;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      transition: all 0.2s ease;
+    }
+
+    .sprint-item:hover {
+      border-color: var(--primary);
+      background: #10192e;
+    }
+
+    .sprint-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .sprint-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sprint-lead {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .sprint-metric {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* Team Members Grid */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .member-card {
+      background: #0d1424;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .member-card:hover, .member-card.selected {
+      border-color: var(--primary);
+      background: #101a30;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+    }
+
+    .member-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #0ea5e9);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+    }
+
+    .member-info h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .member-info p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .member-stats {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .member-stats b {
+      color: #ffffff;
+    }
+
+    /* Warning Cards */
+    .warning-card {
+      background: #0d1424;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-left: 4px solid var(--danger);
+      border-top: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      transition: transform 0.15s ease;
+    }
+
+    .warning-card:hover {
+      transform: translateX(3px);
+    }
+
+    .warning-card.critical { border-left-color: var(--danger); }
+    .warning-card.high { border-left-color: #f97316; }
+    .warning-card.medium { border-left-color: var(--warning); }
+    .warning-card.info { border-left-color: var(--info); }
+
+    .warning-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .warning-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .tag-critical { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .tag-high { background: rgba(249, 115, 22, 0.2); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.4); }
+    .tag-medium { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .tag-info { background: rgba(14, 165, 233, 0.2); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.4); }
+
+    .warning-desc {
+      font-size: 13px;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+    }
+
+    .warning-recom {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #93c5fd;
+      border: 1px dashed rgba(56, 189, 248, 0.3);
+    }
+
+    /* Jira Issues Table */
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 220px;
+      background: #0b0f19;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: #ffffff;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+    }
+
+    .filter-select {
+      background: #0b0f19;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: #ffffff;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th {
+      background: #0f172a;
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: #cbd5e1;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status-done { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .status-todo { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; }
+    .status-progress { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+
+    .jira-key-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .jira-key-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Modal / Drawer */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      max-width: 650px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    /* Tab switching control */
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Chart SVG */
+    .chart-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px 0;
+    }
+  </style>
+<script id="embedded-jira-data">window.__EMBEDDED_DATA__ = {"project": {"name": "ECOTRACK V2 (CDCF Conforme)", "key": "SCRUM", "site": "ouerhaniadem0805.atlassian.net", "lead": "Adem Ouerhani", "lastSync": "2026-11-02 22:18:46"}, "kpis": {"totalIssues": 33, "totalTasks": 27, "doneIssues": 0, "inProgressIssues": 0, "toDoIssues": 27, "completionRate": 0.0, "totalEpics": 6, "criticalWarningsCount": 2, "teamSize": 4}, "epics": [{"key": "SCRUM-33", "name": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)", "owner": "Adem Ouerhani", "total": 5, "done": 0, "rate": 0.0, "status": "À démarrer"}, {"key": "SCRUM-34", "name": "EPIC 1: Identity, JWT & RBAC (Sprint 1)", "owner": "Adem Ouerhani", "total": 5, "done": 0, "rate": 0.0, "status": "À démarrer"}, {"key": "SCRUM-35", "name": "EPIC 2: Core Report & Media Service (Sprint 2)", "owner": "Ahmed Salah", "total": 5, "done": 0, "rate": 0.0, "status": "À démarrer"}, {"key": "SCRUM-36", "name": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)", "owner": "Sara Shih", "total": 4, "done": 0, "rate": 0.0, "status": "À démarrer"}, {"key": "SCRUM-37", "name": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)", "owner": "Adem / Sara", "total": 4, "done": 0, "rate": 0.0, "status": "À démarrer"}, {"key": "SCRUM-54", "name": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)", "owner": "Adem Ouerhani", "total": 4, "done": 0, "rate": 0.0, "status": "À démarrer"}], "assignees": {"Adem Ouerhani": {"total": 8, "done": 0, "in_progress": 0, "to_do": 8, "issues": [{"key": "SCRUM-38", "summary": "ECO-01 | [DevOps] Initialize Nx Monorepo & CI/CD", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-38"}, {"key": "SCRUM-42", "summary": "ECO-11 | [DB] Create User Mongoose Schema & Hashing Logic", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-42"}, {"key": "SCRUM-47", "summary": "ECO-21 | [API] Build Media Service (Sharp EXIF Purge & S3)", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-47"}, {"key": "SCRUM-52", "summary": "ECO-41 | [BI-Data] Pipeline CDC Anonymisé (SHA-256) & Modèle DAX Power BI", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-52"}, {"key": "SCRUM-55", "summary": "ECO-05 | [BI-Data] DDL PostgreSQL Schéma en Étoile (2 Faits, 5 Dimensions) & Mocks Contrats", "status": "À faire", "type": "Tâche", "priority": "High", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-55"}, {"key": "SCRUM-56", "summary": "ECO-15 | [Audit & RGPD] Microservice AuditLogs Append-Only & Traces Immuables", "status": "À faire", "type": "Tâche", "priority": "High", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-56"}, {"key": "SCRUM-62", "summary": "ECO-50 | [QA-DevOps] Tests de Charge k6 validant la latence API P95 < 300 ms (NFR-01)", "status": "À faire", "type": "Tâche", "priority": "High", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-62"}, {"key": "SCRUM-65", "summary": "ECO-53 | [DevOps] Déploiement K8s avec HPA, Scripts de Seed 500 Signalements & Répétition Soutenance", "status": "À faire", "type": "Tâche", "priority": "High", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-65"}], "completion_rate": 0.0}, "Ahmed Salah": {"total": 6, "done": 0, "in_progress": 0, "to_do": 6, "issues": [{"key": "SCRUM-39", "summary": "ECO-02 | [UI-MOB] Initialize Expo App & Design Tokens", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-39"}, {"key": "SCRUM-44", "summary": "ECO-13 | [UI-MOB] Build Mobile Registration Screen", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-44"}, {"key": "SCRUM-46", "summary": "ECO-20 | [DB] Create Report Schema & 2dsphere Index", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-46"}, {"key": "SCRUM-53", "summary": "ECO-42 | [BI-Web] API Power BI Embed Token & Intégration React du Rapport Décisionnel", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-53"}, {"key": "SCRUM-57", "summary": "ECO-24 | [ETL-Data] Worker Python bi-etl-worker : Extraction Incrémentale vers Fact_Reports", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-57"}, {"key": "SCRUM-59", "summary": "ECO-33 | [Web-Data] Composant Carte de Supervision Multi-filtres & Calcul des Lead Times", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-59"}], "completion_rate": 0.0}, "Hiba Dhouib": {"total": 6, "done": 0, "in_progress": 0, "to_do": 6, "issues": [{"key": "SCRUM-40", "summary": "ECO-03 | [AI] Initialize FastAPI & PyTorch Environment", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-40"}, {"key": "SCRUM-45", "summary": "ECO-14 | [API] Build POST /auth/login with RS256 & Redis Rate Limit", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-45"}, {"key": "SCRUM-48", "summary": "ECO-22 | [AI] Build FastAPI Image Classification Route", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-48"}, {"key": "SCRUM-51", "summary": "ECO-31 | [UI-WEB] Build Agent Qualification Split-Screen", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-51"}, {"key": "SCRUM-61", "summary": "ECO-43 | [AI-MLOps] Suivi de la Concordance IA/Humain, Export Active Learning & Matrice de Confusion BI", "status": "À faire", "type": "Tâche", "priority": "High", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-61"}, {"key": "SCRUM-63", "summary": "ECO-51 | [AI-MLOps] Évaluation Scientifique du Modèle IA sur Jeu Étiqueté (Précision, Rappel, F1-Score)", "status": "À faire", "type": "Tâche", "priority": "High", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-63"}], "completion_rate": 0.0}, "Sara Shih": {"total": 7, "done": 0, "in_progress": 0, "to_do": 7, "issues": [{"key": "SCRUM-41", "summary": "ECO-04 | [UI-WEB] Initialize React Vite & Tailwind CSS", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-41"}, {"key": "SCRUM-43", "summary": "ECO-12 | [API] Build POST /auth/register Route", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-43"}, {"key": "SCRUM-49", "summary": "ECO-23 | [API] Combine Creation & Emit 'report.created'", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-49"}, {"key": "SCRUM-50", "summary": "ECO-30 | [API] Build Workflow Guard Service (T1 - T4)", "status": "À faire", "type": "Tâche", "priority": "Medium", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-50"}, {"key": "SCRUM-58", "summary": "ECO-32 | [UI-MOB] Feuille de Route Mobile Ouvrier par Proximité ($near) & Démarrage Chantier (T3)", "status": "À faire", "type": "Tâche", "priority": "High", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-58"}, {"key": "SCRUM-60", "summary": "ECO-40 | [Workflow] Clôture Chantier T4 avec Photo après travaux (EXIF Purgé) & Réouverture Admin", "status": "À faire", "type": "Tâche", "priority": "High", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-60"}, {"key": "SCRUM-64", "summary": "ECO-52 | [QA-E2E] Recette Complète E2E Multi-Acteurs (Playwright) & Audit Accessibilité WCAG 2.1 AA", "status": "À faire", "type": "Tâche", "priority": "High", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-64"}], "completion_rate": 0.0}}, "types": {"Epic": 6, "Tâche": 27}, "statusStats": {"Done": 0, "InProgress": 0, "ToDo": 33}, "warnings": [{"id": "WARN-01", "level": "critical", "title": "Socle Fondateur Sprint 0: ECO-01 (Nx Monorepo & CI/CD)", "target": "SCRUM-38 (ECO-01)", "assignee": "Adem Ouerhani", "deadline": "Sprint 0 (J1 à J6)", "description": "L'initialisation du monorepo Nx, docker-compose.yml et des contrats Mocks OpenAPI est le prérequis bloquant pour le démarrage de l'app mobile Expo (ECO-02) et du microservice FastAPI (ECO-03).", "impact": "Conditionne l'architecture et les espaces de travail de toute l'équipe.", "recommendation": "Créer la branche feature/ECO-01-adem-nx-init et démarrer le scaffolding Nx."}, {"id": "WARN-02", "level": "high", "title": "Dépendance Sécurité Sprint 1: ECO-11 & ECO-15 (Users, Argon2 & AuditLogs)", "target": "SCRUM-42, SCRUM-56", "assignee": "Adem Ouerhani", "deadline": "Sprint 1 (J7 à J16)", "description": "La collection Users, le hachage argon2id et le microservice AuditLogs en écriture seule bloquent l'inscription (ECO-12) et le login JWT RS256 (ECO-14).", "impact": "Goulot d'étranglement sur le sous-système d'authentification et de conformité RGPD.", "recommendation": "Valider le schéma User Mongoose et tester la collection AuditLogs Append-Only."}, {"id": "WARN-03", "level": "medium", "title": "Contrat d'Interface Média, IA & ETL: ECO-21 / ECO-22 / ECO-24", "target": "SCRUM-47, SCRUM-48, SCRUM-57", "assignee": "Adem, Hiba, Ahmed", "deadline": "Sprint 2 (J17 à J26)", "description": "Le pipeline d'upload média (Sharp sans EXIF) doit fournir des images au format attendu par MobileNetV3 (Resize 224), et l'ETL initial doit alimenter Fact_Reports sans dégrader la latence API (P95 < 300 ms).", "impact": "Risque d'incompatibilité de dimensions ou de latence lors de l'inférence et de l'extraction.", "recommendation": "Vérifier le test Chaos validant le repli manuel si le conteneur IA dépasse 1,5s."}, {"id": "WARN-04", "level": "info", "title": "Architecture V2 100% Conforme au CDCF (6 Sprints Actifs)", "target": "Projet SCRUM V2", "assignee": "Équipe Complète (Adem, Ahmed, Hiba, Sara)", "deadline": "60 Jours Calendaires", "description": "Les 6 Sprints sont intégralement peuplés avec les 27 tâches d'ingénierie, les règles RBAC, la purge EXIF, les lead times ETL et les 4 rapports Power BI.", "impact": "Excellente traçabilité et alignement parfait pour la soutenance.", "recommendation": "Démarrer le Sprint 0 sur le board Jira."}], "issues": [{"key": "SCRUM-33", "summary": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Epic", "priority": "High", "assignee": "Adem Ouerhani", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:14:35.965+0100", "updated": "2026-11-02T22:16:12.149+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-33", "epicKey": "SCRUM-33", "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"}, {"key": "SCRUM-34", "summary": "EPIC 1: Identity, JWT & RBAC (Sprint 1)", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Epic", "priority": "High", "assignee": "Adem Ouerhani", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:14:40.138+0100", "updated": "2026-11-02T22:16:15.289+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-34", "epicKey": "SCRUM-34", "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"}, {"key": "SCRUM-35", "summary": "EPIC 2: Core Report & Media Service (Sprint 2)", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Epic", "priority": "High", "assignee": "Ahmed Salah", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:14:43.528+0100", "updated": "2026-11-02T22:16:18.276+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-35", "epicKey": "SCRUM-35", "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"}, {"key": "SCRUM-36", "summary": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Epic", "priority": "High", "assignee": "Sara Shih", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:14:46.806+0100", "updated": "2026-11-02T22:16:20.996+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-36", "epicKey": "SCRUM-36", "epicName": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)"}, {"key": "SCRUM-37", "summary": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Epic", "priority": "High", "assignee": "Adem Ouerhani", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:14:50.379+0100", "updated": "2026-11-02T22:16:24.540+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-37", "epicKey": "SCRUM-37", "epicName": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)"}, {"key": "SCRUM-38", "summary": "ECO-01 | [DevOps] Initialize Nx Monorepo & CI/CD", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Adem Ouerhani", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:14:54.131+0100", "updated": "2026-11-02T21:54:46.572+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-38", "epicKey": "SCRUM-33", "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"}, {"key": "SCRUM-39", "summary": "ECO-02 | [UI-MOB] Initialize Expo App & Design Tokens", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Ahmed Salah", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:14:57.557+0100", "updated": "2026-11-02T21:55:06.025+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-39", "epicKey": "SCRUM-33", "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"}, {"key": "SCRUM-40", "summary": "ECO-03 | [AI] Initialize FastAPI & PyTorch Environment", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Hiba Dhouib", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:15:00.987+0100", "updated": "2026-11-02T21:55:09.496+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-40", "epicKey": "SCRUM-33", "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"}, {"key": "SCRUM-41", "summary": "ECO-04 | [UI-WEB] Initialize React Vite & Tailwind CSS", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Sara Shih", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:15:04.492+0100", "updated": "2026-11-02T21:55:12.584+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-41", "epicKey": "SCRUM-33", "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"}, {"key": "SCRUM-42", "summary": "ECO-11 | [DB] Create User Mongoose Schema & Hashing Logic", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Adem Ouerhani", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:15:07.808+0100", "updated": "2026-11-02T21:55:16.722+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-42", "epicKey": "SCRUM-34", "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"}, {"key": "SCRUM-43", "summary": "ECO-12 | [API] Build POST /auth/register Route", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Sara Shih", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:15:11.244+0100", "updated": "2026-11-02T21:55:20.156+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-43", "epicKey": "SCRUM-34", "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"}, {"key": "SCRUM-44", "summary": "ECO-13 | [UI-MOB] Build Mobile Registration Screen", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Ahmed Salah", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:15:14.798+0100", "updated": "2026-11-02T21:55:23.307+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-44", "epicKey": "SCRUM-34", "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"}, {"key": "SCRUM-45", "summary": "ECO-14 | [API] Build POST /auth/login with RS256 & Redis Rate Limit", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Hiba Dhouib", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:15:18.170+0100", "updated": "2026-11-02T21:55:26.528+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-45", "epicKey": "SCRUM-34", "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"}, {"key": "SCRUM-46", "summary": "ECO-20 | [DB] Create Report Schema & 2dsphere Index", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Ahmed Salah", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:15:21.548+0100", "updated": "2026-11-02T21:55:29.967+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-46", "epicKey": "SCRUM-35", "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"}, {"key": "SCRUM-47", "summary": "ECO-21 | [API] Build Media Service (Sharp EXIF Purge & S3)", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Adem Ouerhani", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:15:24.877+0100", "updated": "2026-11-02T21:55:33.390+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-47", "epicKey": "SCRUM-35", "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"}, {"key": "SCRUM-48", "summary": "ECO-22 | [AI] Build FastAPI Image Classification Route", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Hiba Dhouib", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:15:28.361+0100", "updated": "2026-11-02T21:55:36.829+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-48", "epicKey": "SCRUM-35", "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"}, {"key": "SCRUM-49", "summary": "ECO-23 | [API] Combine Creation & Emit 'report.created'", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Sara Shih", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:15:31.932+0100", "updated": "2026-11-02T21:55:39.914+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-49", "epicKey": "SCRUM-35", "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"}, {"key": "SCRUM-50", "summary": "ECO-30 | [API] Build Workflow Guard Service (T1 - T4)", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Sara Shih", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:15:35.621+0100", "updated": "2026-11-02T21:55:43.223+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-50", "epicKey": "SCRUM-36", "epicName": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)"}, {"key": "SCRUM-51", "summary": "ECO-31 | [UI-WEB] Build Agent Qualification Split-Screen", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Hiba Dhouib", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:15:39.222+0100", "updated": "2026-11-02T21:55:46.643+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-51", "epicKey": "SCRUM-36", "epicName": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)"}, {"key": "SCRUM-52", "summary": "ECO-41 | [BI-Data] Pipeline CDC Anonymisé (SHA-256) & Modèle DAX Power BI", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Adem Ouerhani", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:15:42.612+0100", "updated": "2026-11-02T22:06:31.648+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-52", "epicKey": "SCRUM-37", "epicName": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)"}, {"key": "SCRUM-53", "summary": "ECO-42 | [BI-Web] API Power BI Embed Token & Intégration React du Rapport Décisionnel", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Ahmed Salah", "reporter": "Adem Ouerhani", "created": "2026-11-02T20:15:46.062+0100", "updated": "2026-11-02T22:06:37.243+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-53", "epicKey": "SCRUM-37", "epicName": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)"}, {"key": "SCRUM-54", "summary": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Epic", "priority": "High", "assignee": "Adem Ouerhani", "reporter": "Adem Ouerhani", "created": "2026-11-02T22:06:18.772+0100", "updated": "2026-11-02T22:16:29.712+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-54", "epicKey": "SCRUM-54", "epicName": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)"}, {"key": "SCRUM-55", "summary": "ECO-05 | [BI-Data] DDL PostgreSQL Schéma en Étoile (2 Faits, 5 Dimensions) & Mocks Contrats", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "High", "assignee": "Adem Ouerhani", "reporter": "Adem Ouerhani", "created": "2026-11-02T22:06:40.479+0100", "updated": "2026-11-02T22:16:47.431+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-55", "epicKey": "SCRUM-33", "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"}, {"key": "SCRUM-56", "summary": "ECO-15 | [Audit & RGPD] Microservice AuditLogs Append-Only & Traces Immuables", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "High", "assignee": "Adem Ouerhani", "reporter": "Adem Ouerhani", "created": "2026-11-02T22:06:53.226+0100", "updated": "2026-11-02T22:17:05.256+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-56", "epicKey": "SCRUM-34", "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"}, {"key": "SCRUM-57", "summary": "ECO-24 | [ETL-Data] Worker Python bi-etl-worker : Extraction Incrémentale vers Fact_Reports", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Ahmed Salah", "reporter": "Adem Ouerhani", "created": "2026-11-02T22:07:05.463+0100", "updated": "2026-11-02T22:17:22.675+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-57", "epicKey": "SCRUM-35", "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"}, {"key": "SCRUM-58", "summary": "ECO-32 | [UI-MOB] Feuille de Route Mobile Ouvrier par Proximité ($near) & Démarrage Chantier (T3)", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "High", "assignee": "Sara Shih", "reporter": "Adem Ouerhani", "created": "2026-11-02T22:07:16.862+0100", "updated": "2026-11-02T22:17:32.644+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-58", "epicKey": "SCRUM-36", "epicName": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)"}, {"key": "SCRUM-59", "summary": "ECO-33 | [Web-Data] Composant Carte de Supervision Multi-filtres & Calcul des Lead Times", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "Medium", "assignee": "Ahmed Salah", "reporter": "Adem Ouerhani", "created": "2026-11-02T22:07:28.567+0100", "updated": "2026-11-02T22:17:36.227+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-59", "epicKey": "SCRUM-36", "epicName": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)"}, {"key": "SCRUM-60", "summary": "ECO-40 | [Workflow] Clôture Chantier T4 avec Photo après travaux (EXIF Purgé) & Réouverture Admin", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "High", "assignee": "Sara Shih", "reporter": "Adem Ouerhani", "created": "2026-11-02T22:07:43.191+0100", "updated": "2026-11-02T22:17:46.050+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-60", "epicKey": "SCRUM-37", "epicName": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)"}, {"key": "SCRUM-61", "summary": "ECO-43 | [AI-MLOps] Suivi de la Concordance IA/Humain, Export Active Learning & Matrice de Confusion BI", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "High", "assignee": "Hiba Dhouib", "reporter": "Adem Ouerhani", "created": "2026-11-02T22:07:57.014+0100", "updated": "2026-11-02T22:17:49.360+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-61", "epicKey": "SCRUM-37", "epicName": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)"}, {"key": "SCRUM-62", "summary": "ECO-50 | [QA-DevOps] Tests de Charge k6 validant la latence API P95 < 300 ms (NFR-01)", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "High", "assignee": "Adem Ouerhani", "reporter": "Adem Ouerhani", "created": "2026-11-02T22:08:11.060+0100", "updated": "2026-11-02T22:17:52.884+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-62", "epicKey": "SCRUM-54", "epicName": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)"}, {"key": "SCRUM-63", "summary": "ECO-51 | [AI-MLOps] Évaluation Scientifique du Modèle IA sur Jeu Étiqueté (Précision, Rappel, F1-Score)", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "High", "assignee": "Hiba Dhouib", "reporter": "Adem Ouerhani", "created": "2026-11-02T22:08:23.027+0100", "updated": "2026-11-02T22:17:55.989+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-63", "epicKey": "SCRUM-54", "epicName": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)"}, {"key": "SCRUM-64", "summary": "ECO-52 | [QA-E2E] Recette Complète E2E Multi-Acteurs (Playwright) & Audit Accessibilité WCAG 2.1 AA", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "High", "assignee": "Sara Shih", "reporter": "Adem Ouerhani", "created": "2026-11-02T22:08:30.028+0100", "updated": "2026-11-02T22:17:59.295+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-64", "epicKey": "SCRUM-54", "epicName": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)"}, {"key": "SCRUM-65", "summary": "ECO-53 | [DevOps] Déploiement K8s avec HPA, Scripts de Seed 500 Signalements & Répétition Soutenance", "status": "À faire", "rawStatus": "À faire", "isDone": false, "type": "Tâche", "priority": "High", "assignee": "Adem Ouerhani", "reporter": "Adem Ouerhani", "created": "2026-11-02T22:08:36.379+0100", "updated": "2026-11-02T22:18:02.899+0100", "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-65", "epicKey": "SCRUM-54", "epicName": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)"}]};</script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <div class="logo-badge">ET</div>
+        <div class="brand-text">
+          <h1>ECOTRACK <span class="badge-tag">Power BI Edition</span></h1>
+          <p>Supervision & Tableau de Bord Jira en Temps Réel • Projet <code>SCRUM</code></p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a class="btn btn-secondary" href="screens/index.html" target="_blank" style="border-color: #059669; color: #34d399; display: inline-flex; align-items: center; gap: 6px;">🎨 Profils Web Figma</a>
+        <span id="last-sync-tag" style="font-size: 12px; color: var(--text-muted);">Sync: Chargement...</span>
+        <button class="btn btn-secondary" onclick="location.reload()">🔄 Actualiser</button>
+        <a id="btn-open-jira" class="btn btn-primary" href="https://ouerhaniadem0805.atlassian.net/jira/software/projects/SCRUM/boards/1" target="_blank">🌐 Ouvrir dans Jira</a>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="tabs-bar">
+      <button class="tab-btn active" onclick="switchTab('tab-overview', this)">📊 Vue Générale</button>
+      <button class="tab-btn" onclick="switchTab('tab-warnings', this)">⚠️ Alertes & Délais (<span id="warn-count-badge">0</span>)</button>
+      <button class="tab-btn" onclick="switchTab('tab-team', this)">👥 Avancement d'Équipe</button>
+      <button class="tab-btn" onclick="switchTab('tab-sprints', this)">🎯 Macro-Sprints Roadmap</button>
+      <button class="tab-btn" onclick="switchTab('tab-issues', this)">📋 Supervision Tickets Jira</button>
+    </nav>
+
+    <!-- Main Container -->
+    <main>
+      <!-- KPI Row (Always Visible) -->
+      <div class="kpi-grid">
+        <div class="kpi-card progress">
+          <div class="kpi-title">
+            <span>Avancement Global</span>
+            <span>🎯</span>
+          </div>
+          <div class="kpi-value" id="kpi-completion">--%</div>
+          <div class="kpi-sub" id="kpi-completion-sub">-- sur -- terminées</div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="kpi-progress-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div class="kpi-card done">
+          <div class="kpi-title">
+            <span>Tâches Terminées</span>
+            <span>✅</span>
+          </div>
+          <div class="kpi-value" id="kpi-done">--</div>
+          <div class="kpi-sub">Validation & QA effectuées</div>
+        </div>
+
+        <div class="kpi-card pending">
+          <div class="kpi-title">
+            <span>Tâches En Cours & À Faire</span>
+            <span>⏳</span>
+          </div>
+          <div class="kpi-value" id="kpi-pending">--</div>
+          <div class="kpi-sub">Backlog actif à délivrer</div>
+        </div>
+
+        <div class="kpi-card warning">
+          <div class="kpi-title">
+            <span>Alertes Critiques / Risques</span>
+            <span>⚠️</span>
+          </div>
+          <div class="kpi-value" id="kpi-warnings">--</div>
+          <div class="kpi-sub">Points de blocage identifiés</div>
+        </div>
+
+        <div class="kpi-card team">
+          <div class="kpi-title">
+            <span>Membres Actifs</span>
+            <span>👥</span>
+          </div>
+          <div class="kpi-value" id="kpi-team">4</div>
+          <div class="kpi-sub">Collaborateurs assignés</div>
+        </div>
+      </div>
+
+      <!-- TAB 1: OVERVIEW -->
+      <div id="tab-overview" class="tab-content active">
+        <div class="dashboard-grid">
+          <!-- Left: Sprints Summary -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><span class="icon">🚀</span> Progression des Macro-Sprints</div>
+              <span class="badge-tag">Jira Software</span>
+            </div>
+            <div class="sprint-list" id="overview-sprint-list">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+
+          <!-- Right: Visual Charts (Donut + Stats) -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><span class="icon">🍩</span> Répartition des Statuts</div>
+            </div>
+            <div class="chart-container" id="donut-chart-container">
+              <!-- SVG Donut Chart -->
+            </div>
+            <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px;" id="status-legend">
+              <!-- Status Legend -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Warnings Widget -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><span class="icon">⚡</span> Aperçu des Alertes et Actions Immédiates</div>
+            <button class="btn btn-secondary" onclick="switchTab('tab-warnings', document.querySelectorAll('.tab-btn')[1])">Consulter toutes les alertes →</button>
+          </div>
+          <div id="overview-warnings-list">
+            <!-- First 2 warnings injected here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: WARNINGS & DEADLINES -->
+      <div id="tab-warnings" class="tab-content">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><span class="icon">⚠️</span> Centre d'Alertes, Délais & Gestion des Risques</div>
+            <span class="badge-tag">Analyse Automatisée TWG</span>
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+            Détection proactive des points de blocage, dépendances inter-modules et sous-tâches en retard sur le projet ECOTRACK.
+          </p>
+          <div id="all-warnings-container">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: TEAM MEMBERS -->
+      <div id="tab-team" class="tab-content">
+        <div class="panel" style="margin-bottom: 20px;">
+          <div class="panel-header">
+            <div class="panel-title"><span class="icon">👥</span> Charge de Travail & Taux d'Avancement par Membre</div>
+            <span style="font-size: 12px; color: var(--text-muted);">Cliquez sur un membre pour filtrer ses tickets</span>
+          </div>
+          <div class="team-grid" id="team-members-container">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <div class="panel" id="member-detail-panel" style="display: none;">
+          <div class="panel-header">
+            <div class="panel-title" id="member-detail-title"><span class="icon">📋</span> Tâches du Membre Sélectionné</div>
+            <button class="btn btn-secondary" onclick="clearMemberFilter()">Voir tous les membres</button>
+          </div>
+          <div class="table-container">
+            <table id="member-issues-table">
+              <thead>
+                <tr>
+                  <th>Clé</th>
+                  <th>Résumé</th>
+                  <th>Type</th>
+                  <th>Priorité</th>
+                  <th>Statut</th>
+                  <th>Lien</th>
+                </tr>
+              </thead>
+              <tbody id="member-issues-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: SPRINTS ROADMAP -->
+      <div id="tab-sprints" class="tab-content">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><span class="icon">🎯</span> Feuille de Route Détaillée des Macro-Sprints</div>
+            <span class="badge-tag">5 Sprints Planifiés</span>
+          </div>
+          <div class="sprint-list" id="full-sprint-list">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: JIRA SUPERVISION ISSUES TABLE -->
+      <div id="tab-issues" class="tab-content">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><span class="icon">📋</span> Supervision Intégrale des Tickets Jira (29 éléments)</div>
+            <span class="badge-tag" id="table-count-tag">Affichage: 29</span>
+          </div>
+
+          <!-- Filter Toolbar -->
+          <div class="filter-bar">
+            <input type="text" id="search-box" class="search-input" placeholder="🔍 Rechercher par clé, mot-clé, assigné..." oninput="applyFilters()">
+            
+            <select id="filter-status" class="filter-select" onchange="applyFilters()">
+              <option value="">Tous les statuts</option>
+              <option value="Terminé">Terminé</option>
+              <option value="À faire">À faire</option>
+              <option value="En cours">En cours</option>
+            </select>
+
+            <select id="filter-type" class="filter-select" onchange="applyFilters()">
+              <option value="">Tous les types</option>
+              <option value="Epic">Epic</option>
+              <option value="Tâche">Tâche</option>
+              <option value="Subtask">Sous-tâche</option>
+            </select>
+
+            <select id="filter-assignee" class="filter-select" onchange="applyFilters()">
+              <option value="">Tous les assignés</option>
+            </select>
+
+            <select id="filter-epic" class="filter-select" onchange="applyFilters()">
+              <option value="">Tous les sprints</option>
+            </select>
+          </div>
+
+          <!-- Table -->
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Clé</th>
+                  <th>Résumé</th>
+                  <th>Type</th>
+                  <th>Priorité</th>
+                  <th>Assigné</th>
+                  <th>Macro-Sprint</th>
+                  <th>Statut</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="issues-tbody">
+                <!-- Injected by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="issue-modal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div id="modal-body">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global data cache
+    let projectData = null;
+    let selectedMember = null;
+
+    // Load initial data
+    async function loadDashboardData() {
+      try {
+        if (window.__EMBEDDED_DATA__) {
+          projectData = window.__EMBEDDED_DATA__;
+        }
+        const res = await fetch('data.json');
+        if (res && res.ok) {
+          projectData = await res.json();
+        }
+      } catch (err) {
+        console.log('Using embedded fallback data');
+      }
+      renderDashboard();
+    }
+
+    function renderFallbackNotice() {
+      document.getElementById('last-sync-tag').textContent = "Données locales synchronisées";
+    }
+
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      const target = document.getElementById(tabId);
+      if (target) target.classList.add('active');
+      if (el) el.classList.add('active');
+    }
+
+    function renderDashboard() {
+      if (!projectData) return;
+
+      const p = projectData.project;
+      const kpis = projectData.kpis;
+
+      // Update sync and titles
+      document.getElementById('last-sync-tag').textContent = `Dernière synchro: ${p.lastSync || 'Aujourd\'hui'}`;
+      document.getElementById('warn-count-badge').textContent = projectData.warnings ? projectData.warnings.length : 0;
+
+      // KPIs
+      document.getElementById('kpi-completion').textContent = `${kpis.completionRate}%`;
+      document.getElementById('kpi-completion-sub').textContent = `${kpis.doneIssues} sur ${kpis.totalIssues} tâches finalisées`;
+      document.getElementById('kpi-progress-bar').style.width = `${kpis.completionRate}%`;
+      document.getElementById('kpi-done').textContent = kpis.doneIssues;
+      document.getElementById('kpi-pending').textContent = kpis.toDoIssues + (kpis.inProgressIssues || 0);
+      document.getElementById('kpi-warnings').textContent = `${kpis.criticalWarningsCount} prioritaires`;
+      document.getElementById('kpi-team').textContent = kpis.teamSize;
+
+      // Sprints lists
+      renderSprints(projectData.epics);
+
+      // Donut Chart & Status Breakdown
+      renderDonutChart(kpis);
+
+      // Warnings
+      renderWarnings(projectData.warnings);
+
+      // Team Members
+      renderTeamMembers(projectData.assignees);
+
+      // Filter options & Table
+      populateFilterOptions();
+      applyFilters();
+    }
+
+    function renderSprints(epics) {
+      if (!epics) return;
+      const html = epics.map(e => `
+        <div class="sprint-item">
+          <div class="sprint-header">
+            <div class="sprint-name">
+              <span class="badge-tag">${e.key}</span>
+              <span>${e.name}</span>
+            </div>
+            <div class="sprint-metric">${e.rate}% (${e.done}/${e.total})</div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">
+            <span>Lead: <b>${e.owner}</b></span>
+            <span>Statut: <b style="color: ${e.rate === 100 ? 'var(--success)' : (e.rate > 0 ? 'var(--primary)' : 'var(--text-muted)')}">${e.status}</b></span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: ${e.rate}%; background: ${e.rate === 100 ? 'var(--success)' : 'linear-gradient(90deg, #0ea5e9, #818cf8)'}"></div>
+          </div>
+        </div>
+      `).join('');
+
+      const overviewContainer = document.getElementById('overview-sprint-list');
+      if (overviewContainer) overviewContainer.innerHTML = html;
+
+      const fullContainer = document.getElementById('full-sprint-list');
+      if (fullContainer) fullContainer.innerHTML = html;
+    }
+
+    function renderDonutChart(kpis) {
+      const done = kpis.doneIssues;
+      const pending = kpis.toDoIssues + (kpis.inProgressIssues || 0);
+      const total = done + pending;
+      const donePct = (done / total) * 100;
+      const pendingPct = (pending / total) * 100;
+
+      const circumference = 2 * Math.PI * 40; // r=40 -> ~251.3
+      const doneOffset = circumference * (1 - donePct / 100);
+
+      const chartHtml = `
+        <svg width="180" height="180" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="40" fill="transparent" stroke="#1e293b" stroke-width="14" />
+          <circle cx="50" cy="50" r="40" fill="transparent" stroke="#10b981" stroke-width="14"
+            stroke-dasharray="${circumference}" stroke-dashoffset="${doneOffset}"
+            stroke-linecap="round" transform="rotate(-90 50 50)" />
+          <text x="50" y="47" text-anchor="middle" font-size="14" font-weight="800" fill="#ffffff">${Math.round(donePct)}%</text>
+          <text x="50" y="60" text-anchor="middle" font-size="7" font-weight="600" fill="#94a3b8">COMPLÉTÉ</text>
+        </svg>
+      `;
+
+      document.getElementById('donut-chart-container').innerHTML = chartHtml;
+
+      document.getElementById('status-legend').innerHTML = `
+        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981;"></span>
+            <span>Terminé</span>
+          </span>
+          <b>${done} (${Math.round(donePct)}%)</b>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #1e293b;"></span>
+            <span>À faire / En attente</span>
+          </span>
+          <b>${pending} (${Math.round(pendingPct)}%)</b>
+        </div>
+      `;
+    }
+
+    function renderWarnings(warnings) {
+      if (!warnings) return;
+
+      const html = warnings.map(w => `
+        <div class="warning-card ${w.level}">
+          <div class="warning-header">
+            <div class="warning-title">
+              <span>${w.level === 'critical' ? '🔴' : (w.level === 'high' ? '🟠' : '🟡')}</span>
+              <span>${w.title}</span>
+            </div>
+            <div>
+              <span class="tag tag-${w.level}">${w.level.toUpperCase()}</span>
+              <span class="badge-tag">${w.target}</span>
+            </div>
+          </div>
+          <div class="warning-desc">${w.description}</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+            <span>Assigné: <b>${w.assignee}</b></span> • <span>Délai: <b style="color: #f87171;">${w.deadline}</b></span>
+          </div>
+          <div class="warning-recom">
+            💡 <b>Recommandation:</b> ${w.recommendation}
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('all-warnings-container').innerHTML = html;
+
+      // Top 2 for overview
+      const overviewWarnings = warnings.slice(0, 2).map(w => `
+        <div class="warning-card ${w.level}" style="margin-bottom: 8px;">
+          <div class="warning-header">
+            <span class="warning-title">${w.title}</span>
+            <span class="tag tag-${w.level}">${w.level}</span>
+          </div>
+          <div class="warning-recom">💡 ${w.recommendation}</div>
+        </div>
+      `).join('');
+      document.getElementById('overview-warnings-list').innerHTML = overviewWarnings;
+    }
+
+    function renderTeamMembers(assignees) {
+      if (!assignees) return;
+
+      const container = document.getElementById('team-members-container');
+      const names = Object.keys(assignees).filter(n => n !== 'Non assigné');
+
+      container.innerHTML = names.map(name => {
+        const s = assignees[name];
+        const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        return `
+          <div class="member-card" id="card-${encodeURIComponent(name)}" onclick="selectMember('${name.replace(/'/g, "\\'")}')">
+            <div class="member-top">
+              <div class="avatar">${initials}</div>
+              <div class="member-info">
+                <h4>${name}</h4>
+                <p>${s.total} tâches assignées</p>
+              </div>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" style="width: ${s.completion_rate}%;"></div>
+            </div>
+            <div class="member-stats">
+              <span>Avancement: <b>${s.completion_rate}%</b></span>
+              <span>Terminées: <b>${s.done}/${s.total}</b></span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectMember(name) {
+      selectedMember = name;
+      document.querySelectorAll('.member-card').forEach(c => c.classList.remove('selected'));
+      const card = document.getElementById(`card-${encodeURIComponent(name)}`);
+      if (card) card.classList.add('selected');
+
+      const panel = document.getElementById('member-detail-panel');
+      panel.style.display = 'block';
+      document.getElementById('member-detail-title').innerHTML = `<span class="icon">📋</span> Tâches de <b>${name}</b>`;
+
+      const memberIssues = projectData.assignees[name]?.issues || [];
+      const tbody = document.getElementById('member-issues-tbody');
+      tbody.innerHTML = memberIssues.map(iss => `
+        <tr>
+          <td><a href="${iss.url}" target="_blank" class="jira-key-link">${iss.key} ↗</a></td>
+          <td><b>${iss.summary}</b></td>
+          <td><span class="badge-tag">${iss.type}</span></td>
+          <td>${iss.priority}</td>
+          <td><span class="status-pill ${iss.status === 'Terminé' ? 'status-done' : 'status-todo'}">${iss.status}</span></td>
+          <td><a href="${iss.url}" target="_blank" class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;">Jira</a></td>
+        </tr>
+      `).join('');
+    }
+
+    function clearMemberFilter() {
+      selectedMember = null;
+      document.querySelectorAll('.member-card').forEach(c => c.classList.remove('selected'));
+      document.getElementById('member-detail-panel').style.display = 'none';
+    }
+
+    function populateFilterOptions() {
+      if (!projectData) return;
+
+      const assigneeSelect = document.getElementById('filter-assignee');
+      const epicSelect = document.getElementById('filter-epic');
+
+      const assignees = Object.keys(projectData.assignees || {});
+      assigneeSelect.innerHTML = '<option value="">Tous les assignés</option>' + 
+        assignees.map(a => `<option value="${a}">${a}</option>`).join('');
+
+      const epics = projectData.epics || [];
+      epicSelect.innerHTML = '<option value="">Tous les sprints</option>' + 
+        epics.map(e => `<option value="${e.key}">${e.key} - ${e.name.substring(0, 30)}...</option>`).join('');
+    }
+
+    function applyFilters() {
+      if (!projectData || !projectData.issues) return;
+
+      const query = document.getElementById('search-box').value.toLowerCase().trim();
+      const statusFilter = document.getElementById('filter-status').value;
+      const typeFilter = document.getElementById('filter-type').value;
+      const assigneeFilter = document.getElementById('filter-assignee').value;
+      const epicFilter = document.getElementById('filter-epic').value;
+
+      const filtered = projectData.issues.filter(iss => {
+        if (query && !iss.key.toLowerCase().includes(query) && !iss.summary.toLowerCase().includes(query) && !iss.assignee.toLowerCase().includes(query)) {
+          return false;
+        }
+        if (statusFilter && iss.status !== statusFilter) return false;
+        if (typeFilter && iss.type !== typeFilter) return false;
+        if (assigneeFilter && iss.assignee !== assigneeFilter) return false;
+        if (epicFilter && iss.epicKey !== epicFilter) return false;
+        return true;
+      });
+
+      document.getElementById('table-count-tag').textContent = `Affichage: ${filtered.length} / ${projectData.issues.length}`;
+
+      const tbody = document.getElementById('issues-tbody');
+      tbody.innerHTML = filtered.map(iss => `
+        <tr onclick="openIssueModal('${iss.key}')" style="cursor: pointer;">
+          <td><a href="${iss.url}" target="_blank" class="jira-key-link" onclick="event.stopPropagation()">${iss.key}</a></td>
+          <td><b>${iss.summary}</b></td>
+          <td><span class="badge-tag">${iss.type}</span></td>
+          <td>${iss.priority}</td>
+          <td>${iss.assignee}</td>
+          <td style="font-size: 11px; color: var(--text-muted);">${iss.epicKey}</td>
+          <td><span class="status-pill ${iss.status === 'Terminé' ? 'status-done' : (iss.status === 'En cours' ? 'status-progress' : 'status-todo')}">${iss.status}</span></td>
+          <td>
+            <a href="${iss.url}" target="_blank" class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="event.stopPropagation()">Jira ↗</a>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openIssueModal(key) {
+      const issue = projectData.issues.find(i => i.key === key);
+      if (!issue) return;
+
+      const body = document.getElementById('modal-body');
+      body.innerHTML = `
+        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
+          <span class="badge-tag">${issue.type}</span>
+          <span class="status-pill ${issue.status === 'Terminé' ? 'status-done' : 'status-todo'}">${issue.status}</span>
+          <span class="badge-tag">${issue.priority}</span>
+        </div>
+        <h3 style="font-size: 18px; margin-bottom: 14px; color: #ffffff;">${issue.key} : ${issue.summary}</h3>
+        <div style="background: #0d1424; padding: 14px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px; font-size: 13px;">
+          <div style="margin-bottom: 6px;"><b>Macro-Sprint:</b> ${issue.epicName} (${issue.epicKey})</div>
+          <div style="margin-bottom: 6px;"><b>Assigné à:</b> ${issue.assignee}</div>
+          <div style="margin-bottom: 6px;"><b>Rapporteur:</b> ${issue.reporter}</div>
+          <div style="margin-bottom: 6px;"><b>Date de création:</b> ${new Date(issue.created).toLocaleString()}</div>
+          <div><b>Dernière mise à jour:</b> ${new Date(issue.updated).toLocaleString()}</div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button class="btn btn-secondary" onclick="closeModal()">Fermer</button>
+          <a href="${issue.url}" target="_blank" class="btn btn-primary">Ouvrir dans Atlassian Jira ↗</a>
+        </div>
+      `;
+      document.getElementById('issue-modal').style.display = 'flex';
+    }
+
+    function closeModal(e) {
+      document.getElementById('issue-modal').style.display = 'none';
+    }
+
+    // Auto-initialize
+    window.addEventListener('DOMContentLoaded', loadDashboardData);
+  </script>
+</body>
+</html>
