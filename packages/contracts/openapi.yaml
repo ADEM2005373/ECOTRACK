@@ -1,0 +1,338 @@
+openapi: 3.1.0
+info:
+  title: EcoTrack API Platform
+  version: 2.1.0
+  description: >
+    Plateforme collaborative et intelligente de gestion des déchets municipaux et signalements écologiques (ECOTRACK).
+    Spécification officielle des contrats d'interfaces inter-services (Identity, Reports, Workflows, IA Vision, BI/ETL).
+  contact:
+    name: Équipe EcoTrack DevOps & Architecture
+    email: ouerhaniadem0805@gmail.com
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: API Gateway Local (Nginx Docker)
+  - url: https://api.ecotrack.tn/api/v1
+    description: Cluster Kubernetes Production
+
+tags:
+  - name: Auth & Identity
+    description: Authentification JWT, Refresh Tokens, Enregistrement & RBAC
+  - name: Reports (Signalements)
+    description: Création citoyenne avec coordonnées GeoJSON 2dsphere et upload de photos purgées EXIF
+  - name: Workflows & Interventions
+    description: Machine à états stricte (T1 à T5), validation agent et clôture terrain ouvrier
+  - name: IA Vision
+    description: Inférence FastAPI YOLOv8 / ViT avec suggestion de catégorie et score de confiance
+  - name: BI & Data Warehouse
+    description: Métriques décisionnelles, exports ETL et KPIs Power BI
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth & Identity]
+      summary: Inscription citoyenne
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, fullName]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                fullName:
+                  type: string
+                phoneNumber:
+                  type: string
+      responses:
+        '201':
+          description: Compte créé avec succès
+        '409':
+          description: Email déjà utilisé
+
+  /auth/login:
+    post:
+      tags: [Auth & Identity]
+      summary: Connexion avec délivrance de tokens JWT (Access + Refresh)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Authentification réussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenResponse'
+        '401':
+          description: Identifiants invalides
+
+  /auth/refresh:
+    post:
+      tags: [Auth & Identity]
+      summary: Renouvellement du token d'accès via Refresh Token rotatif
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenResponse'
+
+  /reports:
+    post:
+      tags: [Reports (Signalements)]
+      summary: Création d'un signalement d'anomalie environnementale
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [photo, latitude, longitude]
+              properties:
+                photo:
+                  type: string
+                  format: binary
+                  description: Photo haute résolution (purge EXIF côté serveur)
+                latitude:
+                  type: number
+                  format: double
+                  example: 36.8065
+                longitude:
+                  type: number
+                  format: double
+                  example: 10.1815
+                description:
+                  type: string
+                categorySuggested:
+                  type: string
+      responses:
+        '201':
+          description: Signalement enregistré avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+
+    get:
+      tags: [Reports (Signalements)]
+      summary: Recherche géospatiale de signalements (2dsphere $near / $geoWithin)
+      parameters:
+        - name: lat
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: lng
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: radiusMeters
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 5000
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Report'
+
+  /interventions/{id}/transition:
+    post:
+      tags: [Workflows & Interventions]
+      summary: Exécution d'une transition d'état stricte (T1 à T5)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [transition, targetState]
+              properties:
+                transition:
+                  type: string
+                  enum: [T1_VALIDATE, T2_ASSIGN, T3_START, T4_CLOSE, T5_REJECT]
+                targetState:
+                  type: string
+                  enum: [VALIDATED, ASSIGNED, IN_PROGRESS, RESOLVED, REJECTED]
+                reason:
+                  type: string
+                teamId:
+                  type: string
+                afterPhotoUrl:
+                  type: string
+      responses:
+        '200':
+          description: Transition validée et enregistrée
+        '400':
+          description: Transition illégale ou rôle non autorisé
+
+  /vision/classify:
+    post:
+      tags: [IA Vision]
+      summary: Analyse visuelle par IA de détection et suggestion de catégorie
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [image]
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  predictedCategory:
+                    type: string
+                    example: "DEPOT_SAUVAGE"
+                  confidenceScore:
+                    type: number
+                    format: float
+                    example: 0.9421
+                  isReliable:
+                    type: boolean
+                    example: true
+                  modelVersion:
+                    type: string
+                    example: "v2.1.0"
+                  processingTimeMs:
+                    type: integer
+                    example: 124
+
+  /bi/kpis/performance:
+    get:
+      tags: [BI & Data Warehouse]
+      summary: Récupération des indicateurs de performance DW pour tableaux de bord
+      responses:
+        '200':
+          description: KPIs agrégés (MTTR, Respect SLA, Concordance IA)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  avgMttrHours:
+                    type: number
+                  slaBreachRatePercent:
+                    type: number
+                  totalResolved:
+                    type: integer
+                  aiConcordanceRatePercent:
+                    type: number
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AuthTokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+          example: 900
+        tokenType:
+          type: string
+          example: Bearer
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+            email:
+              type: string
+            role:
+              type: string
+              enum: [CITOYEN, AGENT, OUVRIER, ADMIN]
+
+    Report:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [NOUVEAU, EN_COURS_DE_VALIDATION, REJETE, VALIDE, ASSIGNE, EN_TRAITEMENT, RESOLU]
+        location:
+          type: object
+          properties:
+            type:
+              type: string
+              example: Point
+            coordinates:
+              type: array
+              items:
+                type: number
+              example: [10.1815, 36.8065]
+        photoUrl:
+          type: string
+        categorySuggested:
+          type: string
+        categoryValidated:
+          type: string
+        aiConfidenceScore:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
