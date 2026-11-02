@@ -4,15 +4,15 @@
     "key": "SCRUM",
     "site": "ouerhaniadem0805.atlassian.net",
     "lead": "Adem Ouerhani",
-    "lastSync": "2026-11-02 22:18:46"
+    "lastSync": "2026-11-02 23:31:13"
   },
   "kpis": {
     "totalIssues": 33,
     "totalTasks": 27,
-    "doneIssues": 0,
+    "doneIssues": 2,
     "inProgressIssues": 0,
-    "toDoIssues": 27,
-    "completionRate": 0.0,
+    "toDoIssues": 25,
+    "completionRate": 7.4,
     "totalEpics": 6,
     "criticalWarningsCount": 2,
     "teamSize": 4
@@ -23,9 +23,9 @@
       "name": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)",
       "owner": "Adem Ouerhani",
       "total": 5,
-      "done": 0,
-      "rate": 0.0,
-      "status": "À démarrer"
+      "done": 2,
+      "rate": 40.0,
+      "status": "En cours"
     },
     {
       "key": "SCRUM-34",
@@ -76,14 +76,14 @@
   "assignees": {
     "Adem Ouerhani": {
       "total": 8,
-      "done": 0,
+      "done": 2,
       "in_progress": 0,
-      "to_do": 8,
+      "to_do": 6,
       "issues": [
         {
           "key": "SCRUM-38",
           "summary": "ECO-01 | [DevOps] Initialize Nx Monorepo & CI/CD",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "Medium",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-38"
@@ -115,7 +115,7 @@
         {
           "key": "SCRUM-55",
           "summary": "ECO-05 | [BI-Data] DDL PostgreSQL Schéma en Étoile (2 Faits, 5 Dimensions) & Mocks Contrats",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "High",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-55"
@@ -145,7 +145,7 @@
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-65"
         }
       ],
-      "completion_rate": 0.0
+      "completion_rate": 25.0
     },
     "Ahmed Salah": {
       "total": 6,
@@ -332,9 +332,9 @@
     "Tâche": 27
   },
   "statusStats": {
-    "Done": 0,
+    "Done": 2,
     "InProgress": 0,
-    "ToDo": 33
+    "ToDo": 31
   },
   "warnings": [
     {
@@ -466,15 +466,15 @@
     {
       "key": "SCRUM-38",
       "summary": "ECO-01 | [DevOps] Initialize Nx Monorepo & CI/CD",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "Medium",
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:54.131+0100",
-      "updated": "2026-11-02T21:54:46.572+0100",
+      "updated": "2026-11-02T23:31:02.691+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-38",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -738,15 +738,15 @@
     {
       "key": "SCRUM-55",
       "summary": "ECO-05 | [BI-Data] DDL PostgreSQL Schéma en Étoile (2 Faits, 5 Dimensions) & Mocks Contrats",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "High",
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:06:40.479+0100",
-      "updated": "2026-11-02T22:16:47.431+0100",
+      "updated": "2026-11-02T23:31:05.036+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-55",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
