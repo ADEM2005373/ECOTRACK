@@ -4,7 +4,7 @@
     "key": "SCRUM",
     "site": "ouerhaniadem0805.atlassian.net",
     "lead": "Adem Ouerhani",
-    "lastSync": "2026-11-02 23:49:12"
+    "lastSync": "2026-11-03 21:13:56"
   },
   "kpis": {
     "totalIssues": 33,
@@ -554,7 +554,7 @@
       "assignee": "Sara Shih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:11.244+0100",
-      "updated": "2026-11-02T21:55:20.156+0100",
+      "updated": "2026-11-03T21:03:21.114+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-43",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -570,7 +570,7 @@
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:14.798+0100",
-      "updated": "2026-11-02T21:55:23.307+0100",
+      "updated": "2026-11-03T21:03:08.832+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-44",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -586,7 +586,7 @@
       "assignee": "Hiba Dhouib",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:18.170+0100",
-      "updated": "2026-11-02T21:55:26.528+0100",
+      "updated": "2026-11-03T21:03:22.444+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-45",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -762,7 +762,7 @@
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:06:53.226+0100",
-      "updated": "2026-11-02T22:17:05.256+0100",
+      "updated": "2026-11-03T21:03:23.763+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-56",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
