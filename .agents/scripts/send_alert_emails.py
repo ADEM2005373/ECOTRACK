@@ -13,6 +13,7 @@ import webbrowser
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.utils import formatdate, make_msgid
 
 TEAM_ALERTS = [
     {
@@ -90,42 +91,37 @@ Adem Ouerhani - Lead Project ECOTRACK"""
     }
 ]
 
-def open_webmail():
-    print("[INFO] Launching Gmail Web Compose windows for team members...")
-    for alert in TEAM_ALERTS:
-        params = {
-            "view": "cm",
-            "fs": "1",
-            "to": alert["email"],
-            "su": alert["subject"],
-            "body": alert["body"]
-        }
-        url = "https://mail.google.com/mail/?" + urllib.parse.urlencode(params)
-        print(f"Opening compose window for {alert['name']} ({alert['email']})...")
-        webbrowser.open(url)
-    print("[SUCCESS] All 3 Gmail compose tabs opened in your browser.")
-
-def send_smtp(app_password):
+def send_smtp(raw_password):
+    app_password = raw_password.replace(" ", "").strip()
     sender = "ouerhaniadem0805@gmail.com"
-    print(f"[INFO] Connecting to Gmail SMTP server as {sender}...")
+    print(f"[INFO] Connecting to Gmail SMTP server (smtp.gmail.com:587) as {sender}...")
     try:
-        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=15)
+        server.ehlo()
         server.starttls()
+        server.ehlo()
         server.login(sender, app_password)
+        print("[AUTH OK] Successfully authenticated with Gmail SMTP!")
+        
         for alert in TEAM_ALERTS:
-            msg = MIMEMultipart()
+            msg = MIMEMultipart("alternative")
             msg["From"] = f"Adem Ouerhani <{sender}>"
             msg["To"] = alert["email"]
             msg["Subject"] = alert["subject"]
-            msg.attach(MIMEText(alert["body"], "plain", "utf-8"))
+            msg["Date"] = formatdate(localtime=True)
+            msg["Message-ID"] = make_msgid(domain="gmail.com")
+            
+            part = MIMEText(alert["body"], "plain", "utf-8")
+            msg.attach(part)
+            
             server.send_message(msg)
-            print(f"[SENT] Email sent successfully to {alert['name']} ({alert['email']})")
+            print(f"[SENT] Email sent successfully to {alert['name']} <{alert['email']}>")
+            
         server.quit()
-        print("[SUCCESS] All emails sent via SMTP.")
+        print("[SUCCESS] All 3 team alert emails have been dispatched successfully!")
     except Exception as e:
         print(f"[ERROR] SMTP sending failed: {e}", file=sys.stderr)
-        print("[FALLBACK] Opening browser Gmail compose windows instead...")
-        open_webmail()
+        sys.exit(1)
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--smtp":
@@ -133,5 +129,6 @@ if __name__ == "__main__":
             send_smtp(sys.argv[2])
         else:
             print("Usage: python send_alert_emails.py --smtp <GMAIL_APP_PASSWORD>")
+            sys.exit(1)
     else:
-        open_webmail()
+        print("Please provide --smtp argument")
