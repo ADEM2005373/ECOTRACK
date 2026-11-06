@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECOTRACK V2 — Cockpit PO & Scrum Master</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              900: '#064e3b',
+            },
+            dark: {
+              bg: '#080d1a',
+              card: '#0f172a',
+              cardHover: '#17223b',
+              border: '#1e293b',
+              borderLight: '#334155'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #080d1a; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    .glow-emerald { box-shadow: 0 0 25px rgba(16, 185, 129, 0.2); }
+    .glow-sky { box-shadow: 0 0 25px rgba(14, 165, 233, 0.2); }
+    .glow-amber { box-shadow: 0 0 25px rgba(245, 158, 11, 0.2); }
+    .glow-rose { box-shadow: 0 0 25px rgba(244, 63, 94, 0.2); }
+  </style>
+</head>
+<body class="bg-dark-bg text-slate-100 min-h-screen flex flex-col font-sans selection:bg-brand-500/30 selection:text-white">
+
+  <!-- Top Sticky Navigation Bar -->
+  <header class="sticky top-0 z-50 bg-dark-bg/90 backdrop-blur-md border-b border-dark-border px-4 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3.5">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-sky-500 flex items-center justify-center text-slate-950 font-black text-lg shadow-lg shadow-brand-500/25">
+        <i data-lucide="shield-check" class="w-5 h-5"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-base font-bold text-white tracking-tight">ECOTRACK V2</h1>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-sky-500/10 text-sky-400 border border-sky-500/20">PO & Scrum Master Cockpit</span>
+        </div>
+        <p class="text-xs text-slate-400">Direction de Projet & Supervision Agile : <span class="text-slate-200 font-semibold">Adem Ouerhani</span></p>
+      </div>
+    </div>
+
+    <!-- Quick Status Pill Badges -->
+    <div class="hidden sm:flex items-center gap-2.5">
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-400">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Sprint 1 ACTIF (57.1%)</span>
+      </div>
+      <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/10 border border-sky-500/20 text-xs font-medium text-sky-400">
+        <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+        <span>21/21 Tests PASS</span>
+      </div>
+      <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs font-medium text-amber-400">
+        <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+        <span>Deadline Sprint Dépassée (25 Oct)</span>
+      </div>
+    </div>
+
+    <!-- Right Header Actions -->
+    <div class="flex items-center gap-2">
+      <a href="index.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 bg-slate-800/80 hover:bg-slate-700 hover:text-white border border-dark-border transition-all">
+        <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+        <span>Vue Supervision Jira</span>
+      </a>
+      <a href="https://ouerhaniadem0805.atlassian.net/jira/software/projects/SCRUM/boards/1" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 transition-all shadow-sm shadow-blue-500/20">
+        <i data-lucide="trello" class="w-3.5 h-3.5"></i>
+        <span class="hidden md:inline">Jira Cloud</span>
+      </a>
+      <a href="https://github.com/ADEM2005373/ECOTRACK" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all">
+        <i data-lucide="github" class="w-3.5 h-3.5"></i>
+        <span class="hidden md:inline">GitHub</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Navigation Tab Bar -->
+  <nav class="bg-dark-card border-b border-dark-border px-4 lg:px-8 py-2 overflow-x-auto flex items-center gap-1">
+    <button onclick="switchTab('tab-overview', this)" class="tab-btn active px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all text-white bg-slate-800/90 border border-slate-700 shadow-sm">
+      <i data-lucide="gauge" class="w-4 h-4 text-sky-400"></i>
+      <span>Vue Exécutive & Équipe</span>
+    </button>
+    <button onclick="switchTab('tab-codereview', this)" class="tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/40">
+      <i data-lucide="bot" class="w-4 h-4 text-emerald-400"></i>
+      <span>Code Review Agent</span>
+      <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-400 font-bold">8.0/10</span>
+    </button>
+    <button onclick="switchTab('tab-branches', this)" class="tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/40">
+      <i data-lucide="git-branch" class="w-4 h-4 text-indigo-400"></i>
+      <span>Branches Git & PRs</span>
+      <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-indigo-500/20 text-indigo-400 font-bold">4 branches</span>
+    </button>
+    <button onclick="switchTab('tab-gap', this)" class="tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/40">
+      <i data-lucide="layers" class="w-4 h-4 text-amber-400"></i>
+      <span>Écarts CDCF V2 (Gap Analysis)</span>
+    </button>
+    <button onclick="switchTab('tab-actions', this)" class="tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/40">
+      <i data-lucide="check-square" class="w-4 h-4 text-rose-400"></i>
+      <span>Action Center Scrum Master</span>
+      <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-rose-500/20 text-rose-400 font-bold">5 priorités</span>
+    </button>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="flex-1 px-4 lg:px-8 py-6 max-w-7xl w-full mx-auto space-y-6">
+
+    <!-- ========================================================================= -->
+    <!-- TAB 1: VUE EXÉCUTIVE & STATUT GRANULAIRE PAR MEMBRE -->
+    <!-- ========================================================================= -->
+    <div id="tab-overview" class="tab-content space-y-6">
+
+      <!-- Executive KPI Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+        
+        <!-- Total Completion -->
+        <div class="bg-dark-card border border-dark-border rounded-xl p-4 flex flex-col justify-between hover:border-sky-500/30 transition-all glow-sky">
+          <div class="flex items-center justify-between text-slate-400 text-xs">
+            <span>Complétion Globale</span>
+            <i data-lucide="activity" class="w-4 h-4 text-sky-400"></i>
+          </div>
+          <div class="mt-2">
+            <div class="text-2xl font-black text-white">14.8 %</div>
+            <p class="text-[11px] text-slate-400 mt-0.5">4 sur 27 tâches closes</p>
+          </div>
+          <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2.5">
+            <div class="bg-sky-500 h-full rounded-full" style="width: 14.8%"></div>
+          </div>
+        </div>
+
+        <!-- Sprint 1 Progress -->
+        <div class="bg-dark-card border border-dark-border rounded-xl p-4 flex flex-col justify-between hover:border-brand-500/30 transition-all glow-emerald">
+          <div class="flex items-center justify-between text-slate-400 text-xs">
+            <span>Sprint 1 Actif</span>
+            <i data-lucide="flame" class="w-4 h-4 text-brand-500"></i>
+          </div>
+          <div class="mt-2">
+            <div class="text-2xl font-black text-emerald-400">57.1 %</div>
+            <p class="text-[11px] text-slate-400 mt-0.5">4 closes, 1 IP, 2 Todo</p>
+          </div>
+          <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2.5">
+            <div class="bg-gradient-to-r from-brand-500 to-emerald-400 h-full rounded-full" style="width: 57.1%"></div>
+          </div>
+        </div>
+
+        <!-- Automated Tests -->
+        <div class="bg-dark-card border border-dark-border rounded-xl p-4 flex flex-col justify-between hover:border-emerald-500/30 transition-all">
+          <div class="flex items-center justify-between text-slate-400 text-xs">
+            <span>Tests de Livraison</span>
+            <i data-lucide="check-check" class="w-4 h-4 text-emerald-400"></i>
+          </div>
+          <div class="mt-2">
+            <div class="text-2xl font-black text-white">21 / 21</div>
+            <p class="text-[11px] text-emerald-400 mt-0.5 font-medium">100% Tests Passants</p>
+          </div>
+          <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2.5">
+            <div class="bg-emerald-500 h-full rounded-full" style="width: 100%"></div>
+          </div>
+        </div>
+
+        <!-- Active Epics -->
+        <div class="bg-dark-card border border-dark-border rounded-xl p-4 flex flex-col justify-between hover:border-indigo-500/30 transition-all">
+          <div class="flex items-center justify-between text-slate-400 text-xs">
+            <span>Épics Macro</span>
+            <i data-lucide="milestone" class="w-4 h-4 text-indigo-400"></i>
+          </div>
+          <div class="mt-2">
+            <div class="text-2xl font-black text-white">6 Épics</div>
+            <p class="text-[11px] text-slate-400 mt-0.5">Sprints 0 à 5 alignés</p>
+          </div>
+          <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2.5">
+            <div class="bg-indigo-500 h-full rounded-full" style="width: 33%"></div>
+          </div>
+        </div>
+
+        <!-- Schedule Deviation -->
+        <div class="bg-dark-card border border-dark-border rounded-xl p-4 flex flex-col justify-between hover:border-amber-500/30 transition-all glow-amber">
+          <div class="flex items-center justify-between text-slate-400 text-xs">
+            <span>Dérive Calendrier</span>
+            <i data-lucide="clock" class="w-4 h-4 text-amber-400"></i>
+          </div>
+          <div class="mt-2">
+            <div class="text-2xl font-black text-amber-400">+12 Jours</div>
+            <p class="text-[11px] text-slate-400 mt-0.5">Retard Front & API Auth</p>
+          </div>
+          <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2.5">
+            <div class="bg-amber-500 h-full rounded-full" style="width: 70%"></div>
+          </div>
+        </div>
+
+        <!-- Team Size -->
+        <div class="bg-dark-card border border-dark-border rounded-xl p-4 flex flex-col justify-between hover:border-slate-500/30 transition-all">
+          <div class="flex items-center justify-between text-slate-400 text-xs">
+            <span>Équipe Projet</span>
+            <i data-lucide="users" class="w-4 h-4 text-slate-300"></i>
+          </div>
+          <div class="mt-2">
+            <div class="text-2xl font-black text-white">4 Dév.</div>
+            <p class="text-[11px] text-slate-400 mt-0.5">Vertical Slices dédiées</p>
+          </div>
+          <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2.5">
+            <div class="bg-slate-400 h-full rounded-full" style="width: 100%"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Section: Detailed Member Roster Cards -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-sm font-bold text-white tracking-wide uppercase flex items-center gap-2">
+              <i data-lucide="users-2" class="w-4 h-4 text-sky-400"></i>
+              <span>État Granulaire des 4 Membres de l'Équipe</span>
+            </h2>
+            <p class="text-xs text-slate-400">Responsabilité de bout en bout, avancement Jira, activité Git et points de blocage</p>
+          </div>
+          <span class="text-xs text-slate-400">Mis à jour en direct via Jira & Git</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <!-- 1. ADEM OUERHANI -->
+          <div class="bg-dark-card border border-dark-border rounded-xl p-5 hover:border-slate-700 transition-all flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-sky-500/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+            <div>
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    AO
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h3 class="text-sm font-bold text-white">Adem Ouerhani</h3>
+                      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">Lead Dev & PO</span>
+                    </div>
+                    <p class="text-xs text-slate-400">DevOps, Auth RBAC, Data Warehouse & Audit</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="px-2 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">50.0% Fait</span>
+                  <div class="text-[11px] text-slate-400 mt-1">4 / 8 tâches closes</div>
+                </div>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden my-3.5">
+                <div class="bg-gradient-to-r from-sky-500 to-emerald-400 h-full rounded-full" style="width: 50%"></div>
+              </div>
+
+              <!-- Completed Badges -->
+              <div class="space-y-1.5 mb-3.5">
+                <div class="text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Livrables Validés (Terminés) :</div>
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="px-2 py-0.5 rounded text-[11px] bg-slate-800 text-slate-300 border border-slate-700 flex items-center gap-1">
+                    <i data-lucide="check" class="w-3 h-3 text-emerald-400"></i>
+                    <b>SCRUM-38</b> : Monorepo Nx & CI/CD
+                  </span>
+                  <span class="px-2 py-0.5 rounded text-[11px] bg-slate-800 text-slate-300 border border-slate-700 flex items-center gap-1">
+                    <i data-lucide="check" class="w-3 h-3 text-emerald-400"></i>
+                    <b>SCRUM-55</b> : DW Star Schema DDL
+                  </span>
+                  <span class="px-2 py-0.5 rounded text-[11px] bg-slate-800 text-slate-300 border border-slate-700 flex items-center gap-1">
+                    <i data-lucide="check" class="w-3 h-3 text-emerald-400"></i>
+                    <b>SCRUM-42</b> : User Schema & Argon2id
+                  </span>
+                  <span class="px-2 py-0.5 rounded text-[11px] bg-slate-800 text-slate-300 border border-slate-700 flex items-center gap-1">
+                    <i data-lucide="check" class="w-3 h-3 text-emerald-400"></i>
+                    <b>SCRUM-56</b> : AuditLogs Append-Only
+                  </span>
+                </div>
+              </div>
+
+              <!-- Pending / Next -->
+              <div class="text-xs text-slate-400 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80">
+                <span class="text-slate-300 font-semibold">Prochains Tickets :</span> SCRUM-47 (Purge EXIF S3), SCRUM-52 (Pipeline CDC Power BI), SCRUM-62 (Charge k6).
+              </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="mt-4 pt-3 border-t border-dark-border flex items-center justify-between text-xs">
+              <span class="text-slate-400 flex items-center gap-1">
+                <i data-lucide="git-commit" class="w-3.5 h-3.5 text-indigo-400"></i>
+                Branche : <code class="text-indigo-300 font-mono">feature/ECO-11-adem-user-schema</code>
+              </span>
+              <span class="text-emerald-400 font-semibold">Code Review : 9.2/10</span>
+            </div>
+          </div>
+
+          <!-- 2. HIBA DHOUIB -->
+          <div class="bg-dark-card border border-dark-border rounded-xl p-5 hover:border-slate-700 transition-all flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+            <div>
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    HD
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h3 class="text-sm font-bold text-white">Hiba Dhouib</h3>
+                      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Ingénieure IA</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Computer Vision, FastAPI, Modération & Catégories</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="px-2 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">1 En cours</span>
+                  <div class="text-[11px] text-slate-400 mt-1">0 / 6 closes (Git actif)</div>
+                </div>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden my-3.5">
+                <div class="bg-amber-400 h-full rounded-full" style="width: 20%"></div>
+              </div>
+
+              <!-- Status -->
+              <div class="space-y-1.5 mb-3.5">
+                <div class="text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Activité en direct :</div>
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="px-2 py-0.5 rounded text-[11px] bg-amber-500/10 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                    <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i>
+                    <b>SCRUM-45</b> : POST /auth/login avec JWT RS256 & Redis
+                  </span>
+                  <span class="px-2 py-0.5 rounded text-[11px] bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
+                    <i data-lucide="git-pull-request" class="w-3 h-3"></i>
+                    <b>ECO-03</b> : Socle FastAPI & PyTorch pushé sur Git
+                  </span>
+                </div>
+              </div>
+
+              <!-- Notice -->
+              <div class="text-xs text-slate-400 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80">
+                <span class="text-slate-300 font-semibold">Prochains Tickets :</span> SCRUM-48 (Inférence /v1/classify), SCRUM-51 (UI Qualification Agent), SCRUM-61 (Concordance MLOps).
+              </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="mt-4 pt-3 border-t border-dark-border flex items-center justify-between text-xs">
+              <span class="text-slate-400 flex items-center gap-1">
+                <i data-lucide="git-branch" class="w-3.5 h-3.5 text-emerald-400"></i>
+                Branche : <code class="text-emerald-300 font-mono">feature/ECO-03-hiba-fastapi-init</code>
+              </span>
+              <span class="text-amber-400 font-semibold">Code Review : 6.8/10</span>
+            </div>
+          </div>
+
+          <!-- 3. SARA SHIH -->
+          <div class="bg-dark-card border border-dark-border rounded-xl p-5 hover:border-slate-700 transition-all flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+            <div>
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-rose-600 to-pink-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    SS
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h3 class="text-sm font-bold text-white">Sara Shih</h3>
+                      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">Workflow & Mobile</span>
+                    </div>
+                    <p class="text-xs text-slate-400">FSM Machine à États (T1-T4), Chantiers Ouvrier, SSE</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="px-2 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">Point Critique</span>
+                  <div class="text-[11px] text-slate-400 mt-1">0 / 7 tâches closes</div>
+                </div>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden my-3.5">
+                <div class="bg-rose-500 h-full rounded-full" style="width: 5%"></div>
+              </div>
+
+              <!-- Blocker Alert -->
+              <div class="bg-rose-950/40 border border-rose-800/40 rounded-lg p-2.5 mb-3 text-xs flex items-start gap-2 text-rose-300">
+                <i data-lucide="alert-octagon" class="w-4 h-4 shrink-0 text-rose-400 mt-0.5"></i>
+                <div>
+                  <span class="font-bold">Blocage Sprint 1 :</span> <b>SCRUM-43</b> (<code>POST /auth/register</code>) n'est pas démarré. Bloque l'enrôlement citoyen de bout en bout.
+                </div>
+              </div>
+
+              <div class="text-xs text-slate-400 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80">
+                <span class="text-slate-300 font-semibold">Backlog Restant :</span> SCRUM-41 (UI Web React Vite), SCRUM-49 (Event report.created), SCRUM-50 (Moteur de gardes T1-T4), SCRUM-58 (Feuille de route Ouvrier $near).
+              </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="mt-4 pt-3 border-t border-dark-border flex items-center justify-between text-xs">
+              <span class="text-slate-400 flex items-center gap-1">
+                <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+                <code>sarah.sou2016@gmail.com</code>
+              </span>
+              <a href="mailto:sarah.sou2016@gmail.com?subject=ECOTRACK%20-%20Blocage%20Sprint%201%20SCRUM-43" class="text-sky-400 hover:underline font-semibold flex items-center gap-1">
+                <span>Relancer</span>
+                <i data-lucide="arrow-right" class="w-3 h-3"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- 4. AHMED SALAH -->
+          <div class="bg-dark-card border border-dark-border rounded-xl p-5 hover:border-slate-700 transition-all flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+            <div>
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-amber-600 to-orange-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    AS
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h3 class="text-sm font-bold text-white">Ahmed Salah</h3>
+                      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">Core SIG & Médias</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Signalements 2dsphere, Purge EXIF, Mobile Citoyen Expo</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="px-2 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">En Attente</span>
+                  <div class="text-[11px] text-slate-400 mt-1">0 / 6 tâches closes</div>
+                </div>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden my-3.5">
+                <div class="bg-amber-500 h-full rounded-full" style="width: 5%"></div>
+              </div>
+
+              <!-- Blocker Alert -->
+              <div class="bg-amber-950/40 border border-amber-800/40 rounded-lg p-2.5 mb-3 text-xs flex items-start gap-2 text-amber-300">
+                <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0 text-amber-400 mt-0.5"></i>
+                <div>
+                  <span class="font-bold">Priorité Immédiate :</span> <b>SCRUM-44</b> (Écran Mobile Inscription Expo) & <b>SCRUM-39</b> (Initialisation Expo).
+                </div>
+              </div>
+
+              <div class="text-xs text-slate-400 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80">
+                <span class="text-slate-300 font-semibold">Backlog Restant :</span> SCRUM-46 (Schéma Reports 2dsphere), SCRUM-57 (Worker bi-etl-worker), SCRUM-59 (Carte Supervision Web), SCRUM-53 (Power BI Embed).
+              </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="mt-4 pt-3 border-t border-dark-border flex items-center justify-between text-xs">
+              <span class="text-slate-400 flex items-center gap-1">
+                <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+                <code>hmidsalah2005@gmail.com</code>
+              </span>
+              <a href="mailto:hmidsalah2005@gmail.com?subject=ECOTRACK%20-%20Sprint%201%20SCRUM-44" class="text-sky-400 hover:underline font-semibold flex items-center gap-1">
+                <span>Relancer</span>
+                <i data-lucide="arrow-right" class="w-3 h-3"></i>
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Roadmap Macro-Sprints Visualizer -->
+      <div class="bg-dark-card border border-dark-border rounded-xl p-5">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+          <i data-lucide="calendar-range" class="w-4 h-4 text-sky-400"></i>
+          <span>Progression des 6 Macro-Sprints (Calendrier J1 à J60)</span>
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-6 gap-3 text-xs">
+          <!-- Sprint 0 -->
+          <div class="bg-slate-900/80 border border-slate-800 rounded-lg p-3">
+            <div class="flex items-center justify-between font-bold text-slate-200">
+              <span>Sprint 0</span>
+              <span class="text-emerald-400">40%</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-1">Socles V2, Nx & DW</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
+              <div class="bg-emerald-500 h-full" style="width: 40%"></div>
+            </div>
+          </div>
+
+          <!-- Sprint 1 (Actif) -->
+          <div class="bg-slate-900/80 border-2 border-brand-500/40 rounded-lg p-3 glow-emerald">
+            <div class="flex items-center justify-between font-bold text-white">
+              <span class="flex items-center gap-1">Sprint 1 <span class="w-1.5 h-1.5 rounded-full bg-brand-500 animate-ping"></span></span>
+              <span class="text-brand-400">57.1%</span>
+            </div>
+            <p class="text-[11px] text-brand-300 mt-1">Auth, RBAC & Audit</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
+              <div class="bg-brand-500 h-full" style="width: 57.1%"></div>
+            </div>
+          </div>
+
+          <!-- Sprint 2 -->
+          <div class="bg-slate-900/40 border border-slate-800/60 rounded-lg p-3 opacity-75">
+            <div class="flex items-center justify-between font-bold text-slate-400">
+              <span>Sprint 2</span>
+              <span>0%</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1">Carte 2dsphere & S3</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2"></div>
+          </div>
+
+          <!-- Sprint 3 -->
+          <div class="bg-slate-900/40 border border-slate-800/60 rounded-lg p-3 opacity-75">
+            <div class="flex items-center justify-between font-bold text-slate-400">
+              <span>Sprint 3</span>
+              <span>0%</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1">FSM T1-T4 & IA Vision</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2"></div>
+          </div>
+
+          <!-- Sprint 4 -->
+          <div class="bg-slate-900/40 border border-slate-800/60 rounded-lg p-3 opacity-75">
+            <div class="flex items-center justify-between font-bold text-slate-400">
+              <span>Sprint 4</span>
+              <span>0%</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1">Photo T4 & Power BI</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2"></div>
+          </div>
+
+          <!-- Sprint 5 -->
+          <div class="bg-slate-900/40 border border-slate-800/60 rounded-lg p-3 opacity-75">
+            <div class="flex items-center justify-between font-bold text-slate-400">
+              <span>Sprint 5</span>
+              <span>0%</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1">Tests k6, K8s & Jury</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 2: CODE REVIEW AGENT -->
+    <!-- ========================================================================= -->
+    <div id="tab-codereview" class="tab-content hidden space-y-6">
+
+      <!-- Code Review Top Header Banner -->
+      <div class="bg-gradient-to-r from-emerald-950/60 via-dark-card to-sky-950/40 border border-emerald-500/30 rounded-xl p-5 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-2xl border border-emerald-500/30">
+            <i data-lucide="cpu" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-base font-bold text-white">Rapport d'Audit Automatisé du Code Review Agent</h2>
+              <span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Score Global : 8.0 / 10</span>
+            </div>
+            <p class="text-xs text-slate-400">Conformité OWASP, solidité TypeScript, gestion des schémas, conteneurisation et respect du CDCF V2</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 text-xs">
+          <div class="text-right">
+            <div class="font-bold text-emerald-400">21 Tests Validés (100%)</div>
+            <div class="text-slate-400">0 régression détectée</div>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold">
+            A
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Review per Developer -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Review: ADEM OUERHANI -->
+        <div class="bg-dark-card border border-dark-border rounded-xl p-5 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-dark-border">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-sky-600/20 text-sky-400 flex items-center justify-center font-bold">
+                AO
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-white">Livrables d'Adem Ouerhani</h3>
+                <p class="text-xs text-slate-400">Identity API, Audit Service, DB Schemas, SQL DDL</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="text-xl font-black text-emerald-400 font-mono">9.2<span class="text-xs text-slate-500">/10</span></span>
+              <p class="text-[10px] text-emerald-400 font-semibold uppercase">Excellent</p>
+            </div>
+          </div>
+
+          <!-- Positives -->
+          <div class="space-y-2 text-xs">
+            <div class="font-bold text-emerald-400 flex items-center gap-1.5">
+              <i data-lucide="check-circle" class="w-4 h-4"></i>
+              <span>Points Forts & Conformité CDCF V2 :</span>
+            </div>
+            <ul class="space-y-1.5 text-slate-300 pl-5 list-disc marker:text-emerald-500">
+              <li><b>Argon2id Durci :</b> 64 MiB mémoire, 3 itérations, 4 threads (conforme OWASP & ADR-02).</li>
+              <li><b>Immutabilité Append-Only :</b> Verrouillage Mongoose absolu interdisant tout <code>UPDATE</code> ou <code>DELETE</code>.</li>
+              <li><b>Conformité RGPD :</b> Troncature IP automatique IPv4/IPv6 dans <code>ip-anonymizer.ts</code>.</li>
+              <li><b>Data Warehouse Pure Star :</b> DDL PostgreSQL propre (2 faits, 5 dimensions, intégrité référentielle).</li>
+            </ul>
+          </div>
+
+          <!-- Vulnerabilities & Findings -->
+          <div class="space-y-2 text-xs">
+            <div class="font-bold text-amber-400 flex items-center gap-1.5">
+              <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+              <span>Points d'Attention & Vulnérabilités Détectées :</span>
+            </div>
+
+            <!-- Finding 1 -->
+            <div class="bg-amber-950/20 border border-amber-800/40 rounded-lg p-3 space-y-1.5">
+              <div class="flex items-center justify-between font-bold text-amber-300">
+                <span>⚠️ Risque d'Usurpation de Rôle (audit.controller.ts)</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">MAJEUR</span>
+              </div>
+              <p class="text-slate-300 text-[11px]">
+                L'authentification Admin vérifie directement <code>req.headers['x-user-role'] === 'admin'</code>. Si l'appel contourne l'API Gateway ou si Nginx ne purge pas les en-têtes entrants, un client externe peut forger ce rôle.
+              </p>
+              <div class="bg-slate-950 p-2 rounded text-[11px] font-mono text-slate-300 overflow-x-auto">
+                <span class="text-rose-400">// Code actuel :</span><br>
+                const userRole = req.headers['x-user-role'] as string;<br>
+                if (userRole !== UserRole.ADMIN) { return res.status(403)... }<br>
+                <span class="text-emerald-400">// Remédiation recommandée :</span><br>
+                Vérifier cryptographiquement le JWT ou valider la clé secrète inter-services (X-Internal-Token).
+              </div>
+            </div>
+
+            <!-- Finding 2 -->
+            <div class="bg-slate-900 border border-slate-800 rounded-lg p-3 space-y-1">
+              <div class="font-bold text-slate-300">ℹ️ Cohérence Route OpenAPI</div>
+              <p class="text-slate-400 text-[11px]">
+                Route déclarée <code>/api/v1/auth/register-dev</code> dans <code>identity-api</code> au lieu de <code>/api/v1/auth/register</code> tel que documenté dans <code>openapi.yaml</code>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review: HIBA DHOUIB -->
+        <div class="bg-dark-card border border-dark-border rounded-xl p-5 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-dark-border">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-emerald-600/20 text-emerald-400 flex items-center justify-center font-bold">
+                HD
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-white">Livrables de Hiba Dhouib</h3>
+                <p class="text-xs text-slate-400">Microservice AI Vision (FastAPI, Docker, PyTorch)</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="text-xl font-black text-amber-400 font-mono">6.8<span class="text-xs text-slate-500">/10</span></span>
+              <p class="text-[10px] text-amber-400 font-semibold uppercase">À Consolider</p>
+            </div>
+          </div>
+
+          <!-- Positives -->
+          <div class="space-y-2 text-xs">
+            <div class="font-bold text-emerald-400 flex items-center gap-1.5">
+              <i data-lucide="check-circle" class="w-4 h-4"></i>
+              <span>Points Forts :</span>
+            </div>
+            <ul class="space-y-1.5 text-slate-300 pl-5 list-disc marker:text-emerald-500">
+              <li><b>Dockerfile Multi-Stage :</b> Séparation du build et du runtime sous <code>python:3.11-slim</code> pour réduire la surface d'attaque.</li>
+              <li><b>PyTorch CPU Optimisé :</b> Utilisation de l'index allégé CPU pour éviter un conteneur lourd de 4 Go.</li>
+              <li><b>Endpoint /health :</b> Détection dynamique de l'accélération GPU/CPU.</li>
+            </ul>
+          </div>
+
+          <!-- Vulnerabilities & Findings -->
+          <div class="space-y-2 text-xs">
+            <div class="font-bold text-rose-400 flex items-center gap-1.5">
+              <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+              <span>Points Critiques à Corriger :</span>
+            </div>
+
+            <!-- Finding 1 -->
+            <div class="bg-rose-950/20 border border-rose-800/40 rounded-lg p-3 space-y-1.5">
+              <div class="flex items-center justify-between font-bold text-rose-300">
+                <span>🔴 Dépendances Non Figées (requirements.txt)</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-400">CRITIQUE</span>
+              </div>
+              <p class="text-slate-300 text-[11px]">
+                Les bibliothèques <code>fastapi</code>, <code>torch</code>, <code>pydantic</code>, etc. sont sans version explicite (<code>==</code>). Risque majeur de rupture de build lors d'un déploiement K8s ou CI/CD.
+              </p>
+              <div class="bg-slate-950 p-2 rounded text-[11px] font-mono text-slate-300">
+                <span class="text-emerald-400">// Fix requis :</span><br>
+                fastapi==0.111.0<br>
+                uvicorn==0.30.1<br>
+                pydantic==2.7.4<br>
+                pillow==10.3.0
+              </div>
+            </div>
+
+            <!-- Finding 2 -->
+            <div class="bg-amber-950/20 border border-amber-800/40 rounded-lg p-3 space-y-1">
+              <div class="flex items-center justify-between font-bold text-amber-300">
+                <span>⚠️ Endpoint /v1/classify & Circuit Breaker Incomplets</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">MAJEUR</span>
+              </div>
+              <p class="text-slate-300 text-[11px]">
+                Pour le moment, seul <code>/health</code> est présent dans <code>main.py</code>. L'inférence d'images des 6 classes du CDCF V2 sous Circuit Breaker (&lt; 1,5 s) doit être codée.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 3: BRANCHES GIT & PULL REQUESTS -->
+    <!-- ========================================================================= -->
+    <div id="tab-branches" class="tab-content hidden space-y-6">
+
+      <div class="bg-dark-card border border-dark-border rounded-xl p-5">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="git-merge" class="w-4 h-4 text-indigo-400"></i>
+              <span>Topologie & État des 4 Branches Git</span>
+            </h3>
+            <p class="text-xs text-slate-400">Contrôle du Gitflow, traçabilité des commits et préparation des Pull Requests</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-lg text-xs font-mono bg-slate-800 text-slate-300 border border-slate-700">Dépôt : ADEM2005373/ECOTRACK</span>
+        </div>
+
+        <div class="space-y-3">
+
+          <!-- Branch 1: feature/ECO-11-adem-user-schema -->
+          <div class="bg-slate-900/80 border-2 border-indigo-500/40 rounded-xl p-4 glow-sky">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5">
+                <span class="w-3 h-3 rounded-full bg-indigo-500 animate-pulse"></span>
+                <code class="text-sm font-bold text-indigo-300 font-mono">feature/ECO-11-adem-user-schema</code>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30">HEAD LOCALE ACTIVE</span>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Prêt pour PR vers develop</span>
+            </div>
+            <div class="mt-2 text-xs text-slate-300">
+              <b>Dernier Commit :</b> <code class="font-mono text-slate-400">db22ed0</code> — <i>chore(dashboard): update live project KPIs (4 done, 14.8% completion)</i>
+            </div>
+            <div class="mt-2 flex flex-wrap gap-2 text-[11px] text-slate-400">
+              <span class="bg-slate-800 px-2 py-0.5 rounded">Auteur: Adem Ouerhani</span>
+              <span class="bg-slate-800 px-2 py-0.5 rounded">Livrables: SCRUM-42, SCRUM-56, 10 tests Sprint 1</span>
+              <span class="bg-emerald-500/10 text-emerald-300 px-2 py-0.5 rounded">CI: 100% PASS</span>
+            </div>
+          </div>
+
+          <!-- Branch 2: origin/feature/ECO-03-hiba-fastapi-init -->
+          <div class="bg-slate-900/60 border border-dark-border rounded-xl p-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <code class="text-sm font-bold text-emerald-300 font-mono">origin/feature/ECO-03-hiba-fastapi-init</code>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">DISTANTE (HIBA)</span>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">À réaligner sur develop</span>
+            </div>
+            <div class="mt-2 text-xs text-slate-300">
+              <b>Dernier Commit :</b> <code class="font-mono text-slate-400">7796ed2</code> — <i>feat(ECO-03): init FastAPI ai-vision service</i>
+            </div>
+            <div class="mt-2 flex flex-wrap gap-2 text-[11px] text-slate-400">
+              <span class="bg-slate-800 px-2 py-0.5 rounded">Auteur: Hiba Dhouib</span>
+              <span class="bg-slate-800 px-2 py-0.5 rounded">Fichiers: Dockerfile, main.py, requirements.txt</span>
+            </div>
+          </div>
+
+          <!-- Branch 3: origin/feature/ECO-01-adem-nx-init -->
+          <div class="bg-slate-900/60 border border-dark-border rounded-xl p-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+                <code class="text-sm font-bold text-slate-300 font-mono">origin/feature/ECO-01-adem-nx-init</code>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">SOCLE INITIAL</span>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400">Synchronisée</span>
+            </div>
+            <div class="mt-2 text-xs text-slate-300">
+              <b>Dernier Commit :</b> <code class="font-mono text-slate-400">d141de4</code> — <i>chore(jira): sync sprint 1 board containing terminated tickets SCRUM-38 and SCRUM-55</i>
+            </div>
+          </div>
+
+          <!-- Branch 4: origin/main -->
+          <div class="bg-slate-900/60 border border-dark-border rounded-xl p-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                <code class="text-sm font-bold text-blue-300 font-mono">origin/main</code>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">PRODUCTION & DÉMO</span>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">Action : Verrouiller pushs directs</span>
+            </div>
+            <div class="mt-2 text-xs text-slate-300">
+              <b>Dernier Commit :</b> <code class="font-mono text-slate-400">76022b5</code> — <i>first commit</i> (Merge direct Hiba)
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 4: ÉCARTS CDCF V2 (GAP ANALYSIS) -->
+    <!-- ========================================================================= -->
+    <div id="tab-gap" class="tab-content hidden space-y-6">
+
+      <div class="bg-dark-card border border-dark-border rounded-xl p-5">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-2">
+          <i data-lucide="compass" class="w-4 h-4 text-amber-400"></i>
+          <span>Matrice d'Écarts par Rapport au Cahier des Charges (CDCF V2 - 45 pages)</span>
+        </h3>
+        <p class="text-xs text-slate-400 mb-5">Suivi de la conformité des 8 piliers architecturaux et fonctionnels</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+
+          <!-- 1. API Gateway -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white text-sm">1. API Gateway (Nginx)</span>
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-400">85% Fait</span>
+            </div>
+            <p class="text-slate-300">Routage unifié, reverse proxy pour les microservices, configurations SSL et en-têtes de sécurité de base.</p>
+            <div class="text-[11px] text-amber-400"><b>Reste :</b> Purge explicite des en-têtes <code>x-user-*</code> entrants pour étanchéifier le RBAC.</div>
+          </div>
+
+          <!-- 2. Identity Service -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white text-sm">2. Identity Service</span>
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-sky-500/20 text-sky-400">60% Fait</span>
+            </div>
+            <p class="text-slate-300">Schéma User, Argon2id, gestion des 4 rôles (Citoyen, Agent, Ouvrier, Admin), UserService complet.</p>
+            <div class="text-[11px] text-sky-400"><b>Reste :</b> Finaliser <code>POST /auth/register</code> (Sara) et signature RS256 sur <code>/auth/login</code> (Hiba).</div>
+          </div>
+
+          <!-- 3. Core Report Service -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white text-sm">3. Core Report & Geo Service</span>
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-800 text-slate-400">20% Fait</span>
+            </div>
+            <p class="text-slate-300">Contrats OpenAPI 3.1.0 modélisés. Docker Compose avec MongoDB et MinIO opérationnel.</p>
+            <div class="text-[11px] text-rose-400"><b>Reste :</b> Schéma Mongoose <code>Report</code> avec index <code>2dsphere</code> et service Sharp de purge EXIF.</div>
+          </div>
+
+          <!-- 4. Workflow Service -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white text-sm">4. Workflow & Notification Service</span>
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-800 text-slate-400">15% Fait</span>
+            </div>
+            <p class="text-slate-300">ADR-03 rédigé définissant les transitions T1 à T4. Contrats d'interfaces OpenAPI prêts.</p>
+            <div class="text-[11px] text-rose-400"><b>Reste :</b> Moteur de gardes de transition FSM, serveur SSE temps réel et push Expo.</div>
+          </div>
+
+          <!-- 5. Audit Service -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white text-sm">5. Audit & Compliance Service</span>
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-400">95% Fait</span>
+            </div>
+            <p class="text-slate-300">Microservice complet, collection immuable Append-Only, anonymisation IP RGPD et contrôles Admin.</p>
+            <div class="text-[11px] text-emerald-400"><b>Reste :</b> Brancher les producteurs d'événements des autres microservices.</div>
+          </div>
+
+          <!-- 6. AI Vision Service -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white text-sm">6. AI Vision Service (FastAPI)</span>
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/20 text-amber-400">30% Fait</span>
+            </div>
+            <p class="text-slate-300">Dockerfile multi-stage, serveur FastAPI initialisé par Hiba avec PyTorch CPU.</p>
+            <div class="text-[11px] text-amber-400"><b>Reste :</b> Endpoint <code>POST /v1/classify</code>, inférence des 6 classes urbaines et Circuit Breaker 1.5s.</div>
+          </div>
+
+          <!-- 7. BI & Data Warehouse -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white text-sm">7. BI & Data Warehouse (PostgreSQL)</span>
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-sky-500/20 text-sky-400">45% Fait</span>
+            </div>
+            <p class="text-slate-300">DDL Schéma en Étoile pur (2 faits, 5 dimensions), seeds initiaux, vues analytiques prêtes.</p>
+            <div class="text-[11px] text-sky-400"><b>Reste :</b> Développer le worker Python <code>bi-etl-worker</code> d'extraction incrémentale et modèle DAX.</div>
+          </div>
+
+          <!-- 8. Mobile & Web Apps -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white text-sm">8. Applications Clients (Expo & React)</span>
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-500/20 text-rose-400">10% Fait</span>
+            </div>
+            <p class="text-slate-300">Dossiers prévus dans le Monorepo Nx. Prototypes HTML fidèles disponibles.</p>
+            <div class="text-[11px] text-rose-400"><b>Reste :</b> Initialiser les projets Expo (`apps/mobile-expo`) et Vite (`apps/web-react`).</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 5: ACTION CENTER SCRUM MASTER -->
+    <!-- ========================================================================= -->
+    <div id="tab-actions" class="tab-content hidden space-y-6">
+
+      <div class="bg-dark-card border border-dark-border rounded-xl p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+            <span>Plan d'Action Immédiat pour le Scrum Master / PO</span>
+          </h3>
+          <span class="text-xs text-slate-400">5 Décisions Arbitrées</span>
+        </div>
+        <p class="text-xs text-slate-400 mb-5">Actions opérationnelles à mener pour sécuriser la livraison du Sprint 1 et lancer le Sprint 2</p>
+
+        <div class="space-y-3">
+
+          <!-- Action 1 -->
+          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex items-start justify-between gap-4">
+            <div class="flex items-start gap-3">
+              <input type="checkbox" class="mt-1 w-4 h-4 rounded text-brand-500 focus:ring-0 bg-slate-800 border-slate-700">
+              <div>
+                <h4 class="text-sm font-bold text-white">1. Préparer et fusionner la Pull Request de la branche ECO-11 vers develop</h4>
+                <p class="text-xs text-slate-400 mt-1">La branche locale contient 10/10 tests passants (Users, Argon2id, AuditLogs Append-Only). Doit être intégrée pour débloquer les autres services.</p>
+                <div class="mt-2 text-xs font-mono bg-slate-950 p-2 rounded text-slate-300 inline-block">
+                  git checkout develop && git merge --no-ff feature/ECO-11-adem-user-schema
+                </div>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-sky-500/20 text-sky-400 shrink-0">Adem Ouerhani</span>
+          </div>
+
+          <!-- Action 2 -->
+          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex items-start justify-between gap-4">
+            <div class="flex items-start gap-3">
+              <input type="checkbox" class="mt-1 w-4 h-4 rounded text-brand-500 focus:ring-0 bg-slate-800 border-slate-700">
+              <div>
+                <h4 class="text-sm font-bold text-white">2. Débloquer Sara Shih sur SCRUM-43 (Route POST /auth/register)</h4>
+                <p class="text-xs text-slate-400 mt-1">Fournir à Sara le squelette de contrôleur Express branché directement sur <code>userService.createUser()</code> déjà opérationnel et testé.</p>
+                <div class="mt-2 text-xs font-mono bg-slate-950 p-2 rounded text-slate-300 inline-block">
+                  services/identity-api/src/controllers/register.controller.ts
+                </div>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-rose-500/20 text-rose-400 shrink-0">Sara Shih</span>
+          </div>
+
+          <!-- Action 3 -->
+          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex items-start justify-between gap-4">
+            <div class="flex items-start gap-3">
+              <input type="checkbox" class="mt-1 w-4 h-4 rounded text-brand-500 focus:ring-0 bg-slate-800 border-slate-700">
+              <div>
+                <h4 class="text-sm font-bold text-white">3. Accompagner Hiba Dhouib sur SCRUM-45 (Login RS256) & figer requirements.txt</h4>
+                <p class="text-xs text-slate-400 mt-1">Générer la paire de clés asymétriques Ed25519/RS256, mettre en place le rate-limiter Redis et figer les versions exactes dans <code>requirements.txt</code>.</p>
+                <div class="mt-2 text-xs font-mono bg-slate-950 p-2 rounded text-slate-300 inline-block">
+                  ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+                </div>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-400 shrink-0">Hiba Dhouib</span>
+          </div>
+
+          <!-- Action 4 -->
+          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex items-start justify-between gap-4">
+            <div class="flex items-start gap-3">
+              <input type="checkbox" class="mt-1 w-4 h-4 rounded text-brand-500 focus:ring-0 bg-slate-800 border-slate-700">
+              <div>
+                <h4 class="text-sm font-bold text-white">4. Relancer Ahmed Salah pour SCRUM-44 (Écran Mobile Expo) & Schéma Reports</h4>
+                <p class="text-xs text-slate-400 mt-1">L'écran mobile d'enregistrement citoyen est indispensable pour la validation du parcours nominal de fin de Sprint 1.</p>
+                <div class="mt-2 text-xs font-mono bg-slate-950 p-2 rounded text-slate-300 inline-block">
+                  apps/mobile-expo/src/screens/Auth/RegisterScreen.tsx
+                </div>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-500/20 text-amber-400 shrink-0">Ahmed Salah</span>
+          </div>
+
+          <!-- Action 5 -->
+          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex items-start justify-between gap-4">
+            <div class="flex items-start gap-3">
+              <input type="checkbox" class="mt-1 w-4 h-4 rounded text-brand-500 focus:ring-0 bg-slate-800 border-slate-700">
+              <div>
+                <h4 class="text-sm font-bold text-white">5. Sécuriser le rôle Admin dans audit.controller.ts</h4>
+                <p class="text-xs text-slate-400 mt-1">Remplacer la lecture simple de l'en-tête <code>x-user-role</code> par la validation cryptographique du Bearer token JWT.</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400 shrink-0">Sécurité & Qualité</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-dark-card border-t border-dark-border py-4 px-6 text-center text-xs text-slate-500">
+    ECOTRACK V2 — Plateforme Smart City — Direction de Projet Adem Ouerhani — Supervision Synchronisée Jira Cloud & GitHub
+  </footer>
+
+  <!-- Tab Switch Script & Lucide Icon Init -->
+  <script>
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active', 'text-white', 'bg-slate-800/90', 'border', 'border-slate-700', 'shadow-sm');
+        b.classList.add('text-slate-400');
+      });
+
+      const activeContent = document.getElementById(tabId);
+      if (activeContent) {
+        activeContent.classList.remove('hidden');
+      }
+
+      if (btn) {
+        btn.classList.add('active', 'text-white', 'bg-slate-800/90', 'border', 'border-slate-700', 'shadow-sm');
+        btn.classList.remove('text-slate-400');
+      }
+    }
+
+    // Initialize Lucide Icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
