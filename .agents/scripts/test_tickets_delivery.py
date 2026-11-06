@@ -1,8 +1,11 @@
 """
-ECOTRACK Automated Verification Test Suite
+ECOTRACK Automated Verification Test Suite - Sprint 0 (EPIC 0: SCRUM-33)
 Validates all deliverables for tickets:
 - SCRUM-38 (ECO-01): DevOps, Nx Monorepo, Docker Compose, CI/CD
 - SCRUM-55 (ECO-05): PostgreSQL Star Schema DW, Dimensions Seeding, OpenAPI Contracts, ADRs
+- SCRUM-40 (ECO-03): AI FastAPI & PyTorch Microservice Environment
+- SCRUM-39 (ECO-02): Expo Mobile App & CDCF V2 Design Tokens
+- SCRUM-41 (ECO-04): React Vite & Tailwind CSS Atomic UI
 """
 
 import os
@@ -202,11 +205,134 @@ def test_adrs():
     for i in range(1, 6):
         assert f"ADR-0{i}" in content, f"ADR-0{i} missing from decisions.md"
 
+# --- SCRUM-40 TESTS ---
+
+@test("SCRUM-40: FastAPI & PyTorch dependencies in requirements.txt")
+def test_ai_vision_requirements():
+    path = os.path.join("services", "ai-vision", "requirements.txt")
+    assert os.path.exists(path), f"{path} missing"
+    with open(path, "r", encoding="utf-8") as f:
+        content = f.read()
+    required = ["fastapi", "uvicorn", "torch", "torchvision", "pillow", "pydantic"]
+    for pkg in required:
+        assert pkg in content, f"Dependency {pkg} missing from {path}"
+
+@test("SCRUM-40: FastAPI application & GET /health route (main.py)")
+def test_ai_vision_main():
+    path = os.path.join("services", "ai-vision", "main.py")
+    assert os.path.exists(path), f"{path} missing"
+    with open(path, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "FastAPI" in content, "FastAPI import/app missing"
+    assert "/health" in content, "GET /health route missing"
+    assert "torch" in content, "torch import missing"
+    assert "device" in content, "device status missing in health check"
+
+@test("SCRUM-40: Multi-stage Dockerfile based on python:3.11-slim")
+def test_ai_vision_dockerfile():
+    path = os.path.join("services", "ai-vision", "Dockerfile")
+    assert os.path.exists(path), f"{path} missing"
+    with open(path, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "python:3.11-slim" in content, "Base image python:3.11-slim missing"
+    assert "AS builder" in content, "Multi-stage builder missing"
+    assert "uvicorn" in content, "uvicorn command missing"
+
+# --- SCRUM-39 TESTS ---
+
+@test("SCRUM-39: Expo configuration (app.json) & packages")
+def test_expo_app_config():
+    paths = [
+        os.path.join("apps", "mobile-expo", "app.json"),
+        os.path.join("apps", "mobile", "app.json")
+    ]
+    found = any(os.path.exists(p) for p in paths)
+    assert found, "app.json missing from mobile app directory"
+    chosen_path = next(p for p in paths if os.path.exists(p))
+    with open(chosen_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    assert "expo" in data, "'expo' section missing from app.json"
+    assert data["expo"].get("name") == "EcoTrack Mobile", "Mobile app name should be EcoTrack Mobile"
+
+@test("SCRUM-39: Design Tokens Colors (#059669 & #1E3A8A)")
+def test_expo_theme_colors():
+    paths = [
+        os.path.join("apps", "mobile-expo", "src", "theme", "colors.ts"),
+        os.path.join("apps", "mobile", "src", "theme", "colors.ts")
+    ]
+    found = any(os.path.exists(p) for p in paths)
+    assert found, "colors.ts missing"
+    chosen_path = next(p for p in paths if os.path.exists(p))
+    with open(chosen_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "#059669" in content, "Primary color #059669 missing"
+    assert "#1E3A8A" in content, "Secondary color #1E3A8A missing"
+
+@test("SCRUM-39: Typography (PlusJakartaSans-Bold & Inter-Regular)")
+def test_expo_theme_typography():
+    paths = [
+        os.path.join("apps", "mobile-expo", "src", "theme", "typography.ts"),
+        os.path.join("apps", "mobile", "src", "theme", "typography.ts")
+    ]
+    found = any(os.path.exists(p) for p in paths)
+    assert found, "typography.ts missing"
+    chosen_path = next(p for p in paths if os.path.exists(p))
+    with open(chosen_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "PlusJakartaSans-Bold" in content, "PlusJakartaSans-Bold missing"
+    assert "Inter-Regular" in content, "Inter-Regular missing"
+
+# --- SCRUM-41 TESTS ---
+
+@test("SCRUM-41: Tailwind CSS Configuration & CDCF V2 Palette")
+def test_web_tailwind_config():
+    paths = [
+        os.path.join("apps", "web-react", "tailwind.config.js"),
+        os.path.join("apps", "web", "tailwind.config.js")
+    ]
+    found = any(os.path.exists(p) for p in paths)
+    assert found, "tailwind.config.js missing"
+    chosen_path = next(p for p in paths if os.path.exists(p))
+    with open(chosen_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "#059669" in content, "Primary color #059669 missing from tailwind config"
+    assert "#1e3a8a" in content.lower(), "Secondary color #1E3A8A missing from tailwind config"
+
+@test("SCRUM-41: Atomic Button Component with Variants")
+def test_web_button_component():
+    paths = [
+        os.path.join("apps", "web-react", "src", "components", "ui", "Button.tsx"),
+        os.path.join("apps", "web", "src", "components", "ui", "Button.tsx")
+    ]
+    found = any(os.path.exists(p) for p in paths)
+    assert found, "Button.tsx missing"
+    chosen_path = next(p for p in paths if os.path.exists(p))
+    with open(chosen_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "primary" in content, "Primary button variant missing"
+    assert "secondary" in content, "Secondary button variant missing"
+    assert "destructive" in content, "Destructive button variant missing"
+
+@test("SCRUM-41: React App & Test Showcase (App.tsx)")
+def test_web_app_showcase():
+    paths = [
+        os.path.join("apps", "web-react", "src", "App.tsx"),
+        os.path.join("apps", "web", "src", "App.tsx")
+    ]
+    found = any(os.path.exists(p) for p in paths)
+    assert found, "App.tsx missing"
+    chosen_path = next(p for p in paths if os.path.exists(p))
+    with open(chosen_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "Button" in content, "Button import/usage missing in App.tsx"
+    assert "ECOTRACK" in content, "ECOTRACK title missing in App.tsx"
+
 def main():
     print("=" * 60)
-    print("RUNNING ECOTRACK DELIVERY VALIDATION TEST SUITE")
+    print("RUNNING ECOTRACK DELIVERY VALIDATION TEST SUITE (SPRINT 0 / EPIC 0)")
     print("=" * 60)
     
+    # SCRUM-38
     test_package_json()
     test_nx_json()
     test_tsconfig()
@@ -214,10 +340,27 @@ def main():
     test_nginx_conf()
     test_ci_workflow()
     test_env_example()
+
+    # SCRUM-55
     test_star_schema_ddl()
     test_seed_dimensions()
     test_openapi_contract()
     test_adrs()
+
+    # SCRUM-40
+    test_ai_vision_requirements()
+    test_ai_vision_main()
+    test_ai_vision_dockerfile()
+
+    # SCRUM-39
+    test_expo_app_config()
+    test_expo_theme_colors()
+    test_expo_theme_typography()
+
+    # SCRUM-41
+    test_web_tailwind_config()
+    test_web_button_component()
+    test_web_app_showcase()
     
     print("=" * 60)
     passed = sum(1 for r in TEST_RESULTS if r["status"] == "PASS")
