@@ -1,0 +1,11 @@
+{
+  "name": "@ecotrack/db",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "@ecotrack/shared": "*",
+    "mongoose": "^8.4.0",
+    "argon2": "^0.40.1"
+  }
+}
