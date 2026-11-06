@@ -4,13 +4,13 @@
     "key": "SCRUM",
     "site": "ouerhaniadem0805.atlassian.net",
     "lead": "Adem Ouerhani",
-    "lastSync": "2026-11-06 13:25:08"
+    "lastSync": "2026-11-06 15:35:18"
   },
   "kpis": {
     "totalIssues": 33,
     "totalTasks": 27,
     "doneIssues": 7,
-    "inProgressIssues": 1,
+    "inProgressIssues": 2,
     "toDoIssues": 20,
     "completionRate": 25.9,
     "totalEpics": 6,
@@ -264,8 +264,8 @@
     "Sara Shih": {
       "total": 7,
       "done": 1,
-      "in_progress": 0,
-      "to_do": 6,
+      "in_progress": 1,
+      "to_do": 5,
       "issues": [
         {
           "key": "SCRUM-41",
@@ -278,7 +278,7 @@
         {
           "key": "SCRUM-43",
           "summary": "ECO-12 | [API] Build POST /auth/register Route",
-          "status": "À faire",
+          "status": "En cours",
           "type": "Tâche",
           "priority": "Medium",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-43"
@@ -333,8 +333,8 @@
   },
   "statusStats": {
     "Done": 8,
-    "InProgress": 1,
-    "ToDo": 24
+    "InProgress": 2,
+    "ToDo": 23
   },
   "warnings": [
     {
@@ -546,15 +546,15 @@
     {
       "key": "SCRUM-43",
       "summary": "ECO-12 | [API] Build POST /auth/register Route",
-      "status": "À faire",
-      "rawStatus": "À faire",
+      "status": "En cours",
+      "rawStatus": "En cours",
       "isDone": false,
       "type": "Tâche",
       "priority": "Medium",
       "assignee": "Sara Shih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:11.244+0100",
-      "updated": "2026-11-06T12:55:39.098+0100",
+      "updated": "2026-11-06T15:34:54.804+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-43",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
