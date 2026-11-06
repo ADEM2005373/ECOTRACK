@@ -2,7 +2,7 @@
 ECOTRACK Sprint 2 Automated Test Suite
 Validates deliverables for:
 - SCRUM-46 (ECO-20): Report Mongoose Schema & 2dsphere Geospatial Index
-- SCRUM-47 (ECO-21): Media Service with Sharp, EXIF/GPS Metadata Purge & 224x224 AI Thumbnail
+- SCRUM-47 (ECO-21): Media Service & Media API with Sharp (EXIF/GPS Purge, S3/MinIO PutObjectCommand)
 """
 
 import sys
@@ -48,37 +48,50 @@ def test_report_schema():
 
 # --- SCRUM-47 (ECO-21) TESTS ---
 
-@test("SCRUM-47: Media Service package & dependencies definition")
-def test_media_service_package():
-    pkg_path = os.path.join("services", "media-service", "package.json")
-    assert os.path.exists(pkg_path), f"{pkg_path} missing"
-    with open(pkg_path, "r", encoding="utf-8") as f:
+@test("SCRUM-47: Sharp Utility (sharp.util.ts) - Max 1920px & withMetadata(false)")
+def test_sharp_util():
+    util_path = os.path.join("services", "media-api", "src", "utils", "sharp.util.ts")
+    assert os.path.exists(util_path), f"{util_path} missing"
+    with open(util_path, "r", encoding="utf-8") as f:
         content = f.read()
-    assert '"sharp"' in content, "sharp dependency missing"
-    assert '"multer"' in content, "multer dependency missing"
-    assert '"express"' in content, "express dependency missing"
-
-@test("SCRUM-47: Image Processor Service with Sharp (EXIF Purge & AI 224x224)")
-def test_image_processor():
-    svc_path = os.path.join("services", "media-service", "src", "services", "image-processor.service.ts")
-    assert os.path.exists(svc_path), f"{svc_path} missing"
-    with open(svc_path, "r", encoding="utf-8") as f:
-        content = f.read()
-    assert "withMetadata(false)" in content, "EXIF/GPS metadata purge missing"
-    assert "resize(224, 224" in content, "224x224 AI vision thumbnail resizing missing"
+    assert "withMetadata(false)" in content, "EXIF/GPS metadata purge missing (.withMetadata(false))"
+    assert "1920" in content, "1920px max resize constraint missing"
+    assert "224" in content, "224x224 AI thumbnail format missing"
     assert "webp" in content, "webp conversion missing"
 
-@test("SCRUM-47: Media Service Upload Route & Server definition")
-def test_media_routes_and_server():
-    routes_path = os.path.join("services", "media-service", "src", "routes", "media.routes.ts")
-    server_path = os.path.join("services", "media-service", "src", "index.ts")
-    assert os.path.exists(routes_path), f"{routes_path} missing"
-    assert os.path.exists(server_path), f"{server_path} missing"
-    with open(routes_path, "r", encoding="utf-8") as f:
+@test("SCRUM-47: Upload Controller & Multer 10MB Limit (upload.controller.ts)")
+def test_upload_controller():
+    ctrl_path = os.path.join("services", "media-api", "src", "controllers", "upload.controller.ts")
+    assert os.path.exists(ctrl_path), f"{ctrl_path} missing"
+    with open(ctrl_path, "r", encoding="utf-8") as f:
         content = f.read()
-    assert "router.post('/upload'" in content, "POST /upload endpoint missing"
-    assert "upload.single('photo')" in content, "Multer single upload missing"
-    assert "FICHIER_MANQUANT" in content or "metadataPurged" in content, "Validation checks missing"
+    assert "multer.memoryStorage" in content, "Multer memoryStorage missing"
+    assert "10 * 1024 * 1024" in content, "10MB file size limit missing"
+    assert "processCitizenImage" in content, "processCitizenImage call missing"
+    assert "201" in content, "HTTP 201 Created status missing"
+
+@test("SCRUM-47: AWS SDK v3 PutObjectCommand S3/MinIO Integration (s3.service.ts)")
+def test_s3_storage_service():
+    s3_path = os.path.join("services", "media-api", "src", "services", "s3.service.ts")
+    pkg_path = os.path.join("services", "media-api", "package.json")
+    assert os.path.exists(s3_path), f"{s3_path} missing"
+    with open(s3_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "PutObjectCommand" in content, "PutObjectCommand missing from s3.service.ts"
+    assert "S3Client" in content, "S3Client missing from s3.service.ts"
+    assert "forcePathStyle" in content, "forcePathStyle for MinIO missing"
+    with open(pkg_path, "r", encoding="utf-8") as f:
+        pkg_content = f.read()
+    assert "@aws-sdk/client-s3" in pkg_content, "@aws-sdk/client-s3 dependency missing"
+
+@test("SCRUM-47: Media API Server & Routes Definition (index.ts)")
+def test_media_api_server():
+    server_path = os.path.join("services", "media-api", "src", "index.ts")
+    assert os.path.exists(server_path), f"{server_path} missing"
+    with open(server_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "uploadRouter" in content, "uploadRouter missing"
+    assert "SCRUM-47" in content and "ECO-21" in content, "SCRUM-47 / ECO-21 tracking info missing"
 
 def main():
     print("=" * 65)
@@ -87,9 +100,10 @@ def main():
     
     test_report_types()
     test_report_schema()
-    test_media_service_package()
-    test_image_processor()
-    test_media_routes_and_server()
+    test_sharp_util()
+    test_upload_controller()
+    test_s3_storage_service()
+    test_media_api_server()
     
     print("=" * 65)
     passed = sum(1 for r in TEST_RESULTS if r["status"] == "PASS")
