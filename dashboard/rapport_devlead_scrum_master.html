@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>ECOTRACK V2 — Revue 360° & Feuille de Route DevLead & Scrum Master</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: A4;
+      margin: 12mm 14mm 14mm 14mm;
+      @bottom-right {
+        content: counter(page) "/" counter(pages);
+        font-family: 'Inter', sans-serif;
+        font-size: 9px;
+        color: #64748b;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #0f172a;
+      background-color: #ffffff;
+      line-height: 1.45;
+      font-size: 11px;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #0f172a;
+      margin-top: 0;
+    }
+
+    .header-banner {
+      background: linear-gradient(135deg, #059669 0%, #1e3a8a 100%);
+      color: white;
+      padding: 20px 24px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-title h1 {
+      color: white;
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 4px;
+      letter-spacing: -0.02em;
+    }
+
+    .header-title p {
+      margin: 0;
+      font-size: 11.5px;
+      opacity: 0.9;
+    }
+
+    .header-badge {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      padding: 6px 12px;
+      border-radius: 8px;
+      text-align: right;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .meta-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 12px;
+    }
+
+    .meta-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #64748b;
+      margin-bottom: 2px;
+    }
+
+    .meta-value {
+      font-size: 11px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .section-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #0f172a;
+      border-bottom: 2px solid #059669;
+      padding-bottom: 4px;
+      margin-top: 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section-title span.number {
+      background: #059669;
+      color: white;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 14px;
+      font-size: 10px;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+      text-align: left;
+      padding: 6px 8px;
+      border: 1px solid #cbd5e1;
+    }
+
+    td {
+      padding: 6px 8px;
+      border: 1px solid #e2e8f0;
+      color: #1e293b;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #f8fafc;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-success {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+
+    .badge-warning {
+      background: #fef9c3;
+      color: #854d0e;
+      border: 1px solid #fef08a;
+    }
+
+    .badge-danger {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+
+    .badge-info {
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+
+    .callout {
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      border-left: 4px solid;
+    }
+
+    .callout-warning {
+      background-color: #fffbeb;
+      border-left-color: #d97706;
+      color: #92400e;
+    }
+
+    .callout-success {
+      background-color: #f0fdf4;
+      border-left-color: #059669;
+      color: #166534;
+    }
+
+    .callout-primary {
+      background-color: #eff6ff;
+      border-left-color: #1e3a8a;
+      color: #1e3a8a;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .action-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .action-box h4 {
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .action-box ul {
+      margin: 0;
+      padding-left: 16px;
+    }
+
+    .action-box li {
+      margin-bottom: 4px;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      background-color: #f1f5f9;
+      padding: 1px 4px;
+      border-radius: 4px;
+      font-size: 9.5px;
+      color: #0f172a;
+      border: 1px solid #e2e8f0;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 18px;
+      border-left: 2px solid #cbd5e1;
+      margin-bottom: 14px;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -23px;
+      top: 3px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #059669;
+      border: 2px solid #ffffff;
+    }
+
+    .signature-area {
+      margin-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px dashed #cbd5e1;
+      padding-top: 14px;
+      page-break-inside: avoid;
+    }
+
+    .signature-block {
+      width: 45%;
+    }
+
+    .signature-line {
+      margin-top: 30px;
+      border-bottom: 1px solid #94a3b8;
+      width: 80%;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Banner -->
+  <div class="header-banner">
+    <div class="header-title">
+      <h1>ECOTRACK V2 • SMART CITY PLATFORM</h1>
+      <p>Revue de Projet à 360° & Feuille de Route d'Action Lead Dev & Scrum Master</p>
+    </div>
+    <div class="header-badge">
+      <div>DOCUMENT OFFICIEL</div>
+      <div style="font-size: 11px; font-weight: 800; color: #a7f3d0;">DEVLEAD & SCRUM MASTER</div>
+    </div>
+  </div>
+
+  <!-- Meta Header Grid -->
+  <div class="meta-grid">
+    <div class="meta-card">
+      <div class="meta-label">Responsable Projet</div>
+      <div class="meta-value">Adem Ouerhani</div>
+      <div style="font-size: 9px; color: #64748b;">Lead Dev • Scrum Master • DevOps</div>
+    </div>
+    <div class="meta-card">
+      <div class="meta-label">Date & Heure</div>
+      <div class="meta-value">06 Novembre 2026</div>
+      <div style="font-size: 9px; color: #64748b;">Jalon Fin Sprint 0 & Clôture Sprint 1</div>
+    </div>
+    <div class="meta-card">
+      <div class="meta-label">Dépôt GitHub</div>
+      <div class="meta-value">ADEM2005373/ECOTRACK</div>
+      <div style="font-size: 9px; color: #059669; font-weight: 700;">main (protégée) & develop</div>
+    </div>
+    <div class="meta-card">
+      <div class="meta-label">Avancement Global</div>
+      <div class="meta-value">Sprint 0: 100% | Sprint 1: 40%</div>
+      <div style="font-size: 9px; color: #64748b;">Tests Recette: 30/30 Validés</div>
+    </div>
+  </div>
+
+  <!-- SECTION 1 : REVUE COMPLÈTE À 360° -->
+  <div class="section-title">
+    <span class="number">1</span>
+    <span>REVUE TECHNIQUE ET FONCTIONNELLE À 360°</span>
+  </div>
+
+  <p style="margin-top: 0; color: #475569; font-size: 10.5px;">
+    Inventaire exhaustif de la conformité de tous les livrables du monorepo Nx, de l'infrastructure Docker et de l'intégration microservices par rapport au CDCF V2.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 22%;">Composant</th>
+        <th style="width: 18%;">Emplacement</th>
+        <th style="width: 22%;">Stack / Technologies</th>
+        <th style="width: 26%;">Éléments Livrés & Vérifiés</th>
+        <th style="width: 12%; text-align: center;">Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Monorepo & Outillage</strong></td>
+        <td><code>Racine</code></td>
+        <td>Nx 19.8, TS 5.4, Prettier</td>
+        <td>Workspaces apps, services, packages, CI/CD GitHub Actions</td>
+        <td style="text-align: center;"><span class="badge badge-success">Conforme</span></td>
+      </tr>
+      <tr>
+        <td><strong>Infrastructure Docker</strong></td>
+        <td><code>docker-compose.yml</code></td>
+        <td>Docker, Nginx, Mongo, Postgres</td>
+        <td>6 conteneurs (Mongo, Postgres DW, Redis, MinIO, Nginx, Adminer)</td>
+        <td style="text-align: center;"><span class="badge badge-success">Opérationnel</span></td>
+      </tr>
+      <tr>
+        <td><strong>Package Base de Données</strong></td>
+        <td><code>packages/db</code></td>
+        <td>Mongoose 8, TypeScript</td>
+        <td>UserModel (Argon2id pre-save hook), AuditLogModel immuable</td>
+        <td style="text-align: center;"><span class="badge badge-success">Validé (PR #1)</span></td>
+      </tr>
+      <tr>
+        <td><strong>Package Types Partagés</strong></td>
+        <td><code>packages/shared</code></td>
+        <td>TypeScript</td>
+        <td>IUser, CreateUserDto, UserRole (4 rôles), AuditAction (11 actions)</td>
+        <td style="text-align: center;"><span class="badge badge-success">Validé (PR #1)</span></td>
+      </tr>
+      <tr>
+        <td><strong>Contrats API OpenAPI</strong></td>
+        <td><code>packages/contracts</code></td>
+        <td>OpenAPI 3.1.0</td>
+        <td>Spécification complète Auth, Signalements, Médias, Workflow</td>
+        <td style="text-align: center;"><span class="badge badge-success">Conforme</span></td>
+      </tr>
+      <tr>
+        <td><strong>Microservice Identity</strong></td>
+        <td><code>services/identity-api</code></td>
+        <td>Express, Argon2id, JWT RS256</td>
+        <td>UserService unifié, hashing.ts durci (64 MiB, 3 passes, 4 threads)</td>
+        <td style="text-align: center;"><span class="badge badge-warning">En finalisation</span></td>
+      </tr>
+      <tr>
+        <td><strong>Microservice Audit & RGPD</strong></td>
+        <td><code>services/audit-api</code></td>
+        <td>Express, RGPD Truncation</td>
+        <td>Anonymisation IP /24, collection append-only, RBAC admin</td>
+        <td style="text-align: center;"><span class="badge badge-success">100% Conforme</span></td>
+      </tr>
+      <tr>
+        <td><strong>Microservice IA Vision</strong></td>
+        <td><code>services/ai-vision</code></td>
+        <td>FastAPI, PyTorch, Uvicorn</td>
+        <td>GET /health dynamique GPU/CPU, Dockerfile multi-stage, CORS</td>
+        <td style="text-align: center;"><span class="badge badge-success">100% Conforme</span></td>
+      </tr>
+      <tr>
+        <td><strong>Entrepôt Décisionnel (BI)</strong></td>
+        <td><code>services/bi-etl</code></td>
+        <td>PostgreSQL 16, SQL</td>
+        <td>Schéma en étoile (2 Faits, 5 Dimensions) + Scripts de seeding + 5 ADRs</td>
+        <td style="text-align: center;"><span class="badge badge-success">100% Conforme</span></td>
+      </tr>
+      <tr>
+        <td><strong>Frontend Web Supervision</strong></td>
+        <td><code>apps/web-react</code></td>
+        <td>React 18, Vite, Tailwind CSS</td>
+        <td>Palette CDCF V2 (#059669, #1E3A8A), composant &lt;Button /&gt; 5 variants</td>
+        <td style="text-align: center;"><span class="badge badge-success">Revu & Validé</span></td>
+      </tr>
+      <tr>
+        <td><strong>Application Mobile</strong></td>
+        <td><code>apps/mobile-expo</code></td>
+        <td>Expo Router, React Native</td>
+        <td>Structure Expo, tokens de couleurs et typographies intégrés</td>
+        <td style="text-align: center;"><span class="badge badge-info">Socle Prêt</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- GOUVERNANCE GIT & TESTS -->
+  <div class="grid-2">
+    <div class="action-box">
+      <h4>🛡️ Gouvernance Git & Déploiement</h4>
+      <ul>
+        <li><strong>Protection de branche <code>main</code> :</strong> Blocage strict de tout push direct. Obligation d'ouvrir une PR avec au moins 1 revue approbatrice. Deletions et force-push interdits.</li>
+        <li><strong>Branche <code>develop</code> :</strong> Déployée sur GitHub comme cible officielle d'intégration de l'équipe.</li>
+        <li><strong>Pull Request #1 :</strong> Fusionnée avec succès (`develop`), intégrant `@ecotrack/db` et `UserService`.</li>
+      </ul>
+    </div>
+    <div class="action-box">
+      <h4>🧪 Assurance Qualité & Bancs de Tests</h4>
+      <ul>
+        <li><strong>Sprint 0 Suite (20 tests) :</strong> <strong>20/20 PASS (100%)</strong> validant architecture Nx, Docker Compose, Nginx, PostgreSQL DW, FastAPI et React.</li>
+        <li><strong>Sprint 1 Suite (10 tests) :</strong> <strong>10/10 PASS (100%)</strong> validant UserModel, Argon2id, RBAC, immutabilité AuditLog et troncature IP RGPD.</li>
+        <li><strong>État du Working Tree :</strong> Parfaitement propre (<code>working tree clean</code>).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout callout-warning">
+    <strong>⚠️ Diagnostic Scrum Master sur le Planning :</strong> Le <strong>Sprint 0 est validé à 100%</strong> avec tous ses objectifs atteints. En revanche, le <strong>Sprint 1 accuse un retard critique de 12 jours</strong> (échéance initiale fixée au 25 octobre 2026). La cause racine réside dans le blocage de la route <code>POST /auth/register</code> (Sara Shih / SCRUM-43).
+  </div>
+
+  <!-- SECTION 2 : FEUILLE DE ROUTE D'ACTION LEAD DEV & SCRUM MASTER -->
+  <div class="page-break"></div>
+
+  <div class="section-title">
+    <span class="number">2</span>
+    <span>FEUILLE DE ROUTE & PLAN D'ACTION (LEAD DEV & SCRUM MASTER)</span>
+  </div>
+
+  <p style="margin-top: 0; color: #475569; font-size: 10.5px;">
+    Plan opérationnel détaillé pour résoudre les goulots d'étranglement, clôturer le Sprint 1 et embrayer immédiatement sur le Sprint 2.
+  </p>
+
+  <div class="grid-2">
+    <!-- Volet Scrum Master -->
+    <div class="action-box" style="border-left: 3px solid #1e3a8a;">
+      <h4 style="color: #1e3a8a;">👨‍💼 Volet 1 : Actions SCRUM MASTER (Animation & Suivi)</h4>
+      <ul>
+        <li><strong>Accompagnement de Sara Shih (SCRUM-43) :</strong>
+          <br>Email officiel déjà transmis par SMTP.
+          <br>Vérifier qu'elle est positionnée sur <code>feature/ECO-12-sara-auth-register</code>.
+          <br>Passer son ticket à <strong>"En cours"</strong> sur Jira dès 15h.
+        </li>
+        <li style="margin-top: 6px;"><strong>Suivi de Hiba Dhouib (SCRUM-45) :</strong>
+          <br>S'assurer de l'implémentation de la signature JWT RS256 sur <code>POST /auth/login</code> et du rate-limiting Redis (max 5 tentatives / 15 min).
+          <br>Valider qu'elle prépare sa PR vers <code>develop</code>.
+        </li>
+        <li style="margin-top: 6px;"><strong>Mobilisation d'Ahmed Salah (SCRUM-44) :</strong>
+          <br>Lui donner le feu vert pour connecter l'écran mobile d'inscription dès que la route de Sara répond en local.
+        </li>
+        <li style="margin-top: 6px;"><strong>Cérémonie de Clôture Sprint 1 :</strong>
+          <br>Planifier la Sprint Review et la Retrospective pour formaliser la livraison des 5 tickets de l'Épic 1.
+        </li>
+      </ul>
+    </div>
+
+    <!-- Volet Lead Developer -->
+    <div class="action-box" style="border-left: 3px solid #059669;">
+      <h4 style="color: #059669;">💻 Volet 2 : Actions LEAD DEVELOPER (Architecture & Code)</h4>
+      <ul>
+        <li><strong>Sécurisation du Contrôleur Register (Identity API) :</strong>
+          <br>Créer <code>services/identity-api/src/routes/auth.routes.ts</code> avec validation formelle du DTO (email, password &ge; 8 caractères, fullName) et gestion des codes HTTP <code>201</code>, <code>400</code> et <code>409</code>.
+        </li>
+        <li style="margin-top: 6px;"><strong>Nettoyage de la Dette Technique :</strong>
+          <br>Supprimer le dossier orphelin <code>apps/web/</code> (non configuré) pour ne conserver que <code>apps/web-react/</code>.
+          <br>Brancher l'utilitaire <code>cn()</code> (<code>clsx</code> + <code>tailwind-merge</code>) dans <code>Button.tsx</code>.
+          <br>Ajouter le <code>tsconfig.json</code> local dans <code>apps/web-react/</code>.
+        </li>
+        <li style="margin-top: 6px;"><strong>Préparation du Sprint 2 (Media Service - SCRUM-47) :</strong>
+          <br>Initialiser <code>services/media-service</code> avec <code>sharp</code> pour purger les métadonnées EXIF/GPS sensibles des photos citoyennes avant stockage sur MinIO.
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- CHRONOGRAMME 48 HEURES -->
+  <div class="section-title">
+    <span class="number">3</span>
+    <span>CHRONOGRAMME D'EXÉCUTION SUR LES PROCHAINES 48 HEURES</span>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <strong>Aujourd'hui 15h30 :</strong> Point de synchronisation avec Sara Shih. Passage de SCRUM-43 à "En cours". Récupération de <code>develop</code>.
+    </div>
+    <div class="timeline-item">
+      <strong>Aujourd'hui 17h30 :</strong> Revue et test de la route <code>POST /auth/register</code> (Sara) et <code>POST /auth/login</code> (Hiba). Ouverture des PRs vers <code>develop</code>.
+    </div>
+    <div class="timeline-item">
+      <strong>Demain 10h00 :</strong> Revue de code Lead Dev des PRs de Sara et Hiba, fusion dans <code>develop</code>. Clôture des tickets SCRUM-43 et SCRUM-45.
+    </div>
+    <div class="timeline-item">
+      <strong>Demain 14h00 :</strong> Validation de l'écran mobile de login/register (Ahmed - SCRUM-44). Clôture officielle du Sprint 1.
+    </div>
+    <div class="timeline-item">
+      <strong>Demain 16h30 :</strong> Lancement officiel du <strong>Sprint 2 (Carte Citoyenne 2dsphere & Média Service)</strong> et assignation des tickets de l'Épic 2.
+    </div>
+  </div>
+
+  <!-- Signatures -->
+  <div class="signature-area">
+    <div class="signature-block">
+      <div style="font-size: 10px; font-weight: 700; color: #1e3a8a;">POUR LE PÔLE DÉVELOPPEMENT & DEVOPS :</div>
+      <div style="font-size: 11px; font-weight: 800; margin-top: 4px;">Adem Ouerhani</div>
+      <div style="font-size: 9.5px; color: #64748b;">Lead Developer & DevOps Engineer</div>
+      <div class="signature-line"></div>
+      <div style="font-size: 8.5px; color: #94a3b8; margin-top: 4px;">Signature électronique validée • Git Commit 702fa99</div>
+    </div>
+    <div class="signature-block">
+      <div style="font-size: 10px; font-weight: 700; color: #059669;">POUR LE PÔLE GESTION DE PROJET AGILE :</div>
+      <div style="font-size: 11px; font-weight: 800; margin-top: 4px;">Adem Ouerhani</div>
+      <div style="font-size: 9.5px; color: #64748b;">Scrum Master ECOTRACK V2</div>
+      <div class="signature-line"></div>
+      <div style="font-size: 8.5px; color: #94a3b8; margin-top: 4px;">Rapport certifié conforme aux standards CDCF V2</div>
+    </div>
+  </div>
+
+</body>
+</html>
