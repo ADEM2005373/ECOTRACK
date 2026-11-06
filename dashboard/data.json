@@ -4,15 +4,15 @@
     "key": "SCRUM",
     "site": "ouerhaniadem0805.atlassian.net",
     "lead": "Adem Ouerhani",
-    "lastSync": "2026-11-06 12:55:50"
+    "lastSync": "2026-11-06 13:25:08"
   },
   "kpis": {
     "totalIssues": 33,
     "totalTasks": 27,
-    "doneIssues": 4,
+    "doneIssues": 7,
     "inProgressIssues": 1,
-    "toDoIssues": 23,
-    "completionRate": 14.8,
+    "toDoIssues": 20,
+    "completionRate": 25.9,
     "totalEpics": 6,
     "criticalWarningsCount": 2,
     "teamSize": 4
@@ -23,9 +23,9 @@
       "name": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)",
       "owner": "Adem Ouerhani",
       "total": 5,
-      "done": 2,
-      "rate": 40.0,
-      "status": "En cours"
+      "done": 5,
+      "rate": 100.0,
+      "status": "Terminé"
     },
     {
       "key": "SCRUM-34",
@@ -149,14 +149,14 @@
     },
     "Ahmed Salah": {
       "total": 6,
-      "done": 0,
+      "done": 1,
       "in_progress": 0,
-      "to_do": 6,
+      "to_do": 5,
       "issues": [
         {
           "key": "SCRUM-39",
           "summary": "ECO-02 | [UI-MOB] Initialize Expo App & Design Tokens",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "Medium",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-39"
@@ -202,18 +202,18 @@
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-59"
         }
       ],
-      "completion_rate": 0.0
+      "completion_rate": 16.7
     },
     "Hiba Dhouib": {
       "total": 6,
-      "done": 0,
+      "done": 1,
       "in_progress": 1,
-      "to_do": 5,
+      "to_do": 4,
       "issues": [
         {
           "key": "SCRUM-40",
           "summary": "ECO-03 | [AI] Initialize FastAPI & PyTorch Environment",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "Medium",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-40"
@@ -259,18 +259,18 @@
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-63"
         }
       ],
-      "completion_rate": 0.0
+      "completion_rate": 16.7
     },
     "Sara Shih": {
       "total": 7,
-      "done": 0,
+      "done": 1,
       "in_progress": 0,
-      "to_do": 7,
+      "to_do": 6,
       "issues": [
         {
           "key": "SCRUM-41",
           "summary": "ECO-04 | [UI-WEB] Initialize React Vite & Tailwind CSS",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "Medium",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-41"
@@ -324,7 +324,7 @@
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-64"
         }
       ],
-      "completion_rate": 0.0
+      "completion_rate": 14.3
     }
   },
   "types": {
@@ -332,9 +332,9 @@
     "Tâche": 27
   },
   "statusStats": {
-    "Done": 4,
+    "Done": 8,
     "InProgress": 1,
-    "ToDo": 28
+    "ToDo": 24
   },
   "warnings": [
     {
@@ -386,15 +386,15 @@
     {
       "key": "SCRUM-33",
       "summary": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Epic",
       "priority": "High",
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:35.965+0100",
-      "updated": "2026-11-02T22:16:12.149+0100",
+      "updated": "2026-11-06T13:25:01.520+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-33",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -482,15 +482,15 @@
     {
       "key": "SCRUM-39",
       "summary": "ECO-02 | [UI-MOB] Initialize Expo App & Design Tokens",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "Medium",
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:57.557+0100",
-      "updated": "2026-11-02T21:55:06.025+0100",
+      "updated": "2026-11-06T13:24:48.263+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-39",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -498,15 +498,15 @@
     {
       "key": "SCRUM-40",
       "summary": "ECO-03 | [AI] Initialize FastAPI & PyTorch Environment",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "Medium",
       "assignee": "Hiba Dhouib",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:00.987+0100",
-      "updated": "2026-11-04T15:20:08.067+0100",
+      "updated": "2026-11-06T13:24:42.591+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-40",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -514,15 +514,15 @@
     {
       "key": "SCRUM-41",
       "summary": "ECO-04 | [UI-WEB] Initialize React Vite & Tailwind CSS",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "Medium",
       "assignee": "Sara Shih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:04.492+0100",
-      "updated": "2026-11-02T21:55:12.584+0100",
+      "updated": "2026-11-06T13:24:55.277+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-41",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
