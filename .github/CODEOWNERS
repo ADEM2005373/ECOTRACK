@@ -1,0 +1,8 @@
+# ==============================================================================
+# ECOTRACK V2 - CODE OWNERSHIP SPECIFICATION
+# The Dev Lead (@ADEM2005373) is the sole authority for reviewing and
+# approving any pull requests and merges into main.
+# ==============================================================================
+
+# Global fallback: all files and repositories require Dev Lead approval
+* @ADEM2005373
