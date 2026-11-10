@@ -4,13 +4,13 @@
     "key": "SCRUM",
     "site": "ouerhaniadem0805.atlassian.net",
     "lead": "Adem Ouerhani",
-    "lastSync": "2026-11-10 15:11:51"
+    "lastSync": "2026-11-10 15:18:59"
   },
   "kpis": {
     "totalIssues": 33,
     "totalTasks": 27,
     "doneIssues": 8,
-    "inProgressIssues": 4,
+    "inProgressIssues": 3,
     "toDoIssues": 19,
     "completionRate": 29.6,
     "totalEpics": 6,
@@ -150,8 +150,8 @@
     "Ahmed Salah": {
       "total": 6,
       "done": 1,
-      "in_progress": 2,
-      "to_do": 3,
+      "in_progress": 1,
+      "to_do": 4,
       "issues": [
         {
           "key": "SCRUM-39",
@@ -172,7 +172,7 @@
         {
           "key": "SCRUM-46",
           "summary": "ECO-20 | [DB] Create Report Schema & 2dsphere Index",
-          "status": "En cours",
+          "status": "À faire",
           "type": "Tâche",
           "priority": "High",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-46"
@@ -333,8 +333,8 @@
   },
   "statusStats": {
     "Done": 9,
-    "InProgress": 4,
-    "ToDo": 20
+    "InProgress": 3,
+    "ToDo": 21
   },
   "warnings": [
     {
@@ -594,15 +594,15 @@
     {
       "key": "SCRUM-46",
       "summary": "ECO-20 | [DB] Create Report Schema & 2dsphere Index",
-      "status": "En cours",
-      "rawStatus": "En cours",
+      "status": "À faire",
+      "rawStatus": "À faire",
       "isDone": false,
       "type": "Tâche",
       "priority": "High",
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:21.548+0100",
-      "updated": "2026-11-10T13:13:18.620+0100",
+      "updated": "2026-11-10T15:18:49.838+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-46",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
