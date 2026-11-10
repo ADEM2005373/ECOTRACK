@@ -12,9 +12,9 @@ from torchvision.models import mobilenet_v3_small
 
 CATEGORY_LABELS: Final[tuple[str, ...]] = (
     "DEPOT_SAUVAGE",
-    "NID_DE_POULE",
-    "ECLAIRAGE_PUBLIC",
-    "ENCOMBRANT",
+    "ENCOMBRANTS",
+    "DECHETS_VERTS",
+    "GRAVATS_CHANTIER",
 )
 WEIGHTS_ENV_VAR: Final[str] = "AI_VISION_WEIGHTS"
 IMAGE_SIZE: Final[int] = 224

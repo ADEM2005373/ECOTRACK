@@ -32,7 +32,7 @@ class VisionModelTests(unittest.TestCase):
         with patch.object(vision_model, "_get_model", return_value=FakeClassifier()):
             result = vision_model.predict(make_test_image())
 
-        self.assertEqual(result["suggestedCategory"], "ECLAIRAGE_PUBLIC")
+        self.assertEqual(result["suggestedCategory"], "DECHETS_VERTS")
         self.assertGreaterEqual(result["confidence"], 0.0)
         self.assertLessEqual(result["confidence"], 1.0)
         self.assertEqual(len(result["topPredictions"]), 3)
@@ -49,6 +49,8 @@ class ClassifyRouteTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertIn("/v1/classify", schema["paths"])
         self.assertIn("post", schema["paths"]["/v1/classify"])
+        self.assertIn("/api/v1/vision/classify", schema["paths"])
+        self.assertIn("post", schema["paths"]["/api/v1/vision/classify"])
         self.assertEqual(
             schema["paths"]["/v1/classify"]["post"]["responses"]["200"]["content"][
                 "application/json"
@@ -68,6 +70,27 @@ class ClassifyRouteTests(unittest.IsolatedAsyncioTestCase):
             result = await classify_router.classify_image(upload)
 
         self.assertEqual(result, expected)
+
+    async def test_official_endpoint_returns_requested_contract(self) -> None:
+        expected = {
+            "suggestedCategory": "DECHETS_VERTS",
+            "confidence": 0.654321,
+            "inferenceMs": 12.5,
+            "topPredictions": [{"label": "DECHETS_VERTS", "score": 0.654321}],
+        }
+        upload = UploadFile(file=io.BytesIO(make_test_image()), filename="incident.png")
+        with patch.object(classify_router, "predict", return_value=expected):
+            result = await classify_router.classify_incident_photo(upload)
+
+        self.assertEqual(
+            result,
+            {
+                "category": "DECHETS_VERTS",
+                "confidence": 0.6543,
+                "model": "mobilenet_v3_small",
+                "is_confident": True,
+            },
+        )
 
     async def test_classify_returns_503_without_trained_weights(self) -> None:
         upload = UploadFile(file=io.BytesIO(make_test_image()), filename="incident.png")
