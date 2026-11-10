@@ -15,7 +15,10 @@ WORKSPACE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 DASHBOARD_DIR = os.path.join(WORKSPACE_DIR, "dashboard")
 DATA_FILE = os.path.join(DASHBOARD_DIR, "data.json")
 INDEX_FILE = os.path.join(DASHBOARD_DIR, "index.html")
-ARTIFACT_DIR = r"C:\Users\MSI\.gemini\antigravity\brain\b2946e39-ad91-4c44-b7b1-1fdcd0c2735e"
+ARTIFACT_DIRS = [
+    r"C:\Users\MSI\.gemini\antigravity\brain\b2946e39-ad91-4c44-b7b1-1fdcd0c2735e",
+    r"C:\Users\MSI\.gemini\antigravity\brain\e0b8fe36-94b4-49c3-a1a5-68741f1af484"
+]
 
 def fetch_raw_jira():
     try:
@@ -45,7 +48,7 @@ def process_jira_data(raw_data):
     processed_issues = []
     assignee_stats = {}
     type_stats = {}
-    status_stats = {"Done": 0, "InProgress": 0, "ToDo": 0}
+    status_stats = {"Done": 0, "InReview": 0, "InProgress": 0, "ToDo": 0}
     
     epics_dict = {
         "SCRUM-33": {"name": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)", "key": "SCRUM-33", "total": 0, "done": 0, "owner": "Adem Ouerhani"},
@@ -60,9 +63,9 @@ def process_jira_data(raw_data):
         # Sprint 0 (SCRUM-33)
         "SCRUM-38": "SCRUM-33", "SCRUM-39": "SCRUM-33", "SCRUM-40": "SCRUM-33", "SCRUM-41": "SCRUM-33", "SCRUM-55": "SCRUM-33",
         # Sprint 1 (SCRUM-34)
-        "SCRUM-42": "SCRUM-34", "SCRUM-43": "SCRUM-34", "SCRUM-44": "SCRUM-34", "SCRUM-45": "SCRUM-34", "SCRUM-56": "SCRUM-34",
+        "SCRUM-42": "SCRUM-34", "SCRUM-43": "SCRUM-34", "SCRUM-45": "SCRUM-34", "SCRUM-56": "SCRUM-34",
         # Sprint 2 (SCRUM-35)
-        "SCRUM-46": "SCRUM-35", "SCRUM-47": "SCRUM-35", "SCRUM-48": "SCRUM-35", "SCRUM-49": "SCRUM-35", "SCRUM-57": "SCRUM-35",
+        "SCRUM-44": "SCRUM-35", "SCRUM-46": "SCRUM-35", "SCRUM-47": "SCRUM-35", "SCRUM-48": "SCRUM-35", "SCRUM-49": "SCRUM-35", "SCRUM-57": "SCRUM-35",
         # Sprint 3 (SCRUM-36)
         "SCRUM-50": "SCRUM-36", "SCRUM-51": "SCRUM-36", "SCRUM-58": "SCRUM-36", "SCRUM-59": "SCRUM-36",
         # Sprint 4 (SCRUM-37)
@@ -78,15 +81,21 @@ def process_jira_data(raw_data):
         status_name = status_obj.get("name", "À faire")
         cat_key = status_obj.get("statusCategory", {}).get("key", "new")
         
-        is_done = (cat_key == "done" or "Termin" in status_name)
-        is_in_progress = ("cours" in status_name.lower() or "progress" in status_name.lower())
+        is_done = (cat_key == "done" or "termin" in status_name.lower())
+        is_in_review = ("review" in status_name.lower() or "revue" in status_name.lower())
+        is_in_progress = not is_in_review and ("cours" in status_name.lower() or "progress" in status_name.lower())
         
-        status_label = "Terminé" if is_done else ("En cours" if is_in_progress else "À faire")
         if is_done:
+            status_label = "Terminé"
             status_stats["Done"] += 1
+        elif is_in_review:
+            status_label = "Revue en cours"
+            status_stats["InReview"] += 1
         elif is_in_progress:
+            status_label = "En cours"
             status_stats["InProgress"] += 1
         else:
+            status_label = "À faire"
             status_stats["ToDo"] += 1
             
         itype = item.get("issueType", {}).get("name", "Tâche")
@@ -98,11 +107,13 @@ def process_jira_data(raw_data):
         
         if itype != "Epic":
             if assignee_name not in assignee_stats:
-                assignee_stats[assignee_name] = {"total": 0, "done": 0, "in_progress": 0, "to_do": 0, "issues": []}
+                assignee_stats[assignee_name] = {"total": 0, "done": 0, "in_progress": 0, "in_review": 0, "to_do": 0, "issues": []}
             
             assignee_stats[assignee_name]["total"] += 1
             if is_done:
                 assignee_stats[assignee_name]["done"] += 1
+            elif is_in_review:
+                assignee_stats[assignee_name]["in_review"] += 1
             elif is_in_progress:
                 assignee_stats[assignee_name]["in_progress"] += 1
             else:
@@ -226,8 +237,9 @@ def process_jira_data(raw_data):
             "totalIssues": len(processed_issues),
             "totalTasks": tasks_count,
             "doneIssues": tasks_done,
+            "inReviewIssues": status_stats.get("InReview", 0),
             "inProgressIssues": status_stats["InProgress"],
-            "toDoIssues": tasks_count - tasks_done,
+            "toDoIssues": status_stats["ToDo"],
             "completionRate": global_rate,
             "totalEpics": len(epics_list),
             "criticalWarningsCount": len([w for w in warnings if w["level"] in ("critical", "high")]),
@@ -261,11 +273,12 @@ def update_html_with_embedded_data(data):
     with open(INDEX_FILE, "w", encoding="utf-8") as f:
         f.write(html)
 
-    if os.path.exists(ARTIFACT_DIR):
-        artifact_dest = os.path.join(ARTIFACT_DIR, "ecotrack_dashboard.html")
-        with open(artifact_dest, "w", encoding="utf-8") as f:
-            f.write(html)
-        print(f"[INFO] Copied artifact -> {artifact_dest}")
+    for art_dir in ARTIFACT_DIRS:
+        if os.path.exists(art_dir):
+            artifact_dest = os.path.join(art_dir, "ecotrack_dashboard.html")
+            with open(artifact_dest, "w", encoding="utf-8") as f:
+                f.write(html)
+            print(f"[INFO] Copied artifact -> {artifact_dest}")
 
 def main():
     os.makedirs(DASHBOARD_DIR, exist_ok=True)
