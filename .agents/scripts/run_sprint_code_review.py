@@ -183,7 +183,8 @@ def main():
         if key in ["SCRUM-44", "SCRUM-48"]:
             verdict = "❌ REJETÉ : 0% Code (Bloquer à 'En cours' / 'À faire')"
         elif key == "SCRUM-39":
-            verdict = "🟡 PARTIEL : Mockup statique (Action requise)"
+            has_flaw = any(f["ticket"].startswith("SCRUM-39") for f in flaws)
+            verdict = "🟡 PARTIEL : Mockup statique (Action requise)" if has_flaw else "🟢 VALIDÉ : Socle Expo & Tokens CDCF Conformes (Autorisé pour 'Terminé')"
         elif key == "SCRUM-45":
             verdict = "⚠️ ATTENTION : Code présent mais écrit par Adem"
         elif key == "SCRUM-43":

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../src/theme/colors';
 import { typography } from '../src/theme/typography';
@@ -42,7 +42,11 @@ export default function HomeScreen() {
         </View>
 
         {/* Action Button */}
-        <TouchableOpacity style={styles.primaryButton} activeOpacity={0.8}>
+        <TouchableOpacity 
+          style={styles.primaryButton} 
+          activeOpacity={0.8}
+          onPress={() => Alert.alert('EcoTrack Mobile', 'Socle Expo & Design tokens validés pour le Sprint 0 !')}
+        >
           <Text style={styles.primaryButtonText}>Démarrer une intervention</Text>
         </TouchableOpacity>
       </ScrollView>
