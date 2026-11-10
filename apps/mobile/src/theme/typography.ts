@@ -11,7 +11,7 @@ export const typography = {
     body: 'Inter-Regular',
     bodyMedium: 'Inter-Medium',
     bodyBold: 'Inter-Bold',
-    mono: 'JetBrainsMono-Regular',
+    mono: 'JetBrainsMono-Regular', // Non chargée pour l'instant (voir fonts.ts)
   },
   sizes: {
     xs: 12,
@@ -37,3 +37,18 @@ export const typography = {
 } as const;
 
 export type Typography = typeof typography;
+
+/**
+ * Styles de texte prêts à l'emploi (minimum 15px pour le corps, 13px pour
+ * les libellés). Pas de fontWeight : la graisse vient de la famille chargée,
+ * sinon Android peut ignorer la police personnalisée.
+ */
+export const textStyles = {
+  heading: { fontFamily: typography.fonts.heading, fontSize: 28, lineHeight: 34 },
+  subtitle: { fontFamily: typography.fonts.headingSemiBold, fontSize: 18, lineHeight: 24 },
+  body: { fontFamily: typography.fonts.body, fontSize: 15, lineHeight: 22 },
+  label: { fontFamily: typography.fonts.bodyMedium, fontSize: 13, lineHeight: 18 },
+  caption: { fontFamily: typography.fonts.body, fontSize: 13, lineHeight: 18 },
+} as const;
+
+export type TextStyleName = keyof typeof textStyles;
