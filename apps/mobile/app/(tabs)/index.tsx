@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors } from '../src/theme/colors';
-import { typography } from '../src/theme/typography';
+import { colors } from '../../src/theme/colors';
+import { typography } from '../../src/theme/typography';
 
 export default function HomeScreen() {
   return (
@@ -53,7 +53,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.dark.background,
+    backgroundColor: colors.background,
   },
   scrollContent: {
     padding: 24,
@@ -80,20 +80,20 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes['3xl'],
     fontFamily: typography.fonts.heading,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: colors.text,
     letterSpacing: 0.5,
   },
   subtitle: {
     fontSize: typography.sizes.sm,
     fontFamily: typography.fonts.body,
-    color: colors.neutral[400],
+    color: colors.textMuted,
     marginTop: 4,
     textAlign: 'center',
   },
   card: {
     width: '100%',
-    backgroundColor: colors.dark.card,
-    borderColor: colors.dark.border,
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 16,
     padding: 20,
@@ -103,13 +103,13 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.lg,
     fontFamily: typography.fonts.heading,
     fontWeight: typography.weights.bold,
-    color: '#FFFFFF',
+    color: colors.text,
     marginBottom: 8,
   },
   cardText: {
     fontSize: typography.sizes.sm,
     fontFamily: typography.fonts.body,
-    color: colors.neutral[300],
+    color: colors.light.textSecondary,
     marginBottom: 16,
   },
   tokenRow: {
@@ -123,45 +123,48 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginRight: 10,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: colors.border,
   },
   tokenLabel: {
     fontSize: typography.sizes.sm,
     fontFamily: typography.fonts.body,
-    color: colors.neutral[200],
+    color: colors.text,
   },
   fontSection: {
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: colors.dark.border,
+    borderTopColor: colors.border,
   },
   fontLabel: {
     fontSize: typography.sizes.xs,
-    color: colors.neutral[400],
+    color: colors.textMuted,
     textTransform: 'uppercase',
     fontWeight: '600',
     marginBottom: 6,
   },
   fontItem: {
     fontSize: typography.sizes.sm,
-    color: colors.neutral[300],
+    color: colors.light.textSecondary,
     marginBottom: 4,
   },
   primaryButton: {
     width: '100%',
-    backgroundColor: colors.primary,
+    // Bleu saphir + texte blanc (10.36:1) : le blanc sur émeraude échoue en AA.
+    backgroundColor: colors.action.primary,
+    minHeight: 48,
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
-    shadowColor: colors.primary,
+    justifyContent: 'center',
+    shadowColor: colors.action.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
   },
   primaryButtonText: {
-    color: '#FFFFFF',
+    color: colors.action.onPrimary,
     fontSize: typography.sizes.md,
     fontFamily: typography.fonts.heading,
     fontWeight: typography.weights.bold,
