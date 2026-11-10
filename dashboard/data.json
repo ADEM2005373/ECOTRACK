@@ -4,7 +4,7 @@
     "key": "SCRUM",
     "site": "ouerhaniadem0805.atlassian.net",
     "lead": "Adem Ouerhani",
-    "lastSync": "2026-11-10 02:13:08"
+    "lastSync": "2026-11-10 13:01:27"
   },
   "kpis": {
     "totalIssues": 33,
@@ -394,7 +394,7 @@
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:35.965+0100",
-      "updated": "2026-11-10T01:46:19.885+0100",
+      "updated": "2026-11-10T13:00:23.204+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-33",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -410,7 +410,7 @@
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:40.138+0100",
-      "updated": "2026-11-10T01:46:34.076+0100",
+      "updated": "2026-11-10T13:00:25.640+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-34",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -426,7 +426,7 @@
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:43.528+0100",
-      "updated": "2026-11-10T01:46:36.108+0100",
+      "updated": "2026-11-10T13:00:28.320+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-35",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
@@ -442,7 +442,7 @@
       "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:46.806+0100",
-      "updated": "2026-11-10T02:11:17.102+0100",
+      "updated": "2026-11-10T13:00:33.807+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-36",
       "epicKey": "SCRUM-36",
       "epicName": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)"
@@ -458,7 +458,7 @@
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:50.379+0100",
-      "updated": "2026-11-10T01:47:00.934+0100",
+      "updated": "2026-11-10T13:00:36.235+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-37",
       "epicKey": "SCRUM-37",
       "epicName": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)"
@@ -474,7 +474,7 @@
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:54.131+0100",
-      "updated": "2026-11-10T01:42:00.878+0100",
+      "updated": "2026-11-10T12:59:49.374+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-38",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -490,7 +490,7 @@
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:57.557+0100",
-      "updated": "2026-11-10T01:42:03.507+0100",
+      "updated": "2026-11-10T12:59:51.875+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-39",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -506,7 +506,7 @@
       "assignee": "Hiba Dhouib",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:00.987+0100",
-      "updated": "2026-11-10T01:42:10.439+0100",
+      "updated": "2026-11-10T12:59:55.542+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-40",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -522,7 +522,7 @@
       "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:04.492+0100",
-      "updated": "2026-11-10T02:11:20.001+0100",
+      "updated": "2026-11-10T12:59:58.069+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-41",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -538,7 +538,7 @@
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:07.808+0100",
-      "updated": "2026-11-10T01:42:27.788+0100",
+      "updated": "2026-11-10T13:00:04.271+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-42",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -554,7 +554,7 @@
       "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:11.244+0100",
-      "updated": "2026-11-10T02:11:25.173+0100",
+      "updated": "2026-11-10T13:00:08.324+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-43",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -570,7 +570,7 @@
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:14.798+0100",
-      "updated": "2026-11-10T01:49:12.143+0100",
+      "updated": "2026-11-10T12:58:31.687+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-44",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -586,7 +586,7 @@
       "assignee": "Hiba Dhouib",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:18.170+0100",
-      "updated": "2026-11-10T01:48:51.210+0100",
+      "updated": "2026-11-10T13:00:10.901+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-45",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -602,7 +602,7 @@
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:21.548+0100",
-      "updated": "2026-11-10T01:43:04.876+0100",
+      "updated": "2026-11-10T12:54:36.152+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-46",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
@@ -618,7 +618,7 @@
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:24.877+0100",
-      "updated": "2026-11-10T01:43:17.590+0100",
+      "updated": "2026-11-10T12:58:39.898+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-47",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
@@ -634,7 +634,7 @@
       "assignee": "Hiba Dhouib",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:28.361+0100",
-      "updated": "2026-11-10T01:43:24.211+0100",
+      "updated": "2026-11-10T12:58:42.488+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-48",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
@@ -650,7 +650,7 @@
       "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:31.932+0100",
-      "updated": "2026-11-10T02:11:30.071+0100",
+      "updated": "2026-11-10T12:58:45.670+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-49",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
@@ -666,7 +666,7 @@
       "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:35.621+0100",
-      "updated": "2026-11-10T02:10:52.080+0100",
+      "updated": "2026-11-10T12:58:56.978+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-50",
       "epicKey": "SCRUM-36",
       "epicName": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)"
@@ -682,7 +682,7 @@
       "assignee": "Hiba Dhouib",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:39.222+0100",
-      "updated": "2026-11-10T01:44:03.494+0100",
+      "updated": "2026-11-10T12:59:06.144+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-51",
       "epicKey": "SCRUM-36",
       "epicName": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)"
@@ -698,7 +698,7 @@
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:42.612+0100",
-      "updated": "2026-11-10T01:44:17.431+0100",
+      "updated": "2026-11-10T12:59:24.228+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-52",
       "epicKey": "SCRUM-37",
       "epicName": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)"
@@ -714,7 +714,7 @@
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:46.062+0100",
-      "updated": "2026-11-10T01:44:21.152+0100",
+      "updated": "2026-11-10T12:59:26.879+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-53",
       "epicKey": "SCRUM-37",
       "epicName": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)"
@@ -730,7 +730,7 @@
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:06:18.772+0100",
-      "updated": "2026-11-10T01:47:03.094+0100",
+      "updated": "2026-11-10T13:00:41.897+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-54",
       "epicKey": "SCRUM-54",
       "epicName": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)"
@@ -746,7 +746,7 @@
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:06:40.479+0100",
-      "updated": "2026-11-10T01:42:24.331+0100",
+      "updated": "2026-11-10T13:00:00.908+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-55",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -762,7 +762,7 @@
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:06:53.226+0100",
-      "updated": "2026-11-10T01:43:02.157+0100",
+      "updated": "2026-11-10T13:00:14.122+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-56",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -778,7 +778,7 @@
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:07:05.463+0100",
-      "updated": "2026-11-10T01:43:35.366+0100",
+      "updated": "2026-11-10T12:58:48.685+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-57",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
@@ -794,7 +794,7 @@
       "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:07:16.862+0100",
-      "updated": "2026-11-10T02:11:42.312+0100",
+      "updated": "2026-11-10T12:59:09.026+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-58",
       "epicKey": "SCRUM-36",
       "epicName": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)"
@@ -810,7 +810,7 @@
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:07:28.567+0100",
-      "updated": "2026-11-10T01:44:11.171+0100",
+      "updated": "2026-11-10T12:59:13.596+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-59",
       "epicKey": "SCRUM-36",
       "epicName": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)"
@@ -826,7 +826,7 @@
       "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:07:43.191+0100",
-      "updated": "2026-11-10T02:11:44.798+0100",
+      "updated": "2026-11-10T12:59:20.023+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-60",
       "epicKey": "SCRUM-37",
       "epicName": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)"
@@ -842,7 +842,7 @@
       "assignee": "Hiba Dhouib",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:07:57.014+0100",
-      "updated": "2026-11-10T01:44:31.954+0100",
+      "updated": "2026-11-10T12:59:30.611+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-61",
       "epicKey": "SCRUM-37",
       "epicName": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)"
@@ -858,7 +858,7 @@
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:08:11.060+0100",
-      "updated": "2026-11-10T01:44:44.304+0100",
+      "updated": "2026-11-10T12:59:33.870+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-62",
       "epicKey": "SCRUM-54",
       "epicName": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)"
@@ -874,7 +874,7 @@
       "assignee": "Hiba Dhouib",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:08:23.027+0100",
-      "updated": "2026-11-10T01:44:51.310+0100",
+      "updated": "2026-11-10T12:59:39.324+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-63",
       "epicKey": "SCRUM-54",
       "epicName": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)"
@@ -890,7 +890,7 @@
       "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:08:30.028+0100",
-      "updated": "2026-11-10T01:44:57.062+0100",
+      "updated": "2026-11-10T12:59:43.718+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-64",
       "epicKey": "SCRUM-54",
       "epicName": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)"
@@ -906,7 +906,7 @@
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:08:36.379+0100",
-      "updated": "2026-11-10T01:45:17.522+0100",
+      "updated": "2026-11-10T12:59:46.763+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-65",
       "epicKey": "SCRUM-54",
       "epicName": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)"
