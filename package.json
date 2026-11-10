@@ -1,0 +1,34 @@
+{
+  "name": "ecotrack",
+  "version": "2.0.0",
+  "private": true,
+  "description": "EcoTrack V2 - Plateforme Smart City de Signalement & Résolution des Anomalies Urbaines (SOA, Microservices & Power BI)",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "nx run-many --target=serve --parallel",
+    "build": "nx run-many --target=build",
+    "test": "nx run-many --target=test",
+    "lint": "nx run-many --target=lint",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "docker:ps": "docker compose ps",
+    "dw:init": "docker compose exec -T postgres psql -U ecotrack_admin -d ecotrack_dw -f /docker-entrypoint-initdb.d/01_create_star_schema.sql",
+    "dw:seed": "docker compose exec -T postgres psql -U ecotrack_admin -d ecotrack_dw -f /docker-entrypoint-initdb.d/02_seed_dimensions.sql"
+  },
+  "devDependencies": {
+    "nx": "^19.8.0",
+    "@nx/workspace": "^19.8.0",
+    "@types/node": "^20.14.0",
+    "typescript": "^5.4.5",
+    "prettier": "^3.3.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECOTRACK · Prototype Web Interactif Haute Fidélité</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            brand: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            ecodark: '#102c35',
+            ecoactive: '#1b4449',
+            ecoborder: '#355259',
+            ecomuted: '#aec5cb',
+            ecomain: '#059669',
+            ecogreen: '#047857',
+            ecolight: '#6ee7b7',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+    .font-brand { font-family: 'Plus Jakarta Sans', sans-serif; }
+    
+    /* Interactive Hover & Focus Micro-interactions */
+    .btn-interactive {
+      transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-interactive:hover {
+      transform: translateY(-1px);
+    }
+    .btn-interactive:active {
+      transform: translateY(0px) scale(0.98);
+    }
+
+    .input-interactive {
+      transition: all 0.2s ease;
+    }
+    .input-interactive:focus {
+      border-color: #059669;
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18);
+      outline: none;
+    }
+
+    /* Modal animation */
+    .modal-enter {
+      animation: modalFade 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes modalFade {
+      from { opacity: 0; transform: scale(0.96) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* Toast animation */
+    .toast-anim {
+      animation: toastSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes toastSlide {
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="h-full antialiased text-slate-800 select-none overflow-hidden">
+
+  <!-- ==================== TOP PROTOTYPE BAR CONTROLLER ==================== -->
+  <aside class="h-10 bg-slate-950 border-b border-slate-800 px-4 flex items-center justify-between text-xs text-slate-300 z-50 relative shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1.5 font-semibold text-emerald-400">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>PROTOTYPE FIGMA LIVE</span>
+      </div>
+      <span class="text-slate-600">|</span>
+      <span class="text-slate-400">Flux d’interaction & navigation entre fenêtres</span>
+    </div>
+
+    <!-- Mode Switcher (Admin vs Agent) -->
+    <div class="flex items-center gap-2">
+      <span class="text-slate-400 text-[11px]">Rôle actif :</span>
+      <div class="inline-flex rounded-lg bg-slate-900 p-0.5 border border-slate-800">
+        <button id="roleBtnAdmin" onclick="setRole('admin')" class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-600 text-white shadow transition-all">
+          👑 Admin (Marc Bernard)
+        </button>
+        <button id="roleBtnAgent" onclick="setRole('agent')" class="px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-400 hover:text-white transition-all">
+          ⚡ Agent (Camille Durand)
+        </button>
+      </div>
+      <button onclick="toggleFigmaHotspots()" id="btnHotspots" class="ml-2 px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] flex items-center gap-1 border border-slate-700">
+        <i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i>
+        <span>Zones cliquables</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN APPLICATION CONTAINER ==================== -->
+  <div class="flex h-[calc(100vh-40px)] w-full overflow-hidden">
+    
+    <!-- ==================== DYNAMIC SIDEBAR (224px) ==================== -->
+    <nav class="bg-ecodark w-[224px] h-full flex flex-col justify-between shrink-0 pb-4 pt-6 px-4 border-r border-[#163a45] transition-colors duration-300">
+      
+      <!-- Top Group -->
+      <div class="flex flex-col gap-5">
+        <!-- Logo Brand -->
+        <div class="flex items-center gap-2.5 px-2 cursor-pointer hover:opacity-90 transition-opacity" onclick="navigateTo('inbox')">
+          <div class="bg-ecomain w-[34px] h-[34px] rounded-[9px] flex items-center justify-center shrink-0 shadow-sm shadow-emerald-950">
+            <i data-lucide="leaf" class="w-5 h-5 text-white"></i>
+          </div>
+          <div class="flex flex-col leading-tight">
+            <span class="font-brand font-bold text-[18px] text-white tracking-tight">ECOTRACK</span>
+            <span class="text-ecomuted text-[10px] tracking-[2px] font-normal uppercase">CONSOLE V2</span>
+          </div>
+        </div>
+
+        <!-- Territoire Badge -->
+        <div class="bg-ecoactive rounded-[8px] p-2.5 flex flex-col gap-0.5 border border-ecoborder/30">
+          <div class="flex items-center justify-between">
+            <span class="text-white text-[12px] font-semibold">Ville de Lyon</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          </div>
+          <span class="text-ecomuted text-[10px]">Services de proximité · 9 arr.</span>
+        </div>
+
+        <!-- Menu Links Container -->
+        <div id="sidebarMenu" class="flex flex-col gap-1 text-[12px]">
+          <!-- Populated by JavaScript based on Role -->
+        </div>
+      </div>
+
+      <!-- Bottom Group: Assistance & Profile Footer -->
+      <div class="flex flex-col gap-2 pt-2 border-t border-ecoborder/40">
+        <button onclick="showToast('Centre d’aide EcoTrack : Documentation & Raccourcis v2')" class="flex items-center gap-2.5 px-3 py-2 text-ecomuted hover:text-white transition-colors text-[12px] rounded-lg hover:bg-ecoactive/50">
+          <i data-lucide="help-circle" class="w-4 h-4"></i>
+          <span>Centre d’aide</span>
+        </button>
+
+        <!-- Profile Card (Clickable -> Opens Profile Window) -->
+        <div onclick="navigateTo('profile')" class="group cursor-pointer rounded-xl p-2 -mx-1 border border-transparent hover:border-ecoborder/80 hover:bg-ecoactive/60 transition-all flex items-center justify-between">
+          <div class="flex items-center gap-2.5 overflow-hidden">
+            <div id="sidebarAvatar" class="bg-ecoborder text-white font-semibold text-[11px] w-[34px] h-[34px] rounded-full flex items-center justify-center shrink-0 ring-2 ring-emerald-500/40 group-hover:ring-emerald-400 transition-all">
+              MB
+            </div>
+            <div class="flex flex-col truncate">
+              <span id="sidebarUserName" class="text-white font-semibold text-[12px] truncate group-hover:text-emerald-300 transition-colors">Marc Bernard</span>
+              <span id="sidebarUserRole" class="text-ecomuted text-[10px] truncate">Super Admin</span>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-ecomuted group-hover:text-white group-hover:translate-x-0.5 transition-all"></i>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ==================== MAIN CONTENT WORKSPACE ==================== -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-[#f8fafc] relative">
+      
+      <!-- Top Navigation Bar (72px) -->
+      <header class="h-[72px] bg-white border-b border-slate-200 px-8 flex items-center justify-between shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.03)] z-10">
+        <!-- Dynamic Breadcrumb -->
+        <div class="flex items-center gap-2.5 text-[12px]">
+          <span id="breadcrumbScope" class="text-slate-500 font-medium">Administration</span>
+          <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+          <span id="breadcrumbCurrent" class="font-semibold text-slate-900">Utilisateurs</span>
+          <span id="breadcrumbBadge" class="ml-2 px-2.5 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full">
+            Console Active
+          </span>
+        </div>
+
+        <!-- Global Search & Header Tools -->
+        <div class="flex items-center gap-4">
+          <div class="relative w-64">
+            <input type="text" placeholder="Rechercher (ticket, agent, rue)..." class="input-interactive w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5"></i>
+          </div>
+
+          <div class="h-4 w-px bg-slate-200"></div>
+
+          <div class="text-[12px] text-slate-500 font-medium flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span>Mardi 3 novembre 2026</span>
+          </div>
+
+          <!-- Notification Bell -->
+          <button onclick="showToast('🔔 2 nouveaux signalements critiques détectés dans le 7e arr.')" class="relative w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors">
+            <i data-lucide="bell" class="w-4 h-4"></i>
+            <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-600 ring-2 ring-white"></span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Dynamic Views Container (Scrollable) -->
+      <div id="viewsViewport" class="flex-1 overflow-y-auto p-8 relative">
+
+        <!-- ==================== VIEW 1: INBOX (WEB_AGT_01_INBOX) ==================== -->
+        <section id="view-inbox" class="space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-xl font-bold text-slate-900">Boîte de Réception & Triage</h1>
+              <p class="text-xs text-slate-500">24 signalements en attente de qualification ou d'assignation</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="navigateTo('map')" class="btn-interactive px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg flex items-center gap-1.5 shadow-sm">
+                <i data-lucide="map" class="w-3.5 h-3.5 text-emerald-600"></i>
+                Vue Carte Opérationnelle
+              </button>
+            </div>
+          </div>
+
+          <!-- Incidents Interactive Table -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-semibold uppercase text-[10px] tracking-wider">
+                  <th class="py-3 px-4">Réf. Signalement</th>
+                  <th class="py-3 px-4">Photo & IA Prédiction</th>
+                  <th class="py-3 px-4">Localisation</th>
+                  <th class="py-3 px-4">Gravité</th>
+                  <th class="py-3 px-4">Statut</th>
+                  <th class="py-3 px-4 text-right">Action de Qualification</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                
+                <!-- Row 1 (Clickable -> Opens Qualification Screen) -->
+                <tr class="hover:bg-slate-50/70 transition-colors cursor-pointer group" onclick="navigateTo('qualification')">
+                  <td class="py-3.5 px-4 font-bold text-emerald-700 flex items-center gap-2">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500"></i>
+                    <span>#SIG-2026-0891</span>
+                  </td>
+                  <td class="py-3.5 px-4">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-9 h-9 rounded-lg bg-slate-200 flex items-center justify-center text-slate-400 font-bold overflow-hidden border border-slate-200">
+                        🗑️
+                      </div>
+                      <div>
+                        <span class="font-semibold text-slate-900 block">Dépôt sauvage d'encombrants</span>
+                        <span class="text-[10px] text-emerald-600 font-medium">IA Confiance: 97.4% (MobileNetV3)</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 text-slate-600">
+                    14 Rue de Marseille, 69007 Lyon
+                  </td>
+                  <td class="py-3.5 px-4">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                      Critique (SLA &lt; 24h)
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-4">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                      À qualifier
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-4 text-right">
+                    <button class="btn-interactive px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 group-hover:scale-105 transition-all">
+                      Qualifier &rarr;
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Row 2 -->
+                <tr class="hover:bg-slate-50/70 transition-colors cursor-pointer group" onclick="navigateTo('qualification')">
+                  <td class="py-3.5 px-4 font-bold text-emerald-700 flex items-center gap-2">
+                    <i data-lucide="info" class="w-4 h-4 text-sky-500"></i>
+                    <span>#SIG-2026-0892</span>
+                  </td>
+                  <td class="py-3.5 px-4">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-9 h-9 rounded-lg bg-slate-200 flex items-center justify-center text-slate-400 font-bold overflow-hidden border border-slate-200">
+                        📦
+                      </div>
+                      <div>
+                        <span class="font-semibold text-slate-900 block">Cartons & Déchets Commerciaux</span>
+                        <span class="text-[10px] text-emerald-600 font-medium">IA Confiance: 91.8%</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 text-slate-600">
+                    42 Avenue Jean Jaurès, 69007 Lyon
+                  </td>
+                  <td class="py-3.5 px-4">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                      Moyenne (48h)
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-4">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                      À qualifier
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-4 text-right">
+                    <button class="btn-interactive px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">
+                      Qualifier &rarr;
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Row 3 -->
+                <tr class="hover:bg-slate-50/70 transition-colors cursor-pointer group" onclick="navigateTo('qualification')">
+                  <td class="py-3.5 px-4 font-bold text-emerald-700 flex items-center gap-2">
+                    <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                    <span>#SIG-2026-0888</span>
+                  </td>
+                  <td class="py-3.5 px-4">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-9 h-9 rounded-lg bg-slate-200 flex items-center justify-center text-slate-400 font-bold overflow-hidden border border-slate-200">
+                        🚧
+                      </div>
+                      <div>
+                        <span class="font-semibold text-slate-900 block">Nid de poule sur piste cyclable</span>
+                        <span class="text-[10px] text-slate-500 font-medium">Qualifié par Camille Durand</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 text-slate-600">
+                    Pont de la Guillotière, 69003 Lyon
+                  </td>
+                  <td class="py-3.5 px-4">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">
+                      Standard
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-4">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Assigné Brigade Nord
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-4 text-right">
+                    <span class="text-slate-400 text-xs">En cours de tournée</span>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 2: QUALIFICATION SPLIT-SCREEN (WEB_AGT_02) ==================== -->
+        <section id="view-qualification" class="hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <button onclick="navigateTo('inbox')" class="btn-interactive p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+              </button>
+              <div>
+                <h1 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <span>Dossier #SIG-2026-0891</span>
+                  <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-rose-100 text-rose-800">Haute Priorité</span>
+                </h1>
+                <p class="text-xs text-slate-500">Transmis par Citoyen Anonyme · il y a 12 minutes</p>
+              </div>
+            </div>
+
+            <!-- Action Buttons (Trigger Modals!) -->
+            <div class="flex items-center gap-2">
+              <button onclick="openModal('modalReject')" class="btn-interactive px-3.5 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg flex items-center gap-1.5 shadow-sm">
+                <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
+                Rejeter le dossier
+              </button>
+
+              <button onclick="openModal('modalAssign')" class="btn-interactive px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg flex items-center gap-1.5 shadow-sm shadow-emerald-600/30">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                Valider & Assigner Brigade
+              </button>
+            </div>
+          </div>
+
+          <!-- Split Screen: 2 Columns -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Left: Photo & Metadata -->
+            <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex flex-col gap-4">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-700">Photographie de l'incident (EXIF purgé)</span>
+                <span class="text-[11px] text-slate-400">Prise le 03/11 à 09:34</span>
+              </div>
+              
+              <div class="w-full h-80 rounded-xl bg-slate-900 flex items-center justify-center overflow-hidden relative shadow-inner border border-slate-200">
+                <img src="https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80" alt="Dépôt sauvage" class="w-full h-full object-cover">
+                <div class="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg text-white text-xs flex items-center gap-2">
+                  <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-400"></i>
+                  <span>14 Rue de Marseille (45.7538° N, 4.8392° E)</span>
+                </div>
+              </div>
+
+              <!-- Inférence IA Card -->
+              <div class="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200/80 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                    IA
+                  </div>
+                  <div>
+                    <span class="text-xs font-bold text-emerald-950 block">Inférence Computer Vision : Dépôt Sauvage</span>
+                    <span class="text-[11px] text-emerald-700">Volume estimé : 1.8 m³ · Encombrants & Plastiques</span>
+                  </div>
+                </div>
+                <span class="text-xs font-bold text-emerald-800 bg-emerald-200 px-2.5 py-1 rounded-md">97.4% match</span>
+              </div>
+            </div>
+
+            <!-- Right: Editable Qualification Form -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
+              <h2 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">Paramètres d'Intervention</h2>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Catégorie confirmée</label>
+                <select class="input-interactive w-full text-xs px-3 py-2 border border-slate-200 rounded-lg bg-slate-50">
+                  <option selected>Dépôts sauvages & Encombrants</option>
+                  <option>Débordements de corbeilles</option>
+                  <option>Dégradations & Graffitis</option>
+                  <option>Voirie & Nids de poule</option>
+                </select>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-slate-700 mb-1">Niveau d'Urgence (SLA)</label>
+                  <select class="input-interactive w-full text-xs px-3 py-2 border border-slate-200 rounded-lg bg-slate-50">
+                    <option selected>Priorité 1 - Urgence 24h</option>
+                    <option>Priorité 2 - Standard 48h</option>
+                    <option>Priorité 3 - Tournée planifiée 7j</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-medium text-slate-700 mb-1">Arrondissement</label>
+                  <input type="text" value="69007 (Lyon 7e)" readonly class="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg bg-slate-100 text-slate-500">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Instructions pour la Brigade Terrain</label>
+                <textarea rows="4" class="input-interactive w-full text-xs p-3 border border-slate-200 rounded-lg bg-slate-50" placeholder="Ex: Véhicule benne nécessaire, passage piéton partiellement obstrué...">Véhicule benne requis pour évacuation de 2 canapés et matelas. Prévoir un balayage des bris de verre aux abords.</textarea>
+              </div>
+
+              <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-between text-xs">
+                <span class="text-slate-600">Qualification opérée par :</span>
+                <span class="font-semibold text-slate-900">Camille Durand (Matricule: AGT-69003)</span>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 3: MAP (WEB_AGT_03_MAP) ==================== -->
+        <section id="view-map" class="hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-xl font-bold text-slate-900">Carte Opérationnelle en Temps Réel</h1>
+              <p class="text-xs text-slate-500">Supervision géospatiale des signalements et tournées des équipes</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-500">Filtre :</span>
+              <button class="px-2.5 py-1 text-xs rounded-lg bg-emerald-100 text-emerald-800 font-semibold border border-emerald-200">
+                Tous les arrondissements
+              </button>
+            </div>
+          </div>
+
+          <!-- Interactive Simulated Map Canvas -->
+          <div class="w-full h-[520px] rounded-2xl bg-[#0f172a] relative overflow-hidden border border-slate-200 shadow-md">
+            <!-- Simulated Map Grids & Streets -->
+            <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:24px_24px]"></div>
+            
+            <!-- Map Markers -->
+            <!-- Marker 1 (Lyon 7e) -->
+            <div onclick="navigateTo('qualification')" class="group absolute top-1/3 left-1/2 -translate-x-1/2 cursor-pointer flex flex-col items-center">
+              <div class="px-2.5 py-1 rounded-md bg-rose-600 text-white font-bold text-[10px] shadow-lg mb-1 group-hover:scale-110 transition-transform flex items-center gap-1">
+                <span>#SIG-0891 (Critique)</span>
+              </div>
+              <div class="w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-xs ring-4 ring-rose-500/30 animate-bounce">
+                📍
+              </div>
+            </div>
+
+            <!-- Marker 2 (Lyon 3e) -->
+            <div class="absolute top-1/4 left-1/3 cursor-pointer flex flex-col items-center">
+              <div class="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-[10px] ring-4 ring-amber-500/30">
+                📍
+              </div>
+            </div>
+
+            <!-- Marker 3 (Lyon 8e) -->
+            <div class="absolute bottom-1/3 right-1/3 cursor-pointer flex flex-col items-center">
+              <div class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-[10px] ring-4 ring-emerald-500/30">
+                📍
+              </div>
+            </div>
+
+            <!-- Map Floating Control Card -->
+            <div class="absolute bottom-4 left-4 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border border-slate-200 text-xs w-72 space-y-2">
+              <span class="font-bold text-slate-900 block">Légende des Alertes</span>
+              <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-rose-500"></span> <span>Urgence 24h (Dépôt bloquant)</span></div>
+              <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span> <span>Standard 48h (Débordement)</span></div>
+              <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> <span>Pris en charge par une brigade</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 4: USERS (WEB_ADM_01_USERS) ==================== -->
+        <section id="view-users" class="hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-xl font-bold text-slate-900">Gestion des Utilisateurs & Rôles</h1>
+              <p class="text-xs text-slate-500">Comptes agents, brigadiers et administrateurs métropolitains</p>
+            </div>
+            <!-- Open Modal Button! -->
+            <button onclick="openModal('modalUserForm')" class="btn-interactive px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg flex items-center gap-1.5 shadow-sm shadow-emerald-600/30">
+              <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+              Nouvel Utilisateur
+            </button>
+          </div>
+
+          <!-- Users Table -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-semibold uppercase text-[10px] tracking-wider">
+                  <th class="py-3 px-4">Utilisateur</th>
+                  <th class="py-3 px-4">Rôle RBAC</th>
+                  <th class="py-3 px-4">Pôle & Affectation</th>
+                  <th class="py-3 px-4">Statut</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr class="hover:bg-slate-50/60 transition-colors">
+                  <td class="py-3 px-4 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-[#102c35] text-white flex items-center justify-center font-bold text-xs">
+                      MB
+                    </div>
+                    <div>
+                      <span class="font-bold text-slate-900 block">Marc Bernard</span>
+                      <span class="text-[11px] text-slate-400">marc.bernard@lyon.fr</span>
+                    </div>
+                  </td>
+                  <td class="py-3 px-4">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">
+                      Super Administrateur
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-slate-600">Direction Propreté (Hôtel de Ville)</td>
+                  <td class="py-3 px-4"><span class="text-emerald-700 font-semibold text-[11px]">● Actif</span></td>
+                  <td class="py-3 px-4 text-right">
+                    <button onclick="navigateTo('profile')" class="text-slate-500 hover:text-emerald-600 font-medium text-xs">Voir Profil</button>
+                  </td>
+                </tr>
+
+                <tr class="hover:bg-slate-50/60 transition-colors">
+                  <td class="py-3 px-4 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-cyan-700 text-white flex items-center justify-center font-bold text-xs">
+                      CD
+                    </div>
+                    <div>
+                      <span class="font-bold text-slate-900 block">Camille Durand</span>
+                      <span class="text-[11px] text-slate-400">camille.durand@lyon.fr</span>
+                    </div>
+                  </td>
+                  <td class="py-3 px-4">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cyan-100 text-cyan-800">
+                      Agent de Qualification
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-slate-600">Pôle Est (Lyon 3e/7e/8e)</td>
+                  <td class="py-3 px-4"><span class="text-emerald-700 font-semibold text-[11px]">● En service</span></td>
+                  <td class="py-3 px-4 text-right">
+                    <button onclick="setRole('agent'); navigateTo('profile')" class="text-slate-500 hover:text-cyan-600 font-medium text-xs">Voir Profil</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 5: POWER BI EXECUTIVE (WEB_ADM_03) ==================== -->
+        <section id="view-analytics" class="hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-xl font-bold text-slate-900">Tableaux de Bord Décisionnels Power BI</h1>
+              <p class="text-xs text-slate-500">Supervision analytique des tournées, des SLAs et des performances de tri IA</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="showToast('Rapport Power BI actualisé (ETL synchronisé)')" class="btn-interactive px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg flex items-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                Actualiser Power BI
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Analytics Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+              <span class="text-[11px] font-semibold text-slate-500 uppercase">Taux de Résolution Globale</span>
+              <div class="text-2xl font-bold text-slate-900 mt-1">89.4%</div>
+              <span class="text-[11px] text-emerald-600 font-semibold">+3.2% vs mois dernier</span>
+            </div>
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+              <span class="text-[11px] font-semibold text-slate-500 uppercase">Respect du SLA 48h</span>
+              <div class="text-2xl font-bold text-emerald-700 mt-1">94.8%</div>
+              <span class="text-[11px] text-slate-400">Objectif métropole: 90%</span>
+            </div>
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+              <span class="text-[11px] font-semibold text-slate-500 uppercase">F1-Score Inférence IA</span>
+              <div class="text-2xl font-bold text-teal-700 mt-1">0.924</div>
+              <span class="text-[11px] text-teal-600 font-semibold">Haute fidélité</span>
+            </div>
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+              <span class="text-[11px] font-semibold text-slate-500 uppercase">Temps d’intervention moyen</span>
+              <div class="text-2xl font-bold text-slate-900 mt-1">3h 40m</div>
+              <span class="text-[11px] text-slate-400">Depuis validation</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 6: PROFILES (ADMIN / AGENT) ==================== -->
+        <section id="view-profile" class="hidden space-y-6">
+          <div id="profileContainer">
+            <!-- Will render dynamic profile based on current role -->
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ==================== MODAL 1: ASSIGN (WEB_AGT_MODAL_ASSIGN) ==================== -->
+  <div id="modalAssign" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 modal-enter space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="p-2 rounded-lg bg-emerald-50 text-emerald-700">
+            <i data-lucide="truck" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-slate-900">Assigner à une Brigade de Propreté</h3>
+            <p class="text-[11px] text-slate-500">Dossier #SIG-2026-0891 · 14 Rue de Marseille</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modalAssign')" class="p-1 rounded-lg text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Sélectionner la brigade disponible</label>
+          <select id="selectBrigade" class="input-interactive w-full text-xs p-2.5 border border-slate-200 rounded-lg bg-slate-50">
+            <option value="Brigade Est 01">Brigade Est 01 (Secteur Guillotière · 2 agents · Benne 3.5t)</option>
+            <option value="Brigade Est 02">Brigade Est 02 (Secteur Jean Jaurès · 3 agents · Plateau)</option>
+            <option value="Brigade Intervention Rapide">Brigade Intervention Rapide (Urgence 24/7)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Priorité d'intervention dans la tournée</label>
+          <div class="flex gap-2">
+            <button type="button" class="flex-1 py-2 rounded-lg font-semibold border border-rose-200 bg-rose-50 text-rose-800">Immédiate (1ère étape)</button>
+            <button type="button" class="flex-1 py-2 rounded-lg font-semibold border border-slate-200 bg-white text-slate-600">Standard de tournée</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+        <button onclick="closeModal('modalAssign')" class="btn-interactive px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">
+          Annuler
+        </button>
+        <button onclick="confirmAssign()" class="btn-interactive px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm">
+          Confirmer l'assignation &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: REJECT (WEB_AGT_MODAL_REJECT) ==================== -->
+  <div id="modalReject" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 modal-enter space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="p-2 rounded-lg bg-rose-50 text-rose-700">
+            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-slate-900">Rejeter le Signalement</h3>
+            <p class="text-[11px] text-slate-500">Le citoyen recevra le motif du refus</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modalReject')" class="p-1 rounded-lg text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Motif de rejet officiel</label>
+          <select id="rejectReason" class="input-interactive w-full text-xs p-2.5 border border-slate-200 rounded-lg bg-slate-50">
+            <option>Domaine privé (non compétent collectivité)</option>
+            <option>Photo floue ou inexploitable</option>
+            <option>Doublon déjà pris en charge</option>
+            <option>Signalement malveillant / Spam</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Commentaire explicatif</label>
+          <textarea rows="3" class="input-interactive w-full text-xs p-2.5 border border-slate-200 rounded-lg bg-slate-50" placeholder="Précisez la raison pour l'usager..."></textarea>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+        <button onclick="closeModal('modalReject')" class="btn-interactive px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">
+          Annuler
+        </button>
+        <button onclick="confirmReject()" class="btn-interactive px-4 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-sm">
+          Valider le Rejet
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: USER FORM (WEB_ADM_MODAL_USER_FORM) ==================== -->
+  <div id="modalUserForm" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 modal-enter space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="p-2 rounded-lg bg-emerald-50 text-emerald-700">
+            <i data-lucide="user-plus" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-slate-900">Créer un Nouvel Utilisateur</h3>
+            <p class="text-[11px] text-slate-500">Ajout d'un compte agent ou administrateur</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modalUserForm')" class="p-1 rounded-lg text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 text-xs">
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Prénom</label>
+          <input id="newUserName" type="text" placeholder="Ex: Lucas" class="input-interactive w-full text-xs p-2.5 border border-slate-200 rounded-lg bg-slate-50">
+        </div>
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Nom</label>
+          <input type="text" placeholder="Ex: Morel" class="input-interactive w-full text-xs p-2.5 border border-slate-200 rounded-lg bg-slate-50">
+        </div>
+        <div class="col-span-2">
+          <label class="block font-medium text-slate-700 mb-1">Email Professionnel</label>
+          <input type="email" placeholder="lucas.morel@lyon.fr" class="input-interactive w-full text-xs p-2.5 border border-slate-200 rounded-lg bg-slate-50">
+        </div>
+        <div class="col-span-2">
+          <label class="block font-medium text-slate-700 mb-1">Rôle Système (RBAC)</label>
+          <select class="input-interactive w-full text-xs p-2.5 border border-slate-200 rounded-lg bg-slate-50">
+            <option>Agent de Qualification (Opérations)</option>
+            <option>Brigadier Chef de Tournée (Terrain)</option>
+            <option>Superviseur Territorial</option>
+            <option>Administrateur Métropolitain</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+        <button onclick="closeModal('modalUserForm')" class="btn-interactive px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">
+          Annuler
+        </button>
+        <button onclick="confirmCreateUser()" class="btn-interactive px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm">
+          Enregistrer l'utilisateur
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Element -->
+  <div id="toastNotification" class="fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 text-xs hidden items-center gap-3 z-50">
+    <div id="toastIcon" class="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center font-bold text-xs shrink-0">✓</div>
+    <span id="toastMessage" class="font-medium text-slate-100">Action exécutée avec succès</span>
+  </div>
+
+  <!-- JavaScript Interaction Logic -->
+  <script>
+    let currentRole = 'admin'; // 'admin' | 'agent'
+    let currentView = 'inbox'; // 'inbox' | 'qualification' | 'map' | 'users' | 'analytics' | 'profile'
+    let showHotspots = false;
+
+    // Set Role
+    function setRole(role) {
+      currentRole = role;
+      const btnAdmin = document.getElementById('roleBtnAdmin');
+      const btnAgent = document.getElementById('roleBtnAgent');
+      const avatar = document.getElementById('sidebarAvatar');
+      const name = document.getElementById('sidebarUserName');
+      const userRole = document.getElementById('sidebarUserRole');
+
+      if (role === 'admin') {
+        btnAdmin.className = "px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-600 text-white shadow transition-all";
+        btnAgent.className = "px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-400 hover:text-white transition-all";
+        avatar.innerText = "MB";
+        avatar.className = "bg-ecoborder text-white font-semibold text-[11px] w-[34px] h-[34px] rounded-full flex items-center justify-center shrink-0 ring-2 ring-emerald-500/40";
+        name.innerText = "Marc Bernard";
+        userRole.innerText = "Super Admin";
+        document.getElementById('breadcrumbScope').innerText = "Administration";
+      } else {
+        btnAgent.className = "px-2.5 py-1 rounded-md text-[11px] font-semibold bg-cyan-600 text-white shadow transition-all";
+        btnAdmin.className = "px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-400 hover:text-white transition-all";
+        avatar.innerText = "CD";
+        avatar.className = "bg-cyan-800 text-white font-semibold text-[11px] w-[34px] h-[34px] rounded-full flex items-center justify-center shrink-0 ring-2 ring-cyan-500/40";
+        name.innerText = "Camille Durand";
+        userRole.innerText = "Agent de tri";
+        document.getElementById('breadcrumbScope').innerText = "Opérations Agent";
+      }
+
+      renderSidebar();
+      if (currentView === 'profile') {
+        renderProfileContent();
+      }
+      showToast(`Rôle basculé sur : ${role === 'admin' ? 'Marc Bernard (Admin)' : 'Camille Durand (Agent)'}`);
+    }
+
+    // Render Dynamic Sidebar
+    function renderSidebar() {
+      const menu = document.getElementById('sidebarMenu');
+      let html = '';
+
+      if (currentRole === 'agent') {
+        html = `
+          <div class="text-ecomuted text-[10px] font-semibold tracking-[1.2px] uppercase px-3 py-1">05 / OPÉRATIONS AGENT</div>
+          <button onclick="navigateTo('inbox')" class="flex items-center gap-2.5 h-10 px-3 rounded-lg text-left transition-colors text-[12px] ${currentView === 'inbox' || currentView === 'qualification' ? 'bg-ecoactive text-white font-semibold shadow-sm' : 'text-ecomuted hover:bg-ecoactive/50'}">
+            <i data-lucide="inbox" class="w-4 h-4 shrink-0"></i>
+            <span class="flex-1">Boîte de réception</span>
+            <span class="text-ecolight text-[11px] font-semibold">24</span>
+          </button>
+          <button onclick="navigateTo('map')" class="flex items-center gap-2.5 h-10 px-3 rounded-lg text-left transition-colors text-[12px] ${currentView === 'map' ? 'bg-ecoactive text-white font-semibold shadow-sm' : 'text-ecomuted hover:bg-ecoactive/50'}">
+            <i data-lucide="map" class="w-4 h-4 shrink-0"></i>
+            <span class="flex-1">Carte opérationnelle</span>
+          </button>
+          <div class="text-ecomuted text-[10px] font-semibold tracking-[1.2px] uppercase px-3 pt-4 pb-1">ESPACE PERSONNEL</div>
+          <button onclick="navigateTo('profile')" class="flex items-center gap-2.5 h-10 px-3 rounded-lg text-left transition-colors text-[12px] ${currentView === 'profile' ? 'bg-ecoactive text-white font-semibold shadow-sm' : 'text-ecomuted hover:bg-ecoactive/50'}">
+            <i data-lucide="user-check" class="w-4 h-4 text-ecolight shrink-0"></i>
+            <span class="flex-1">Mon Profil</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-ecolight"></span>
+          </button>
+        `;
+      } else {
+        html = `
+          <div class="text-ecomuted text-[10px] font-semibold tracking-[1.2px] uppercase px-3 py-1">06 / ADMINISTRATION</div>
+          <button onclick="navigateTo('inbox')" class="flex items-center gap-2.5 h-9 px-3 rounded-lg text-left transition-colors text-[12px] ${currentView === 'inbox' || currentView === 'qualification' ? 'bg-ecoactive text-white font-semibold shadow-sm' : 'text-ecomuted hover:bg-ecoactive/50'}">
+            <i data-lucide="inbox" class="w-4 h-4 shrink-0"></i>
+            <span class="flex-1">Boîte de réception</span>
+            <span class="text-ecolight text-[11px] font-semibold">24</span>
+          </button>
+          <button onclick="navigateTo('map')" class="flex items-center gap-2.5 h-9 px-3 rounded-lg text-left transition-colors text-[12px] ${currentView === 'map' ? 'bg-ecoactive text-white font-semibold shadow-sm' : 'text-ecomuted hover:bg-ecoactive/50'}">
+            <i data-lucide="map" class="w-4 h-4 shrink-0"></i>
+            <span class="flex-1">Carte opérationnelle</span>
+          </button>
+          <div class="text-ecomuted text-[10px] font-semibold tracking-[1.2px] uppercase px-3 pt-2 pb-1">GESTION & PILOTAGE</div>
+          <button onclick="navigateTo('users')" class="flex items-center gap-2.5 h-9 px-3 rounded-lg text-left transition-colors text-[12px] ${currentView === 'users' ? 'bg-ecoactive text-white font-semibold shadow-sm' : 'text-ecomuted hover:bg-ecoactive/50'}">
+            <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+            <span class="flex-1">Utilisateurs</span>
+          </button>
+          <button onclick="navigateTo('analytics')" class="flex items-center gap-2.5 h-9 px-3 rounded-lg text-left transition-colors text-[12px] ${currentView === 'analytics' ? 'bg-ecoactive text-white font-semibold shadow-sm' : 'text-ecomuted hover:bg-ecoactive/50'}">
+            <i data-lucide="bar-chart-3" class="w-4 h-4 shrink-0"></i>
+            <span class="flex-1">Power BI Analytics</span>
+          </button>
+          <div class="text-ecomuted text-[10px] font-semibold tracking-[1.2px] uppercase px-3 pt-2 pb-1">COMPTE</div>
+          <button onclick="navigateTo('profile')" class="flex items-center gap-2.5 h-9 px-3 rounded-lg text-left transition-colors text-[12px] ${currentView === 'profile' ? 'bg-ecoactive text-white font-semibold shadow-sm' : 'text-ecomuted hover:bg-ecoactive/50'}">
+            <i data-lucide="user" class="w-4 h-4 text-ecolight shrink-0"></i>
+            <span class="flex-1">Mon Profil</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-ecolight"></span>
+          </button>
+        `;
+      }
+
+      menu.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    // Navigate to View
+    function navigateTo(viewId) {
+      currentView = viewId;
+      const allViews = ['inbox', 'qualification', 'map', 'users', 'analytics', 'profile'];
+      
+      allViews.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.classList.add('hidden');
+      });
+
+      const target = document.getElementById(`view-${viewId}`);
+      if (target) target.classList.remove('hidden');
+
+      // Update Breadcrumbs
+      const labels = {
+        inbox: 'Boîte de Réception',
+        qualification: 'Qualification Incident #0891',
+        map: 'Carte Opérationnelle',
+        users: 'Utilisateurs & RBAC',
+        analytics: 'Power BI Executive',
+        profile: 'Mon Profil'
+      };
+      document.getElementById('breadcrumbCurrent').innerText = labels[viewId] || viewId;
+
+      if (viewId === 'profile') {
+        renderProfileContent();
+      }
+
+      renderSidebar();
+    }
+
+    // Render Dynamic Profile Content
+    function renderProfileContent() {
+      const container = document.getElementById('profileContainer');
+      if (currentRole === 'admin') {
+        container.innerHTML = `
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 relative overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-600 to-teal-700"></div>
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-1">
+              <div class="flex items-center gap-5">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#102c35] to-[#1b4449] text-white flex items-center justify-center font-bold text-xl shadow border-2 border-white">MB</div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h2 class="text-lg font-bold text-slate-900">Marc Bernard</h2>
+                    <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">Super Administrateur</span>
+                  </div>
+                  <p class="text-xs text-slate-500">Direction de la Propreté et du Cadre de Vie · Ville de Lyon</p>
+                  <span class="text-xs text-slate-600 mt-1 block">marc.bernard@lyon.fr · +33 4 72 10 30 30</span>
+                </div>
+              </div>
+              <button onclick="showToast('Modifications du profil Administrateur enregistrées !')" class="btn-interactive px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm">
+                Enregistrer le profil
+              </button>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4 mt-6">
+            <div class="bg-white p-5 rounded-xl border border-slate-200">
+              <span class="font-bold text-xs text-slate-900 block mb-2">Privilèges RBAC (Niveau 5/5)</span>
+              <ul class="text-xs space-y-1.5 text-slate-600">
+                <li>✅ Gestion intégrale des utilisateurs & rôles</li>
+                <li>✅ Configuration des catégories & SLA</li>
+                <li>✅ MLOps & Réentraînement Modèle IA</li>
+              </ul>
+            </div>
+            <div class="bg-white p-5 rounded-xl border border-slate-200">
+              <span class="font-bold text-xs text-slate-900 block mb-2">Sécurité & Sessions</span>
+              <p class="text-xs text-slate-600">2FA Authenticator : <b class="text-emerald-700">ACTIVE</b></p>
+              <p class="text-xs text-slate-500 mt-1">Dernière session : Poste Hôtel de Ville (IP: 194.254.12.8)</p>
+            </div>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 relative overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-teal-600 to-cyan-600"></div>
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-1">
+              <div class="flex items-center gap-5">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#102c35] to-[#235863] text-white flex items-center justify-center font-bold text-xl shadow border-2 border-white">CD</div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h2 class="text-lg font-bold text-slate-900">Camille Durand</h2>
+                    <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-cyan-100 text-cyan-800">Agent de Qualification</span>
+                  </div>
+                  <p class="text-xs text-slate-500">Pôle Est (Lyon 3e, 7e, 8e) · Matricule: AGT-69003-CD</p>
+                  <span class="text-xs text-slate-600 mt-1 block">camille.durand@lyon.fr · Ligne directe vacation</span>
+                </div>
+              </div>
+              <button onclick="showToast('Préférences de travail de l’agent enregistrées !')" class="btn-interactive px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm">
+                Enregistrer les préférences
+              </button>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-4 mt-6">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 text-center">
+              <span class="text-[10px] text-slate-400 font-bold uppercase">Qualifiés ce mois</span>
+              <div class="text-xl font-bold text-slate-900 mt-1">412</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 text-center">
+              <span class="text-[10px] text-slate-400 font-bold uppercase">Accord avec l’IA</span>
+              <div class="text-xl font-bold text-teal-700 mt-1">94.2%</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 text-center">
+              <span class="text-[10px] text-slate-400 font-bold uppercase">Temps moyen / ticket</span>
+              <div class="text-xl font-bold text-amber-700 mt-1">1m 45s</div>
+            </div>
+          </div>
+        `;
+      }
+      lucide.createIcons();
+    }
+
+    // Modal Handlers
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // Actions Confirmation
+    function confirmAssign() {
+      const brigade = document.getElementById('selectBrigade').value;
+      closeModal('modalAssign');
+      showToast(`✅ Dossier #0891 assigné avec succès à "${brigade}" !`);
+      setTimeout(() => navigateTo('inbox'), 600);
+    }
+
+    function confirmReject() {
+      const reason = document.getElementById('rejectReason').value;
+      closeModal('modalReject');
+      showToast(`⚠️ Dossier #0891 rejeté (Motif: ${reason})`);
+      setTimeout(() => navigateTo('inbox'), 600);
+    }
+
+    function confirmCreateUser() {
+      const name = document.getElementById('newUserName').value || 'Lucas Morel';
+      closeModal('modalUserForm');
+      showToast(`👤 Nouvel utilisateur "${name}" créé avec succès !`);
+    }
+
+    // Toast System
+    let toastTimeout;
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      const message = document.getElementById('toastMessage');
+      message.innerText = msg;
+      toast.classList.remove('hidden');
+      toast.classList.add('flex', 'toast-anim');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('flex');
+      }, 3500);
+    }
+
+    // Hotspots Highlighter (to show clickable prototype elements)
+    function toggleFigmaHotspots() {
+      showHotspots = !showHotspots;
+      const btn = document.getElementById('btnHotspots');
+      const clickables = document.querySelectorAll('button, tr, [onclick]');
+      if (showHotspots) {
+        btn.classList.add('bg-amber-500/20', 'border-amber-400', 'text-amber-300');
+        clickables.forEach(c => c.classList.add('ring-2', 'ring-cyan-400/60', 'ring-offset-1'));
+        showToast('💡 Zones interactives et flux mis en surbrillance !');
+      } else {
+        btn.classList.remove('bg-amber-500/20', 'border-amber-400', 'text-amber-300');
+        clickables.forEach(c => c.classList.remove('ring-2', 'ring-cyan-400/60', 'ring-offset-1'));
+      }
+    }
+
+    // Close Modals on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal('modalAssign');
+        closeModal('modalReject');
+        closeModal('modalUserForm');
+      }
+    });
+
+    // Initial render
+    renderSidebar();
+    lucide.createIcons();
+  </script>
+</body>
+</html>

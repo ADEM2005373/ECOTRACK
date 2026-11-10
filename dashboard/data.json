@@ -4,15 +4,15 @@
     "key": "SCRUM",
     "site": "ouerhaniadem0805.atlassian.net",
     "lead": "Adem Ouerhani",
-    "lastSync": "2026-11-02 22:18:46"
+    "lastSync": "2026-11-09 01:46:35"
   },
   "kpis": {
     "totalIssues": 33,
     "totalTasks": 27,
-    "doneIssues": 0,
-    "inProgressIssues": 0,
-    "toDoIssues": 27,
-    "completionRate": 0.0,
+    "doneIssues": 8,
+    "inProgressIssues": 2,
+    "toDoIssues": 19,
+    "completionRate": 29.6,
     "totalEpics": 6,
     "criticalWarningsCount": 2,
     "teamSize": 4
@@ -23,27 +23,27 @@
       "name": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)",
       "owner": "Adem Ouerhani",
       "total": 5,
-      "done": 0,
-      "rate": 0.0,
-      "status": "À démarrer"
+      "done": 5,
+      "rate": 100.0,
+      "status": "Terminé"
     },
     {
       "key": "SCRUM-34",
       "name": "EPIC 1: Identity, JWT & RBAC (Sprint 1)",
       "owner": "Adem Ouerhani",
       "total": 5,
-      "done": 0,
-      "rate": 0.0,
-      "status": "À démarrer"
+      "done": 2,
+      "rate": 40.0,
+      "status": "En cours"
     },
     {
       "key": "SCRUM-35",
       "name": "EPIC 2: Core Report & Media Service (Sprint 2)",
       "owner": "Ahmed Salah",
       "total": 5,
-      "done": 0,
-      "rate": 0.0,
-      "status": "À démarrer"
+      "done": 1,
+      "rate": 20.0,
+      "status": "En cours"
     },
     {
       "key": "SCRUM-36",
@@ -76,14 +76,14 @@
   "assignees": {
     "Adem Ouerhani": {
       "total": 8,
-      "done": 0,
+      "done": 5,
       "in_progress": 0,
-      "to_do": 8,
+      "to_do": 3,
       "issues": [
         {
           "key": "SCRUM-38",
           "summary": "ECO-01 | [DevOps] Initialize Nx Monorepo & CI/CD",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "Medium",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-38"
@@ -91,7 +91,7 @@
         {
           "key": "SCRUM-42",
           "summary": "ECO-11 | [DB] Create User Mongoose Schema & Hashing Logic",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "Medium",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-42"
@@ -99,7 +99,7 @@
         {
           "key": "SCRUM-47",
           "summary": "ECO-21 | [API] Build Media Service (Sharp EXIF Purge & S3)",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "Medium",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-47"
@@ -115,7 +115,7 @@
         {
           "key": "SCRUM-55",
           "summary": "ECO-05 | [BI-Data] DDL PostgreSQL Schéma en Étoile (2 Faits, 5 Dimensions) & Mocks Contrats",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "High",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-55"
@@ -123,7 +123,7 @@
         {
           "key": "SCRUM-56",
           "summary": "ECO-15 | [Audit & RGPD] Microservice AuditLogs Append-Only & Traces Immuables",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "High",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-56"
@@ -145,18 +145,18 @@
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-65"
         }
       ],
-      "completion_rate": 0.0
+      "completion_rate": 62.5
     },
     "Ahmed Salah": {
       "total": 6,
-      "done": 0,
+      "done": 1,
       "in_progress": 0,
-      "to_do": 6,
+      "to_do": 5,
       "issues": [
         {
           "key": "SCRUM-39",
           "summary": "ECO-02 | [UI-MOB] Initialize Expo App & Design Tokens",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "Medium",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-39"
@@ -202,18 +202,18 @@
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-59"
         }
       ],
-      "completion_rate": 0.0
+      "completion_rate": 16.7
     },
     "Hiba Dhouib": {
       "total": 6,
-      "done": 0,
-      "in_progress": 0,
-      "to_do": 6,
+      "done": 1,
+      "in_progress": 1,
+      "to_do": 4,
       "issues": [
         {
           "key": "SCRUM-40",
           "summary": "ECO-03 | [AI] Initialize FastAPI & PyTorch Environment",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "Medium",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-40"
@@ -221,7 +221,7 @@
         {
           "key": "SCRUM-45",
           "summary": "ECO-14 | [API] Build POST /auth/login with RS256 & Redis Rate Limit",
-          "status": "À faire",
+          "status": "En cours",
           "type": "Tâche",
           "priority": "Medium",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-45"
@@ -259,18 +259,18 @@
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-63"
         }
       ],
-      "completion_rate": 0.0
+      "completion_rate": 16.7
     },
     "Sara Shih": {
       "total": 7,
-      "done": 0,
-      "in_progress": 0,
-      "to_do": 7,
+      "done": 1,
+      "in_progress": 1,
+      "to_do": 5,
       "issues": [
         {
           "key": "SCRUM-41",
           "summary": "ECO-04 | [UI-WEB] Initialize React Vite & Tailwind CSS",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "Medium",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-41"
@@ -278,7 +278,7 @@
         {
           "key": "SCRUM-43",
           "summary": "ECO-12 | [API] Build POST /auth/register Route",
-          "status": "À faire",
+          "status": "En cours",
           "type": "Tâche",
           "priority": "Medium",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-43"
@@ -324,7 +324,7 @@
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-64"
         }
       ],
-      "completion_rate": 0.0
+      "completion_rate": 14.3
     }
   },
   "types": {
@@ -332,9 +332,9 @@
     "Tâche": 27
   },
   "statusStats": {
-    "Done": 0,
-    "InProgress": 0,
-    "ToDo": 33
+    "Done": 9,
+    "InProgress": 2,
+    "ToDo": 22
   },
   "warnings": [
     {
@@ -386,15 +386,15 @@
     {
       "key": "SCRUM-33",
       "summary": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Epic",
       "priority": "High",
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:35.965+0100",
-      "updated": "2026-11-02T22:16:12.149+0100",
+      "updated": "2026-11-06T13:25:01.520+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-33",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -410,7 +410,7 @@
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:40.138+0100",
-      "updated": "2026-11-02T22:16:15.289+0100",
+      "updated": "2026-11-06T23:31:51.050+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-34",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -426,7 +426,7 @@
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:43.528+0100",
-      "updated": "2026-11-02T22:16:18.276+0100",
+      "updated": "2026-11-06T23:32:21.860+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-35",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
@@ -466,15 +466,15 @@
     {
       "key": "SCRUM-38",
       "summary": "ECO-01 | [DevOps] Initialize Nx Monorepo & CI/CD",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "Medium",
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:54.131+0100",
-      "updated": "2026-11-02T21:54:46.572+0100",
+      "updated": "2026-11-02T23:48:51.482+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-38",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -482,15 +482,15 @@
     {
       "key": "SCRUM-39",
       "summary": "ECO-02 | [UI-MOB] Initialize Expo App & Design Tokens",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "Medium",
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:57.557+0100",
-      "updated": "2026-11-02T21:55:06.025+0100",
+      "updated": "2026-11-06T13:24:48.263+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-39",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -498,15 +498,15 @@
     {
       "key": "SCRUM-40",
       "summary": "ECO-03 | [AI] Initialize FastAPI & PyTorch Environment",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "Medium",
       "assignee": "Hiba Dhouib",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:00.987+0100",
-      "updated": "2026-11-02T21:55:09.496+0100",
+      "updated": "2026-11-06T13:24:42.591+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-40",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -514,15 +514,15 @@
     {
       "key": "SCRUM-41",
       "summary": "ECO-04 | [UI-WEB] Initialize React Vite & Tailwind CSS",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "Medium",
       "assignee": "Sara Shih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:04.492+0100",
-      "updated": "2026-11-02T21:55:12.584+0100",
+      "updated": "2026-11-06T13:24:55.277+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-41",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -530,15 +530,15 @@
     {
       "key": "SCRUM-42",
       "summary": "ECO-11 | [DB] Create User Mongoose Schema & Hashing Logic",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "Medium",
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:07.808+0100",
-      "updated": "2026-11-02T21:55:16.722+0100",
+      "updated": "2026-11-03T21:33:52.264+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-42",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -546,15 +546,15 @@
     {
       "key": "SCRUM-43",
       "summary": "ECO-12 | [API] Build POST /auth/register Route",
-      "status": "À faire",
-      "rawStatus": "À faire",
+      "status": "En cours",
+      "rawStatus": "En cours",
       "isDone": false,
       "type": "Tâche",
       "priority": "Medium",
       "assignee": "Sara Shih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:11.244+0100",
-      "updated": "2026-11-02T21:55:20.156+0100",
+      "updated": "2026-11-06T23:31:57.764+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-43",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -570,7 +570,7 @@
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:14.798+0100",
-      "updated": "2026-11-02T21:55:23.307+0100",
+      "updated": "2026-11-03T21:03:08.832+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-44",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -578,15 +578,15 @@
     {
       "key": "SCRUM-45",
       "summary": "ECO-14 | [API] Build POST /auth/login with RS256 & Redis Rate Limit",
-      "status": "À faire",
-      "rawStatus": "À faire",
+      "status": "En cours",
+      "rawStatus": "En cours",
       "isDone": false,
       "type": "Tâche",
       "priority": "Medium",
       "assignee": "Hiba Dhouib",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:18.170+0100",
-      "updated": "2026-11-02T21:55:26.528+0100",
+      "updated": "2026-11-06T23:32:04.826+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-45",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -610,15 +610,15 @@
     {
       "key": "SCRUM-47",
       "summary": "ECO-21 | [API] Build Media Service (Sharp EXIF Purge & S3)",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "Medium",
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:24.877+0100",
-      "updated": "2026-11-02T21:55:33.390+0100",
+      "updated": "2026-11-06T23:48:55.556+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-47",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
@@ -738,15 +738,15 @@
     {
       "key": "SCRUM-55",
       "summary": "ECO-05 | [BI-Data] DDL PostgreSQL Schéma en Étoile (2 Faits, 5 Dimensions) & Mocks Contrats",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "High",
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:06:40.479+0100",
-      "updated": "2026-11-02T22:16:47.431+0100",
+      "updated": "2026-11-02T23:48:53.904+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-55",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -754,15 +754,15 @@
     {
       "key": "SCRUM-56",
       "summary": "ECO-15 | [Audit & RGPD] Microservice AuditLogs Append-Only & Traces Immuables",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "High",
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:06:53.226+0100",
-      "updated": "2026-11-02T22:17:05.256+0100",
+      "updated": "2026-11-03T21:33:53.584+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-56",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"

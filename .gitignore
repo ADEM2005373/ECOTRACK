@@ -1,3 +1,8 @@
+# Dependencies & Nx
+node_modules/
+.nx/cache
+.pnpm-store
+
 # Python
 __pycache__/
 *.py[cod]
@@ -21,6 +26,8 @@ wheels/
 .installed.cfg
 *.egg
 .env
+.env.local
+!.env.example
 .venv
 venv/
 ENV/
@@ -31,3 +38,4 @@ Thumbs.db
 .vscode/
 .idea/
 *.log
+coverage/
