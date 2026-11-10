@@ -92,7 +92,7 @@ def process_jira_data(raw_data):
         cat_key = status_obj.get("statusCategory", {}).get("key", "new")
         
         is_done = (cat_key == "done" or "Termin" in status_name)
-        is_in_progress = ("cours" in status_name.lower() or "progress" in status_name.lower())
+        is_in_progress = ("cours" in status_name.lower() or "progress" in status_name.lower() or "review" in status_name.lower() or cat_key == "indeterminate")
         
         status_label = "Terminé" if is_done else ("En cours" if is_in_progress else "À faire")
         if is_done:

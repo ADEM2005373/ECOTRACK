@@ -4,7 +4,7 @@
     "key": "SCRUM",
     "site": "ouerhaniadem0805.atlassian.net",
     "lead": "Adem Ouerhani",
-    "lastSync": "2026-11-10 16:29:24"
+    "lastSync": "2026-11-10 16:37:52"
   },
   "kpis": {
     "totalIssues": 33,
@@ -627,14 +627,14 @@
       "key": "SCRUM-48",
       "summary": "ECO-22 | [AI] Build FastAPI Image Classification Route",
       "status": "En cours",
-      "rawStatus": "In Progress",
+      "rawStatus": "In Review",
       "isDone": false,
       "type": "Task",
       "priority": "High",
       "assignee": "Hiba Dhouib",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:28.361+0100",
-      "updated": "2026-11-10T15:34:36.680+0100",
+      "updated": "2026-11-10T16:37:18.408+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-48",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
