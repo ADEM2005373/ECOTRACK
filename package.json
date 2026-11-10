@@ -13,6 +13,8 @@
     "build": "nx run-many --target=build",
     "test": "nx run-many --target=test",
     "lint": "nx run-many --target=lint",
+    "review:sprint": "python .agents/scripts/run_sprint_code_review.py",
+    "review:sprint:alert": "python .agents/scripts/run_sprint_code_review.py --alert",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",

@@ -3,6 +3,7 @@ name: DevLead Governance & Anti-Fraud Audit
 on:
   pull_request:
     branches: [ main, develop ]
+    types: [ opened, synchronize, reopened, ready_for_review ]
   schedule:
     # Tous les soirs à 18h00 du lundi au vendredi
     - cron: '0 18 * * 1-5'
@@ -27,6 +28,26 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Validate Branch Naming & PR Title (if PR)
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "================================================================================"
+          echo "  ECOTRACK V2 — VERIFICATION DU NOMMAGE DE BRANCHE & CONVENTIONAL COMMITS"
+          echo "================================================================================"
+          HEAD_REF="${{ github.head_ref }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          echo "Head branch : $HEAD_REF"
+          echo "PR Title    : $PR_TITLE"
+          
+          # Vérifier que la branche suit la convention sauf si c'est develop vers main
+          if [[ "$HEAD_REF" != "develop" ]]; then
+            if [[ ! "$HEAD_REF" =~ ^(feature|fix|hotfix|chore)/ECO-[0-9]+ ]]; then
+              echo "⚠️ [ATTENTION] La branche '$HEAD_REF' ne respecte pas la convention 'feature/ECO-XX-nom' ou 'fix/ECO-XX-nom' !"
+            else
+              echo "✅ Convention de nom de branche respectée."
+            fi
+          fi
+
       - name: Verify Git Commits & Branch Attribution
         run: |
           echo "================================================================================"
@@ -34,7 +55,7 @@ jobs:
           echo "  Règle absolue : No Push = No Done"
           echo "================================================================================"
           git log --all --format="%h | %an <%ae> | %s" -n 25
-          
+
       - name: Enforce Definition of Done (DoD Gate)
         run: |
           echo "[DoD AUDIT] Vérification des signatures d'auteurs et intégrité de livraison..."
