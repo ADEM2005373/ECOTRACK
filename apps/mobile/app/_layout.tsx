@@ -5,7 +5,8 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { colors } from '../src/theme';
+import { colors, textStyles } from '../src/theme';
+import { loginStrings, registerStrings } from '../src/constants/strings';
 import { fontAssets } from '../src/theme/fonts';
 
 // Garde le splash visible tant que les polices CDCF ne sont pas chargées.
@@ -33,8 +34,17 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <StatusBar style="dark" />
-        <Stack screenOptions={{ contentStyle: { backgroundColor: colors.background } }}>
+        <Stack
+          screenOptions={{
+            contentStyle: { backgroundColor: colors.background },
+            headerStyle: { backgroundColor: colors.surface },
+            headerTintColor: colors.secondary,
+            headerTitleStyle: { fontFamily: textStyles.subtitle.fontFamily },
+          }}
+        >
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="register" options={{ title: registerStrings.screenTitle }} />
+          <Stack.Screen name="login" options={{ title: loginStrings.screenTitle }} />
         </Stack>
       </QueryClientProvider>
     </SafeAreaProvider>

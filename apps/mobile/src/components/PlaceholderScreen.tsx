@@ -5,16 +5,19 @@ import { colors, spacing, textStyles } from '../theme';
 type Props = {
   title: string;
   description?: string;
+  /** Action optionnelle affichée sous la description. */
+  children?: React.ReactNode;
 };
 
 /** Écran vide temporaire pour les onglets pas encore développés. */
-export function PlaceholderScreen({ title, description = 'Bientôt disponible.' }: Props) {
+export function PlaceholderScreen({ title, description = 'Bientôt disponible.', children }: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.title} accessibilityRole="header">
         {title}
       </Text>
       <Text style={styles.description}>{description}</Text>
+      {children ? <View style={styles.actions}>{children}</View> : null}
     </View>
   );
 }
@@ -37,5 +40,9 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginTop: spacing.sm,
     textAlign: 'center',
+  },
+  actions: {
+    alignSelf: 'stretch',
+    marginTop: spacing.xl,
   },
 });
