@@ -3,6 +3,7 @@ ECOTRACK Sprint 2 Automated Test Suite
 Validates deliverables for:
 - SCRUM-46 (ECO-20): Report Mongoose Schema & 2dsphere Geospatial Index
 - SCRUM-47 (ECO-21): Media Service & Media API with Sharp (EXIF/GPS Purge, S3/MinIO PutObjectCommand)
+- SCRUM-49 (ECO-23): Report API Core Controller, 2dsphere Spatial Proximity ($near) & Service
 """
 
 import sys
@@ -93,9 +94,49 @@ def test_media_api_server():
     assert "uploadRouter" in content, "uploadRouter missing"
     assert "SCRUM-47" in content and "ECO-21" in content, "SCRUM-47 / ECO-21 tracking info missing"
 
+# --- SCRUM-49 (ECO-23) TESTS ---
+
+@test("SCRUM-49: Report Service with 2dsphere $near Proximity Search")
+def test_report_service_spatial():
+    service_path = os.path.join("services", "report-api", "src", "services", "report.service.ts")
+    assert os.path.exists(service_path), f"{service_path} missing"
+    with open(service_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "createReport" in content, "createReport method missing"
+    assert "findReports" in content, "findReports method missing"
+    assert "$near" in content, "$near spatial query missing"
+    assert "$maxDistance" in content, "$maxDistance radius missing"
+    assert "ReportStatus.NOUVEAU" in content, "Default status NOUVEAU missing"
+
+@test("SCRUM-49: Report Controller & HTTP Status Codes (201, 200, 400, 404)")
+def test_report_controller():
+    ctrl_path = os.path.join("services", "report-api", "src", "controllers", "report.controller.ts")
+    assert os.path.exists(ctrl_path), f"{ctrl_path} missing"
+    with open(ctrl_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "createReport" in content, "createReport controller method missing"
+    assert "getReports" in content, "getReports controller method missing"
+    assert "getReportById" in content, "getReportById controller method missing"
+    assert "201" in content, "HTTP 201 Created status missing"
+    assert "404" in content, "HTTP 404 Not Found status missing"
+
+@test("SCRUM-49: Report API Server & Gateway Routes Definition (:3002)")
+def test_report_api_server():
+    server_path = os.path.join("services", "report-api", "src", "index.ts")
+    routes_path = os.path.join("services", "report-api", "src", "routes", "report.routes.ts")
+    pkg_path = os.path.join("services", "report-api", "package.json")
+    assert os.path.exists(server_path), f"{server_path} missing"
+    assert os.path.exists(routes_path), f"{routes_path} missing"
+    assert os.path.exists(pkg_path), f"{pkg_path} missing"
+    with open(server_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "reportRouter" in content, "reportRouter mounting missing"
+    assert "3002" in content, "Port 3002 definition missing"
+    assert "/api/v1/reports" in content, "Gateway route /api/v1/reports missing"
+
 def main():
     print("=" * 65)
-    print("RUNNING ECOTRACK SPRINT 2 TEST SUITE (SCRUM-46 & SCRUM-47)")
+    print("RUNNING ECOTRACK SPRINT 2 TEST SUITE (SCRUM-46, SCRUM-47 & SCRUM-49)")
     print("=" * 65)
     
     test_report_types()
@@ -104,6 +145,9 @@ def main():
     test_upload_controller()
     test_s3_storage_service()
     test_media_api_server()
+    test_report_service_spatial()
+    test_report_controller()
+    test_report_api_server()
     
     print("=" * 65)
     passed = sum(1 for r in TEST_RESULTS if r["status"] == "PASS")
