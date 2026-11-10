@@ -24,7 +24,7 @@ mapped to them by index arithmetic.
 From this directory, install `requirements.txt` and start the API:
 
 ```powershell
-$env:AI_VISION_WEIGHTS = "C:\path\to\mobilenet_v3_small.pth"
+$env:AI_VISION_WEIGHTS = "weights\mobilenet_v3_small_eco.pth"
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 

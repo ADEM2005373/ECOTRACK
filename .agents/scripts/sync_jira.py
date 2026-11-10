@@ -8,6 +8,7 @@ import os
 import sys
 import json
 import re
+import shutil
 import subprocess
 from datetime import datetime
 
@@ -15,11 +16,23 @@ WORKSPACE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 DASHBOARD_DIR = os.path.join(WORKSPACE_DIR, "dashboard")
 DATA_FILE = os.path.join(DASHBOARD_DIR, "data.json")
 INDEX_FILE = os.path.join(DASHBOARD_DIR, "index.html")
-ARTIFACT_DIR = r"C:\Users\MSI\.gemini\antigravity\brain\b2946e39-ad91-4c44-b7b1-1fdcd0c2735e"
+ARTIFACT_DIR = os.environ.get("ANTIGRAVITY_ARTIFACT_DIR", "")
+
+def get_twg_bin():
+    found = shutil.which("twg")
+    if found:
+        return found
+    localappdata = os.environ.get("LOCALAPPDATA", "")
+    if localappdata:
+        candidate = os.path.join(localappdata, "Programs", "twg", "bin", "twg.exe")
+        if os.path.exists(candidate):
+            return candidate
+    return "twg"
 
 def fetch_raw_jira():
     try:
-        cmd = ["twg", "jira", "workitem", "query", "--jql", "project = SCRUM ORDER BY created ASC", "-o", "json"]
+        twg_bin = get_twg_bin()
+        cmd = [twg_bin, "jira", "workitem", "query", "--jql", "project = SCRUM ORDER BY created ASC", "-o", "json"]
         proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
         if proc.returncode != 0:
             print(f"[WARN] twg command failed: {proc.stderr}", file=sys.stderr)
