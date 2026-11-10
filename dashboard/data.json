@@ -4,7 +4,7 @@
     "key": "SCRUM",
     "site": "ouerhaniadem0805.atlassian.net",
     "lead": "Adem Ouerhani",
-    "lastSync": "2026-11-10 01:53:20"
+    "lastSync": "2026-11-10 02:13:08"
   },
   "kpis": {
     "totalIssues": 33,
@@ -15,7 +15,7 @@
     "completionRate": 37.0,
     "totalEpics": 6,
     "criticalWarningsCount": 2,
-    "teamSize": 5
+    "teamSize": 4
   },
   "epics": [
     {
@@ -48,7 +48,7 @@
     {
       "key": "SCRUM-36",
       "name": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)",
-      "owner": "Sara Shih",
+      "owner": "Sara Sahih",
       "total": 4,
       "done": 0,
       "rate": 0.0,
@@ -261,11 +261,11 @@
       ],
       "completion_rate": 33.3
     },
-    "Sara Shih": {
-      "total": 6,
+    "Sara Sahih": {
+      "total": 7,
       "done": 2,
       "in_progress": 0,
-      "to_do": 4,
+      "to_do": 5,
       "issues": [
         {
           "key": "SCRUM-41",
@@ -314,16 +314,7 @@
           "type": "Tâche",
           "priority": "High",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-60"
-        }
-      ],
-      "completion_rate": 33.3
-    },
-    "sara sahih": {
-      "total": 1,
-      "done": 0,
-      "in_progress": 0,
-      "to_do": 1,
-      "issues": [
+        },
         {
           "key": "SCRUM-64",
           "summary": "ECO-52 | [QA-E2E] Recette Complète E2E Multi-Acteurs (Playwright) & Audit Accessibilité WCAG 2.1 AA",
@@ -333,7 +324,7 @@
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-64"
         }
       ],
-      "completion_rate": 0.0
+      "completion_rate": 28.6
     }
   },
   "types": {
@@ -448,10 +439,10 @@
       "isDone": false,
       "type": "Epic",
       "priority": "High",
-      "assignee": "Sara Shih",
+      "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:46.806+0100",
-      "updated": "2026-11-10T01:46:47.181+0100",
+      "updated": "2026-11-10T02:11:17.102+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-36",
       "epicKey": "SCRUM-36",
       "epicName": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)"
@@ -528,10 +519,10 @@
       "isDone": true,
       "type": "Tâche",
       "priority": "Medium",
-      "assignee": "Sara Shih",
+      "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:04.492+0100",
-      "updated": "2026-11-10T01:42:13.270+0100",
+      "updated": "2026-11-10T02:11:20.001+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-41",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -560,10 +551,10 @@
       "isDone": true,
       "type": "Tâche",
       "priority": "High",
-      "assignee": "Sara Shih",
+      "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:11.244+0100",
-      "updated": "2026-11-10T01:42:40.115+0100",
+      "updated": "2026-11-10T02:11:25.173+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-43",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -656,10 +647,10 @@
       "isDone": false,
       "type": "Tâche",
       "priority": "Medium",
-      "assignee": "Sara Shih",
+      "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:31.932+0100",
-      "updated": "2026-11-10T01:43:32.353+0100",
+      "updated": "2026-11-10T02:11:30.071+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-49",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
@@ -672,10 +663,10 @@
       "isDone": false,
       "type": "Tâche",
       "priority": "High",
-      "assignee": "Sara Shih",
+      "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:35.621+0100",
-      "updated": "2026-11-10T01:43:52.793+0100",
+      "updated": "2026-11-10T02:10:52.080+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-50",
       "epicKey": "SCRUM-36",
       "epicName": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)"
@@ -800,10 +791,10 @@
       "isDone": false,
       "type": "Tâche",
       "priority": "High",
-      "assignee": "Sara Shih",
+      "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:07:16.862+0100",
-      "updated": "2026-11-10T01:44:06.174+0100",
+      "updated": "2026-11-10T02:11:42.312+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-58",
       "epicKey": "SCRUM-36",
       "epicName": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)"
@@ -832,10 +823,10 @@
       "isDone": false,
       "type": "Tâche",
       "priority": "High",
-      "assignee": "Sara Shih",
+      "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:07:43.191+0100",
-      "updated": "2026-11-10T01:44:25.597+0100",
+      "updated": "2026-11-10T02:11:44.798+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-60",
       "epicKey": "SCRUM-37",
       "epicName": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)"
@@ -896,7 +887,7 @@
       "isDone": false,
       "type": "Tâche",
       "priority": "High",
-      "assignee": "sara sahih",
+      "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:08:30.028+0100",
       "updated": "2026-11-10T01:44:57.062+0100",
