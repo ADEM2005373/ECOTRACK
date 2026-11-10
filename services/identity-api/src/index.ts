@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { connectMongo } from '@ecotrack/db';
 import { userService } from './services/user.service';
 import { UserRole } from '@ecotrack/shared';
+import { authRouter } from './routes/auth.routes';
 
 const app = express();
 app.use(express.json());
@@ -13,7 +14,11 @@ app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', service: 'identity-api', timestamp: new Date() });
 });
 
-// Route d'inscription directe (utilisée pour les tests unitaires et intégration)
+// Routes d'authentification officielles (OpenAPI & Gateway)
+app.use('/api/v1/auth', authRouter);
+app.use('/auth', authRouter);
+
+// Route d'inscription directe de secours (tests legacy)
 app.post('/api/v1/auth/register-dev', async (req: Request, res: Response) => {
   try {
     const { email, password, fullName, phoneNumber, role } = req.body;

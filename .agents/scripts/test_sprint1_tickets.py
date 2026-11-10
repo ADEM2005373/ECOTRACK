@@ -3,6 +3,8 @@ ECOTRACK Sprint 1 Automated Test Suite
 Validates deliverables for:
 - SCRUM-42 (ECO-11): User Mongoose Schema, Argon2id Hashing Logic & RBAC Enums
 - SCRUM-56 (ECO-15): AuditLogs Append-Only Collection, RGPD IP Truncation & RBAC Admin Guard
+- SCRUM-43 (ECO-12): Auth Register Route & Controller Security (Sara Shih / DevLead)
+- TECH-DEBT: Nx apps cleanup, local tsconfig & cn() utility
 """
 
 import sys
@@ -136,9 +138,40 @@ def test_audit_routes_and_server():
     assert "router.get('/logs'" in content, "GET /logs route missing"
     assert "router.post('/log'" in content, "POST /log route missing"
 
+# --- SCRUM-43 (ECO-12) & LEAD DEV DELIVERABLES ---
+
+@test("SCRUM-43: Auth Register Route & Controller (Identity API)")
+def test_auth_register_route():
+    routes_path = os.path.join("services", "identity-api", "src", "routes", "auth.routes.ts")
+    server_path = os.path.join("services", "identity-api", "src", "index.ts")
+    assert os.path.exists(routes_path), f"{routes_path} missing"
+    with open(routes_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "router.post('/register'" in content, "POST /register endpoint missing"
+    assert "password.length < 8" in content, "Password min-length 8 validation missing"
+    assert "201" in content, "HTTP 201 Created status missing"
+    assert "400" in content, "HTTP 400 Bad Request status missing"
+    assert "409" in content, "HTTP 409 Conflict status missing"
+    with open(server_path, "r", encoding="utf-8") as f:
+        s_content = f.read()
+    assert "authRouter" in s_content, "authRouter must be mounted in index.ts"
+
+@test("TECH-DEBT: Orphan apps/web removed, local tsconfig & cn() plugged")
+def test_tech_debt_cleanup():
+    orphan_web = os.path.join("apps", "web")
+    assert not os.path.exists(orphan_web), "Orphan directory apps/web must be removed"
+    
+    tsconfig_path = os.path.join("apps", "web-react", "tsconfig.json")
+    assert os.path.exists(tsconfig_path), "Local tsconfig.json in apps/web-react missing"
+    
+    button_path = os.path.join("apps", "web-react", "src", "components", "ui", "Button.tsx")
+    with open(button_path, "r", encoding="utf-8") as f:
+        b_content = f.read()
+    assert "cn(" in b_content, "Button.tsx must use cn() helper"
+
 def main():
     print("=" * 65)
-    print("RUNNING ECOTRACK SPRINT 1 TEST SUITE (SCRUM-42 & SCRUM-56)")
+    print("RUNNING ECOTRACK SPRINT 1 TEST SUITE (SCRUM-42, SCRUM-56 & SCRUM-43)")
     print("=" * 65)
     
     test_user_roles()
@@ -151,6 +184,8 @@ def main():
     test_ip_anonymizer()
     test_audit_controller_rbac()
     test_audit_routes_and_server()
+    test_auth_register_route()
+    test_tech_debt_cleanup()
     
     print("=" * 65)
     passed = sum(1 for r in TEST_RESULTS if r["status"] == "PASS")
