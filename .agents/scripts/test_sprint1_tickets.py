@@ -156,10 +156,51 @@ def test_auth_register_route():
         s_content = f.read()
     assert "authRouter" in s_content, "authRouter must be mounted in index.ts"
 
-@test("TECH-DEBT: Orphan apps/web removed, local tsconfig & cn() plugged")
+# --- SCRUM-45 (ECO-14) TESTS ---
+
+@test("SCRUM-45: Token Service with RS256 Asymmetric Signing & Key Export")
+def test_token_service_rs256():
+    token_path = os.path.join("services", "identity-api", "src", "services", "token.service.ts")
+    assert os.path.exists(token_path), f"{token_path} missing"
+    with open(token_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "RS256" in content, "RS256 algorithm missing from token service"
+    assert "signToken" in content, "signToken method missing"
+    assert "verifyToken" in content, "verifyToken method missing"
+    assert "generateAuthTokens" in content, "generateAuthTokens method missing"
+    assert "getPublicKey" in content, "getPublicKey method missing"
+    assert "900" in content, "15 min (900s) Access Token TTL missing"
+
+@test("SCRUM-45: Rate Limiter Service for Brute-Force Protection")
+def test_rate_limiter_service():
+    rate_path = os.path.join("services", "identity-api", "src", "services", "rate-limiter.service.ts")
+    assert os.path.exists(rate_path), f"{rate_path} missing"
+    with open(rate_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "isRateLimited" in content, "isRateLimited method missing"
+    assert "recordFailure" in content, "recordFailure method missing"
+    assert "resetAttempts" in content, "resetAttempts method missing"
+
+@test("SCRUM-45: POST /auth/login with RS256, 401 & 429 Status Codes")
+def test_auth_login_route():
+    route_path = os.path.join("services", "identity-api", "src", "routes", "auth.routes.ts")
+    with open(route_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "router.post('/login'" in content, "POST /login endpoint missing"
+    assert "loginRateLimiter.isRateLimited" in content, "Rate limiting check missing in login"
+    assert "429" in content, "HTTP 429 Too Many Requests status missing"
+    assert "userService.validateCredentials" in content, "validateCredentials call missing"
+    assert "401" in content, "HTTP 401 Unauthorized status missing"
+    assert "tokenService.generateAuthTokens" in content, "generateAuthTokens call missing"
+    assert "200" in content, "HTTP 200 OK status missing"
+
+@test("TECH-DEBT: Duplicate apps/mobile-expo removed, local tsconfig & cn() plugged")
 def test_tech_debt_cleanup():
     orphan_web = os.path.join("apps", "web")
     assert not os.path.exists(orphan_web), "Orphan directory apps/web must be removed"
+    
+    dup_mobile = os.path.join("apps", "mobile-expo")
+    assert not os.path.exists(dup_mobile), "Duplicate workspace apps/mobile-expo must be removed"
     
     tsconfig_path = os.path.join("apps", "web-react", "tsconfig.json")
     assert os.path.exists(tsconfig_path), "Local tsconfig.json in apps/web-react missing"
@@ -185,6 +226,9 @@ def main():
     test_audit_controller_rbac()
     test_audit_routes_and_server()
     test_auth_register_route()
+    test_token_service_rs256()
+    test_rate_limiter_service()
+    test_auth_login_route()
     test_tech_debt_cleanup()
     
     print("=" * 65)

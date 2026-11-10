@@ -4,15 +4,15 @@
     "key": "SCRUM",
     "site": "ouerhaniadem0805.atlassian.net",
     "lead": "Adem Ouerhani",
-    "lastSync": "2026-11-06 15:35:18"
+    "lastSync": "2026-11-09 01:46:35"
   },
   "kpis": {
     "totalIssues": 33,
     "totalTasks": 27,
-    "doneIssues": 7,
+    "doneIssues": 8,
     "inProgressIssues": 2,
-    "toDoIssues": 20,
-    "completionRate": 25.9,
+    "toDoIssues": 19,
+    "completionRate": 29.6,
     "totalEpics": 6,
     "criticalWarningsCount": 2,
     "teamSize": 4
@@ -41,9 +41,9 @@
       "name": "EPIC 2: Core Report & Media Service (Sprint 2)",
       "owner": "Ahmed Salah",
       "total": 5,
-      "done": 0,
-      "rate": 0.0,
-      "status": "À démarrer"
+      "done": 1,
+      "rate": 20.0,
+      "status": "En cours"
     },
     {
       "key": "SCRUM-36",
@@ -76,9 +76,9 @@
   "assignees": {
     "Adem Ouerhani": {
       "total": 8,
-      "done": 4,
+      "done": 5,
       "in_progress": 0,
-      "to_do": 4,
+      "to_do": 3,
       "issues": [
         {
           "key": "SCRUM-38",
@@ -99,7 +99,7 @@
         {
           "key": "SCRUM-47",
           "summary": "ECO-21 | [API] Build Media Service (Sharp EXIF Purge & S3)",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "Medium",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-47"
@@ -145,7 +145,7 @@
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-65"
         }
       ],
-      "completion_rate": 50.0
+      "completion_rate": 62.5
     },
     "Ahmed Salah": {
       "total": 6,
@@ -332,9 +332,9 @@
     "Tâche": 27
   },
   "statusStats": {
-    "Done": 8,
+    "Done": 9,
     "InProgress": 2,
-    "ToDo": 23
+    "ToDo": 22
   },
   "warnings": [
     {
@@ -410,7 +410,7 @@
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:40.138+0100",
-      "updated": "2026-11-02T22:16:15.289+0100",
+      "updated": "2026-11-06T23:31:51.050+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-34",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -426,7 +426,7 @@
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:43.528+0100",
-      "updated": "2026-11-02T22:16:18.276+0100",
+      "updated": "2026-11-06T23:32:21.860+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-35",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
@@ -554,7 +554,7 @@
       "assignee": "Sara Shih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:11.244+0100",
-      "updated": "2026-11-06T15:34:54.804+0100",
+      "updated": "2026-11-06T23:31:57.764+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-43",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -586,7 +586,7 @@
       "assignee": "Hiba Dhouib",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:18.170+0100",
-      "updated": "2026-11-04T20:12:43.773+0100",
+      "updated": "2026-11-06T23:32:04.826+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-45",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -610,15 +610,15 @@
     {
       "key": "SCRUM-47",
       "summary": "ECO-21 | [API] Build Media Service (Sharp EXIF Purge & S3)",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "Medium",
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:24.877+0100",
-      "updated": "2026-11-02T21:55:33.390+0100",
+      "updated": "2026-11-06T23:48:55.556+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-47",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
