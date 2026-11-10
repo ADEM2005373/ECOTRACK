@@ -51,7 +51,7 @@ def process_jira_data(raw_data):
         "SCRUM-33": {"name": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)", "key": "SCRUM-33", "total": 0, "done": 0, "owner": "Adem Ouerhani"},
         "SCRUM-34": {"name": "EPIC 1: Identity, JWT & RBAC (Sprint 1)", "key": "SCRUM-34", "total": 0, "done": 0, "owner": "Adem Ouerhani"},
         "SCRUM-35": {"name": "EPIC 2: Core Report & Media Service (Sprint 2)", "key": "SCRUM-35", "total": 0, "done": 0, "owner": "Ahmed Salah"},
-        "SCRUM-36": {"name": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)", "key": "SCRUM-36", "total": 0, "done": 0, "owner": "Sara Shih"},
+        "SCRUM-36": {"name": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)", "key": "SCRUM-36", "total": 0, "done": 0, "owner": "Sara Sahih"},
         "SCRUM-37": {"name": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)", "key": "SCRUM-37", "total": 0, "done": 0, "owner": "Adem / Sara"},
         "SCRUM-54": {"name": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)", "key": "SCRUM-54", "total": 0, "done": 0, "owner": "Adem Ouerhani"},
     }
@@ -94,7 +94,7 @@ def process_jira_data(raw_data):
         
         assignee_obj = item.get("assignee")
         raw_assignee_name = assignee_obj.get("displayName") if assignee_obj else "Non assigné"
-        assignee_name = "Sara Shih" if raw_assignee_name == "sarahsou2016" else raw_assignee_name
+        assignee_name = "Sara Sahih" if raw_assignee_name in ["sarahsou2016", "sara sahih", "Sara Shih"] else raw_assignee_name
         
         if itype != "Epic":
             if assignee_name not in assignee_stats:
