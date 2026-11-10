@@ -8,7 +8,14 @@ Ce document constitue la **norme officielle et obligatoire** de revue de code (C
 
 1. **Règle d'or : « No Push / No Review = No Done »**
    * Aucun ticket ne peut être marqué comme `Terminé` sur Jira sans commit pushed, sans branche de feature dédiée, et sans validation préalable du Lead Developer.
-2. **Principe de Répartition des Responsabilités :**
+2. **Règle Cardinale Pédagogique : « Ne Jamais Corriger à la Place du Développeur »**
+   * **Stricte interdiction pour le Lead Dev / IA de modifier ou corriger le code défaillant d'un membre.**
+   * En cas d'erreur, de bug, de mockup ou d'omission détecté lors de la revue :
+     1. Le code défaillant reste **intact** (zéro modification par le Lead Dev).
+     2. Un **e-mail d'alerte pédagogique officiel** est envoyé immédiatement au développeur assigné.
+     3. L'e-mail détaille obligatoirement : l'erreur exacte (fichier, ligne), le problème de logique, et le **guide pas-à-pas pour la corriger**.
+     4. Le développeur doit impérativement corriger lui-même sur sa machine, commiter avec son propre compte Git, et soumettre à nouveau en `Revue en cours`.
+3. **Principe de Répartition des Responsabilités :**
    * **Développeurs (Ahmed Salah, Hiba Dhouib, Sara Sahih) :**
      * Accès en lecture à leurs tickets.
      * Déplacement autorisé : `À faire` $\rightarrow$ `En cours` $\rightarrow$ `Revue en cours`.
@@ -68,11 +75,18 @@ Sont formellement qualifiés de **livrables incomplets** :
 * 100% des assertions doivent être au vert (`[PASS]`).
 
 ### Étape 6 : Décision & Transition Jira
-* **Si conforme :** Le Scrum Master passe le ticket de `Revue en cours` à `Terminé` sur Jira.
-* **Si non conforme :** Le ticket est renvoyé en `En cours` avec compte-rendu explicatif.
+* **Si conforme (100% PASS & DoD respectée) :** Le Scrum Master passe le ticket de `Revue en cours` à `Terminé` sur Jira.
+* **Si non conforme (Erreur, Bug, Mockup, Manque) :**
+  * **Interdiction formelle de corriger le code de l'assigné.**
+  * Le ticket est renvoyé en `En cours` sur Jira.
+  * L'alerte e-mail est expédiée avec les directives de correction.
 
-### Étape 7 : Notification et Alerte d'Équipe
-* Envoi automatique d'un e-mail d'alerte SMTP chiffré listant les points de blocage et les actions correctives attendues sous 24h.
+### Étape 7 : Notification & Alerte Pédagogique par Email (Automatisée)
+* Envoi d'un e-mail d'alerte SMTP détaillé à l'assigné contenant :
+  1. Le fichier et la ligne exacte posant problème.
+  2. L'explication technique du bug ou du manque.
+  3. Le **guide de correction pas-à-pas (How to fix)** pour qu'il code la solution lui-même.
+  4. L'échéance de correction (24h) et la commande de push avec son compte Git.
 
 ---
 
