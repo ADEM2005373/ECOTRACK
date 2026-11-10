@@ -4,15 +4,15 @@
     "key": "SCRUM",
     "site": "ouerhaniadem0805.atlassian.net",
     "lead": "Adem Ouerhani",
-    "lastSync": "2026-11-10 15:32:24"
+    "lastSync": "2026-11-10 15:45:16"
   },
   "kpis": {
     "totalIssues": 33,
     "totalTasks": 27,
     "doneIssues": 8,
-    "inReviewIssues": 1,
+    "inReviewIssues": 0,
     "inProgressIssues": 5,
-    "toDoIssues": 18,
+    "toDoIssues": 19,
     "completionRate": 29.6,
     "totalEpics": 6,
     "criticalWarningsCount": 2,
@@ -76,8 +76,8 @@
   ],
   "assignees": {
     "Adem Ouerhani": {
-      "total": 8,
-      "done": 5,
+      "total": 9,
+      "done": 6,
       "in_progress": 0,
       "in_review": 0,
       "to_do": 3,
@@ -89,6 +89,14 @@
           "type": "Tâche",
           "priority": "High",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-38"
+        },
+        {
+          "key": "SCRUM-41",
+          "summary": "ECO-04 | [UI-WEB] Initialize React Vite & Tailwind CSS",
+          "status": "Terminé",
+          "type": "Tâche",
+          "priority": "Medium",
+          "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-41"
         },
         {
           "key": "SCRUM-42",
@@ -147,7 +155,7 @@
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-65"
         }
       ],
-      "completion_rate": 62.5
+      "completion_rate": 66.7
     },
     "Ahmed Salah": {
       "total": 6,
@@ -266,20 +274,12 @@
       "completion_rate": 16.7
     },
     "Sara Sahih": {
-      "total": 7,
-      "done": 1,
+      "total": 6,
+      "done": 0,
       "in_progress": 0,
-      "in_review": 1,
-      "to_do": 5,
+      "in_review": 0,
+      "to_do": 6,
       "issues": [
-        {
-          "key": "SCRUM-41",
-          "summary": "ECO-04 | [UI-WEB] Initialize React Vite & Tailwind CSS",
-          "status": "Terminé",
-          "type": "Tâche",
-          "priority": "Medium",
-          "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-41"
-        },
         {
           "key": "SCRUM-43",
           "summary": "ECO-12 | [API] Build POST /auth/register Route",
@@ -291,7 +291,7 @@
         {
           "key": "SCRUM-49",
           "summary": "ECO-23 | [API] Combine Creation & Emit 'report.created'",
-          "status": "Revue en cours",
+          "status": "À faire",
           "type": "Tâche",
           "priority": "Medium",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-49"
@@ -329,7 +329,7 @@
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-64"
         }
       ],
-      "completion_rate": 14.3
+      "completion_rate": 0.0
     }
   },
   "types": {
@@ -338,9 +338,9 @@
   },
   "statusStats": {
     "Done": 9,
-    "InReview": 1,
+    "InReview": 0,
     "InProgress": 5,
-    "ToDo": 18
+    "ToDo": 19
   },
   "warnings": [
     {
@@ -525,10 +525,10 @@
       "isDone": true,
       "type": "Tâche",
       "priority": "Medium",
-      "assignee": "Sara Sahih",
+      "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:04.492+0100",
-      "updated": "2026-11-10T15:24:28.496+0100",
+      "updated": "2026-11-10T15:45:00.298+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-41",
       "epicKey": "SCRUM-33",
       "epicName": "EPIC 0: Infrastructure, DevOps & Repo Setup (Sprint 0)"
@@ -640,7 +640,7 @@
       "assignee": "Hiba Dhouib",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:28.361+0100",
-      "updated": "2026-11-10T15:21:27.960+0100",
+      "updated": "2026-11-10T15:34:36.680+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-48",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
@@ -648,15 +648,15 @@
     {
       "key": "SCRUM-49",
       "summary": "ECO-23 | [API] Combine Creation & Emit 'report.created'",
-      "status": "Revue en cours",
-      "rawStatus": "Revue en cours",
+      "status": "À faire",
+      "rawStatus": "À faire",
       "isDone": false,
       "type": "Tâche",
       "priority": "Medium",
       "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:31.932+0100",
-      "updated": "2026-11-10T15:21:56.213+0100",
+      "updated": "2026-11-10T15:44:07.442+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-49",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
