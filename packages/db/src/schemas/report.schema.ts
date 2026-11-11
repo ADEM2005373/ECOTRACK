@@ -1,7 +1,42 @@
-import { Schema, model, Document, Model } from 'mongoose';
-import { IReport, ReportStatus } from '@ecotrack/shared';
+import mongoose, { Schema, Document, Types } from 'mongoose';
+import { IReport, GeoLocation, ReportStatus } from '@ecotrack/shared';
 
-export interface IReportDocument extends Omit<IReport, 'id'>, Document {}
+export interface IReportDocument extends Omit<IReport, 'id' | 'reporterId'>, Document {
+  reporterId: Types.ObjectId;
+}
+
+// Vérifie un couple GeoJSON [longitude, latitude] : exactement 2 nombres finis dans les bornes WGS84
+function isValidLngLat(coords: unknown): boolean {
+  if (!Array.isArray(coords) || coords.length !== 2) {
+    return false;
+  }
+  const [lng, lat] = coords;
+  return (
+    Number.isFinite(lng) &&
+    Number.isFinite(lat) &&
+    lng >= -180 &&
+    lng <= 180 &&
+    lat >= -90 &&
+    lat <= 90
+  );
+}
+
+// Point GeoJSON strict (RFC 7946). L'ordre est [longitude, latitude], jamais [latitude, longitude].
+const GeoPointSchema = new Schema<GeoLocation>(
+  {
+    type: { type: String, enum: ['Point'], default: 'Point', required: true },
+    coordinates: {
+      type: [Number],
+      required: [true, 'Les coordonnées GPS sont obligatoires'],
+      default: undefined, // Empêche Mongoose d'initialiser un tableau vide qui satisferait `required`
+      validate: {
+        validator: isValidLngLat,
+        message: 'Les coordonnées doivent respecter le format GeoJSON [longitude, latitude] (longitude ∈ [-180, 180], latitude ∈ [-90, 90]).'
+      }
+    }
+  },
+  { _id: false }
+);
 
 /**
  * Schéma Mongoose pour les Signalements Citoyens (EcoTrack V2)
@@ -10,55 +45,31 @@ export interface IReportDocument extends Omit<IReport, 'id'>, Document {}
  */
 export const ReportSchema = new Schema<IReportDocument>(
   {
-    citizenId: {
-      type: String,
-      required: true,
-      index: true
+    reporterId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: [true, "L'identifiant du citoyen (reporterId) est obligatoire"]
     },
-    title: {
+    // Chaîne libre : les codes catégorie divergent encore entre le DW (Dim_Category) et le service IA
+    category: {
       type: String,
-      required: true,
+      required: [true, 'La catégorie est obligatoire'],
       trim: true,
-      maxlength: 150
+      maxlength: [50, 'La catégorie ne doit pas dépasser 50 caractères']
     },
     description: {
       type: String,
-      required: true,
       trim: true,
-      maxlength: 2000
+      maxlength: [2000, 'La description ne doit pas dépasser 2000 caractères']
     },
-    location: {
-      type: {
-        type: String,
-        enum: ['Point'],
-        required: true,
-        default: 'Point'
-      },
-      // GeoJSON standard : [longitude, latitude]
-      coordinates: {
-        type: [Number],
-        required: true,
-        validate: {
-          validator: function (coords: number[]) {
-            return (
-              Array.isArray(coords) &&
-              coords.length === 2 &&
-              coords[0] >= -180 &&
-              coords[0] <= 180 && // Longitude
-              coords[1] >= -90 &&
-              coords[1] <= 90 // Latitude
-            );
-          },
-          message: 'Les coordonnées doivent respecter le format GeoJSON [longitude, latitude].'
-        }
-      }
-    },
-    photoUrl: {
+    imageUrl: {
       type: String,
-      required: true
+      required: [true, "L'URL de la photo est obligatoire"],
+      trim: true
     },
     thumbnailUrl: {
-      type: String
+      type: String,
+      trim: true
     },
     categorySuggested: {
       type: String,
@@ -73,22 +84,23 @@ export const ReportSchema = new Schema<IReportDocument>(
       min: 0,
       max: 1
     },
+    location: {
+      type: GeoPointSchema,
+      required: [true, 'La localisation GPS est obligatoire']
+    },
     status: {
       type: String,
       enum: Object.values(ReportStatus),
       default: ReportStatus.NOUVEAU,
-      index: true
+      required: true
     }
   },
   {
     timestamps: true,
     toJSON: {
-      virtuals: true,
       transform: (_doc, ret) => {
-        ret.id = ret._id.toString();
-        delete ret._id;
-        delete ret.__v;
-        return ret;
+        const { _id, __v, ...report } = ret;
+        return { ...report, id: String(_id) };
       }
     }
   }
@@ -96,6 +108,8 @@ export const ReportSchema = new Schema<IReportDocument>(
 
 // Index géospatial 2dsphere obligatoire pour les calculs de distance et cartes
 ReportSchema.index({ location: '2dsphere' });
+// Filtre par statut (GET /reports?status=) et liste « Mes signalements » d'un citoyen
 ReportSchema.index({ status: 1, createdAt: -1 });
+ReportSchema.index({ reporterId: 1, createdAt: -1 });
 
-export const ReportModel: Model<IReportDocument> = model<IReportDocument>('Report', ReportSchema);
+export const ReportModel = mongoose.model<IReportDocument>('Report', ReportSchema);
