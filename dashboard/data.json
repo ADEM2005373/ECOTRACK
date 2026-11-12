@@ -4,7 +4,7 @@
     "key": "SCRUM",
     "site": "ouerhaniadem0805.atlassian.net",
     "lead": "Adem Ouerhani",
-    "lastSync": "2026-11-12 01:23:22"
+    "lastSync": "2026-11-12 01:26:09"
   },
   "kpis": {
     "totalIssues": 33,
@@ -576,7 +576,7 @@
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:14.798+0100",
-      "updated": "2026-11-10T16:07:54.366+0100",
+      "updated": "2026-11-12T01:25:15.399+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-44",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
@@ -608,7 +608,7 @@
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:21.548+0100",
-      "updated": "2026-11-12T01:23:14.488+0100",
+      "updated": "2026-11-12T01:25:15.799+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-46",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
@@ -624,7 +624,7 @@
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:24.877+0100",
-      "updated": "2026-11-10T15:11:11.922+0100",
+      "updated": "2026-11-12T01:25:16.464+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-47",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
@@ -640,7 +640,7 @@
       "assignee": "Hiba Dhouib",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:28.361+0100",
-      "updated": "2026-11-12T00:54:28.311+0100",
+      "updated": "2026-11-12T01:25:16.239+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-48",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
@@ -784,7 +784,7 @@
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:07:05.463+0100",
-      "updated": "2026-11-12T01:21:10.538+0100",
+      "updated": "2026-11-12T01:25:16.027+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-57",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
