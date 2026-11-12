@@ -2,6 +2,8 @@ import { Router, Request, Response } from 'express';
 import { userService } from '../services/user.service';
 import { tokenService } from '../services/token.service';
 import { loginRateLimiter } from '../services/rate-limiter.service';
+import { loginController, getPublicKeyController } from '../controllers/login.controller';
+import { loginRateLimitMiddleware } from '../middlewares/rate-limit.middleware';
 import { UserRole } from '@ecotrack/shared';
 
 const router = Router();

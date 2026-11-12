@@ -2,6 +2,8 @@ import { Schema, Model, model, Document } from 'mongoose';
 import * as argon2 from 'argon2';
 import { UserRole, IUserDocument } from '@ecotrack/shared';
 
+export { IUserDocument };
+
 // Paramètres de hachage Argon2id conformes aux recommandations OWASP et CDCF V2 (ECO-11)
 export const ARGON2_CONFIG: argon2.Options = {
   type: argon2.argon2id,
