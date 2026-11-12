@@ -23,15 +23,19 @@ export interface GeoLocation {
 
 export interface IReport {
   id: string;
-  citizenId: string;
-  title: string;
-  description: string;
-  location: GeoLocation;
-  photoUrl: string;
+  reporterId: string;
+  /**
+   * Code catégorie CDCF (ex: DEPOT_SAUVAGE). Chaîne libre tant que le référentiel
+   * des catégories n'est pas figé entre le DW (Dim_Category) et le service IA.
+   */
+  category: string;
+  description?: string;
+  imageUrl: string;
   thumbnailUrl?: string;
   categorySuggested?: string;
   categoryValidated?: string;
   aiConfidenceScore?: number;
+  location: GeoLocation;
   status: ReportStatus;
   createdAt: Date;
   updatedAt: Date;
