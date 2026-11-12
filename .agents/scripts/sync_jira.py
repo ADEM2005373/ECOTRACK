@@ -125,7 +125,9 @@ def process_jira_data(raw_data):
         url = item.get("url", f"https://ouerhaniadem0805.atlassian.net/browse/{key}")
         
         assigned_epic = epic_mapping.get(key, key if itype == "Epic" else "SCRUM-33")
-        if itype != "Epic" and assigned_epic in epics_dict:
+        if itype == "Epic" and key in epics_dict:
+            epics_dict[key]["jira_status"] = status_label
+        elif itype != "Epic" and assigned_epic in epics_dict:
             epics_dict[assigned_epic]["total"] += 1
             if is_done:
                 epics_dict[assigned_epic]["done"] += 1
@@ -164,6 +166,14 @@ def process_jira_data(raw_data):
     epics_list = []
     for e_key, e_data in epics_dict.items():
         rate = round((e_data["done"] / e_data["total"] * 100) if e_data["total"] > 0 else 0, 1)
+        jira_st = e_data.get("jira_status")
+        if rate == 100:
+            epic_status = "Terminé"
+        elif rate > 0 or jira_st == "En cours" or e_key in ["SCRUM-34", "SCRUM-35", "SCRUM-36"]:
+            epic_status = "En cours"
+        else:
+            epic_status = "À démarrer"
+
         epics_list.append({
             "key": e_key,
             "name": e_data["name"],
@@ -171,7 +181,7 @@ def process_jira_data(raw_data):
             "total": e_data["total"],
             "done": e_data["done"],
             "rate": rate,
-            "status": "Terminé" if rate == 100 else ("En cours" if rate > 0 else "À démarrer")
+            "status": epic_status
         })
 
     tasks_count = len([i for i in processed_issues if i["type"] != "Epic"])

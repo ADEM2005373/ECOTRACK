@@ -4,16 +4,16 @@
     "key": "SCRUM",
     "site": "ouerhaniadem0805.atlassian.net",
     "lead": "Adem Ouerhani",
-    "lastSync": "2026-11-12 01:09:25"
+    "lastSync": "2026-11-12 01:21:37"
   },
   "kpis": {
     "totalIssues": 33,
     "totalTasks": 27,
-    "doneIssues": 10,
-    "inReviewIssues": 2,
+    "doneIssues": 11,
+    "inReviewIssues": 1,
     "inProgressIssues": 4,
     "toDoIssues": 16,
-    "completionRate": 37.0,
+    "completionRate": 40.7,
     "totalEpics": 6,
     "criticalWarningsCount": 2,
     "teamSize": 4
@@ -42,8 +42,8 @@
       "name": "EPIC 2: Core Report & Media Service (Sprint 2)",
       "owner": "Ahmed Salah",
       "total": 6,
-      "done": 3,
-      "rate": 50.0,
+      "done": 4,
+      "rate": 66.7,
       "status": "En cours"
     },
     {
@@ -53,7 +53,7 @@
       "total": 4,
       "done": 0,
       "rate": 0.0,
-      "status": "À démarrer"
+      "status": "En cours"
     },
     {
       "key": "SCRUM-37",
@@ -159,9 +159,9 @@
     },
     "Ahmed Salah": {
       "total": 6,
-      "done": 2,
+      "done": 3,
       "in_progress": 1,
-      "in_review": 1,
+      "in_review": 0,
       "to_do": 2,
       "issues": [
         {
@@ -183,7 +183,7 @@
         {
           "key": "SCRUM-46",
           "summary": "ECO-20 | [DB] Create Report Schema & 2dsphere Index",
-          "status": "Revue en cours",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "High",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-46"
@@ -213,7 +213,7 @@
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-59"
         }
       ],
-      "completion_rate": 33.3
+      "completion_rate": 50.0
     },
     "Hiba Dhouib": {
       "total": 6,
@@ -337,8 +337,8 @@
     "Tâche": 27
   },
   "statusStats": {
-    "Done": 11,
-    "InReview": 2,
+    "Done": 12,
+    "InReview": 1,
     "InProgress": 4,
     "ToDo": 16
   },
@@ -600,15 +600,15 @@
     {
       "key": "SCRUM-46",
       "summary": "ECO-20 | [DB] Create Report Schema & 2dsphere Index",
-      "status": "Revue en cours",
-      "rawStatus": "Revue en cours",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "High",
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:21.548+0100",
-      "updated": "2026-11-11T10:35:31.343+0100",
+      "updated": "2026-11-12T01:20:29.962+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-46",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
@@ -784,7 +784,7 @@
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:07:05.463+0100",
-      "updated": "2026-11-11T10:34:42.504+0100",
+      "updated": "2026-11-12T01:21:10.538+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-57",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
