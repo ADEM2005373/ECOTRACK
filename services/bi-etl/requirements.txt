@@ -1,0 +1,6 @@
+# bi-etl worker (ECO-24 / SCRUM-57) - Python 3.12
+pymongo==4.13.2
+psycopg2-binary==2.9.10
+
+# Tests
+pytest==8.4.2
