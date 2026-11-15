@@ -4,14 +4,14 @@
     "key": "SCRUM",
     "site": "ouerhaniadem0805.atlassian.net",
     "lead": "Adem Ouerhani",
-    "lastSync": "2026-11-15 15:25:19"
+    "lastSync": "2026-11-15 15:29:32"
   },
   "kpis": {
     "totalIssues": 33,
     "totalTasks": 27,
     "doneIssues": 16,
     "inReviewIssues": 0,
-    "inProgressIssues": 4,
+    "inProgressIssues": 3,
     "toDoIssues": 11,
     "completionRate": 59.3,
     "totalEpics": 6,
@@ -337,9 +337,9 @@
     "Tâche": 27
   },
   "statusStats": {
-    "Done": 18,
+    "Done": 19,
     "InReview": 0,
-    "InProgress": 4,
+    "InProgress": 3,
     "ToDo": 11
   },
   "warnings": [
@@ -424,15 +424,15 @@
     {
       "key": "SCRUM-35",
       "summary": "EPIC 2: Core Report & Media Service (Sprint 2)",
-      "status": "En cours",
-      "rawStatus": "En cours",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Epic",
       "priority": "High",
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:43.528+0100",
-      "updated": "2026-11-10T13:00:28.320+0100",
+      "updated": "2026-11-15T15:28:43.649+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-35",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
