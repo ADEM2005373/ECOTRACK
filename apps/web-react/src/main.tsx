@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import App from './App';
 import SupervisionPage from './pages/SupervisionPage';
+import AiGovernancePage from './pages/admin/AiGovernancePage';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -11,6 +12,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/supervision" element={<SupervisionPage />} />
+        <Route path="/admin/ai-governance" element={<AiGovernancePage />} />
+        <Route path="/ai-governance" element={<AiGovernancePage />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,
