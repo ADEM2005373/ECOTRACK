@@ -10,9 +10,13 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     resolve: {
-      alias: {
-        '@': path.resolve(__dirname, './src'),
-      },
+      alias: [
+        { find: /^react$/, replacement: path.resolve(__dirname, 'node_modules/react') },
+        { find: /^react-dom$/, replacement: path.resolve(__dirname, 'node_modules/react-dom') },
+        { find: /^react-router-dom$/, replacement: path.resolve(__dirname, 'node_modules/react-router-dom') },
+        { find: '@', replacement: path.resolve(__dirname, './src') },
+      ],
+      dedupe: ['react', 'react-dom', 'react-router', 'react-router-dom'],
     },
     server: {
       port: 3000,
@@ -25,6 +29,11 @@ export default defineConfig(({ mode }) => {
       environment: 'jsdom',
       include: ['src/**/*.test.{ts,tsx}'],
       setupFiles: ['src/test/setup.ts'],
+      server: {
+        deps: {
+          inline: [/react/, /react-dom/, /react-router/],
+        },
+      },
     },
   };
 });
