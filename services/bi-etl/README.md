@@ -16,6 +16,7 @@ Incremental ETL **MongoDB `reports` → PostgreSQL `ecotrack_dw.Fact_Reports`** 
 | `transform.py` | Pure mapping + pseudonymisation + rounding (`COORD_DECIMALS`) |
 | `watermark.py` | Compound cursor logic |
 | `loaders/postgres_loader.py` | psycopg2 UPSERT + watermark in one transaction |
+| `transformers/lead_times.py` | Pure lead-time metrics in decimal hours (ECO-33): triage, pickup, total, SLA. **Not wired yet**: `validatedAt` / `assignedAt` / `startedAt` / `resolvedAt` do not exist in MongoDB until the workflow FSM (ECO-30) stores them |
 | `sql/03_eco24_incremental_etl.sql` | Additive DDL on top of ECO-05 (`01`, `02`) |
 
 ## Setup (PowerShell, from the repo root)
