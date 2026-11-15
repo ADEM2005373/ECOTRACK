@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from './components/ui/Button';
 import { 
   ShieldCheck, 
   Trash2, 
   CheckCircle2, 
-  AlertTriangle, 
   ArrowRight, 
   Sparkles, 
   Layers,
