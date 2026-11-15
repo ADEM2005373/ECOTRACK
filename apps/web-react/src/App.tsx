@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from './components/ui/Button';
+import { RegisterModal } from './components/RegisterModal';
 import { 
   ShieldCheck, 
   Trash2, 
@@ -9,11 +10,13 @@ import {
   Sparkles, 
   Layers,
   MapPin,
-  Clock
+  Clock,
+  UserPlus
 } from 'lucide-react';
 
 export default function App() {
   const [loading, setLoading] = useState(false);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
   const simulateAction = () => {
     setLoading(true);
@@ -34,9 +37,17 @@ export default function App() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="primary"
+            size="sm"
+            icon={<UserPlus className="w-4 h-4" />}
+            onClick={() => setIsRegisterOpen(true)}
+          >
+            S'inscrire (ECO-12)
+          </Button>
           <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-600/20 text-brand-400 border border-brand-600/30">
-            Sprint 0 — Socles Prêts
+            Sprint 1 / 2 Actif
           </span>
         </div>
       </header>
@@ -172,6 +183,9 @@ export default function App() {
       <footer className="border-t border-dark-border py-4 px-6 text-center text-xs text-slate-500">
         EcoTrack V2 • Architecture Monorepo Nx • Tous droits réservés
       </footer>
+
+      {/* Register Modal (ECO-12 / SCRUM-43) */}
+      <RegisterModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
     </div>
   );
 }
