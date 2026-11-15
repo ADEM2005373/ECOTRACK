@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from './components/ui/Button';
+import { MAP_STRINGS } from './components/map/strings.fr';
 import { 
   ShieldCheck, 
   Trash2, 
@@ -34,6 +36,13 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            to="/supervision"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-brand-400 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+            <MapPin className="w-4 h-4" aria-hidden="true" />
+            {MAP_STRINGS.navLink}
+          </Link>
           <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-600/20 text-brand-400 border border-brand-600/30">
             Sprint 0 — Socles Prêts
           </span>
