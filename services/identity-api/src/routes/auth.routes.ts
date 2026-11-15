@@ -3,6 +3,7 @@ import { userService } from '../services/user.service';
 import { tokenService } from '../services/token.service';
 import { loginRateLimiter } from '../services/rate-limiter.service';
 import { loginController, getPublicKeyController } from '../controllers/login.controller';
+import { registerController } from '../controllers/register.controller';
 import { loginRateLimitMiddleware } from '../middlewares/rate-limit.middleware';
 import { UserRole } from '@ecotrack/shared';
 
@@ -25,67 +26,11 @@ router.get('/public-key', (_req: Request, res: Response) => {
 /**
  * POST /auth/register
  * Inscription officielle EcoTrack V2 (SCRUM-43 / ECO-12)
+ * Délégué au contrôleur officiel de Sara Sahih (registerController).
+ * Validation stricte : email regex, password.length < 8, codes HTTP 201, 400, 409.
  */
-router.post('/register', async (req: Request, res: Response) => {
-  try {
-    const { email, password, fullName, phoneNumber, role } = req.body;
-
-    // 1. Validation de l'email
-    if (!email || typeof email !== 'string' || !EMAIL_REGEX.test(email.trim())) {
-      return res.status(400).json({
-        error: 'VALIDATION_ERROR',
-        message: 'Une adresse e-mail valide est obligatoire.'
-      });
-    }
-
-    // 2. Validation du mot de passe (≥ 8 caractères)
-    if (!password || typeof password !== 'string' || password.length < 8) {
-      return res.status(400).json({
-        error: 'VALIDATION_ERROR',
-        message: 'Le mot de passe doit contenir au moins 8 caractères.'
-      });
-    }
-
-    // 3. Validation du nom complet
-    if (!fullName || typeof fullName !== 'string' || fullName.trim().length === 0) {
-      return res.status(400).json({
-        error: 'VALIDATION_ERROR',
-        message: 'Le nom complet (fullName) est obligatoire.'
-      });
-    }
-
-    // 4. Validation du rôle si spécifié
-    const assignedRole = role && Object.values(UserRole).includes(role) 
-      ? role 
-      : UserRole.CITOYEN;
-
-    // 5. Création de l'utilisateur
-    const user = await userService.createUser({
-      email: email.trim(),
-      password,
-      fullName: fullName.trim(),
-      phoneNumber: phoneNumber ? String(phoneNumber).trim() : undefined,
-      role: assignedRole
-    });
-
-    return res.status(201).json({
-      message: 'Compte créé avec succès',
-      user
-    });
-
-  } catch (err: any) {
-    if (err.message?.includes('existe déjà') || err.code === 11000) {
-      return res.status(409).json({
-        error: 'EMAIL_ALREADY_EXISTS',
-        message: 'Un compte existe déjà avec cette adresse e-mail.'
-      });
-    }
-
-    return res.status(400).json({
-      error: 'BAD_REQUEST',
-      message: err.message || 'Données d\'inscription invalides.'
-    });
-  }
+router.post('/register', (req: Request, res: Response) => {
+  return registerController(req, res);
 });
 
 /**
