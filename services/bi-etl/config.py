@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 DEFAULT_MONGODB_DB = "ecotrack_db"
 DEFAULT_BATCH_SIZE = 500
 DEFAULT_INTERVAL_SECONDS = 300
+DEFAULT_CDC_INTERVAL_SECONDS = 5
 MIN_SALT_LENGTH = 16
 # Default value published in the Jira ticket: public, therefore not a secret.
 _FORBIDDEN_SALTS = frozenset({"ecotrack_secret_salt_2026"})
@@ -30,6 +31,7 @@ class EtlConfig:
     salt: str = field(repr=False)
     batch_size: int = DEFAULT_BATCH_SIZE
     interval_seconds: int = DEFAULT_INTERVAL_SECONDS
+    cdc_interval_seconds: int = DEFAULT_CDC_INTERVAL_SECONDS
 
 
 def _required(env: Mapping[str, str], name: str) -> str:
@@ -70,4 +72,5 @@ def load_config(env: Mapping[str, str] | None = None) -> EtlConfig:
         salt=_validate_salt(_required(source, "ETL_SALT")),
         batch_size=_positive_int(source, "ETL_BATCH_SIZE", DEFAULT_BATCH_SIZE),
         interval_seconds=_positive_int(source, "ETL_INTERVAL_SECONDS", DEFAULT_INTERVAL_SECONDS),
+        cdc_interval_seconds=_positive_int(source, "ETL_CDC_INTERVAL_SECONDS", DEFAULT_CDC_INTERVAL_SECONDS),
     )

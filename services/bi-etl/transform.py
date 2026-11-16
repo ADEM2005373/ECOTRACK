@@ -60,6 +60,10 @@ class FactReportRow:
     latitude: Decimal
     created_at: datetime
     updated_at: datetime
+    mttr_hours: Decimal | None = None
+    sla_breached: bool | None = None
+    time_to_qualify_seconds: int | None = None
+    time_to_pickup_hours: Decimal | None = None
 
 
 def hash_citizen_id(reporter_id: ObjectId | str, salt: str) -> str:
@@ -159,6 +163,25 @@ def _concordance(suggested: str | None, validated: str | None) -> bool | None:
     return suggested == validated
 
 
+# SLA targets in hours per category (aligned with Dim_Category seeds in 02_seed_dimensions.sql)
+CATEGORY_SLA_TARGET_HOURS: Mapping[str, float] = {
+    "DEPOT_SAUVAGE": 24.0,
+    "ENCOMBRANTS": 48.0,
+    "DECHETS_DANGEREUX": 12.0,
+    "DECHETS_VERTS": 12.0,
+    "GRAFFITI": 72.0,
+    "AUTRE": 24.0,
+}
+DEFAULT_SLA_TARGET_HOURS: float = 24.0
+
+
+def _optional_timestamp(doc: Mapping[str, Any], name: str) -> datetime | None:
+    value = doc.get(name)
+    if isinstance(value, datetime):
+        return as_utc(value)
+    return None
+
+
 def map_report(doc: Mapping[str, Any], salt: str) -> FactReportRow:
     """Map a MongoDB `reports` document to a Fact_Reports row or raise InvalidReportError."""
     report_id = _report_id(doc)
@@ -171,11 +194,41 @@ def map_report(doc: Mapping[str, Any], salt: str) -> FactReportRow:
     updated_at = _timestamp(doc, "updatedAt")
     suggested = _optional_code(doc, "categorySuggested")
     validated = _optional_code(doc, "categoryValidated")
+    category_code = _category(doc)
+
+    # Lead times & SLA metrics (ECO-41 / SCRUM-52)
+    validated_at = _optional_timestamp(doc, "validatedAt")
+    assigned_at = _optional_timestamp(doc, "assignedAt")
+    started_at = _optional_timestamp(doc, "startedAt")
+    resolved_at = _optional_timestamp(doc, "resolvedAt")
+
+    target_sla_hours = CATEGORY_SLA_TARGET_HOURS.get(category_code, DEFAULT_SLA_TARGET_HOURS)
+    mttr_hours: Decimal | None = None
+    sla_breached: bool | None = None
+
+    if resolved_at is not None and resolved_at >= created_at:
+        mttr_seconds = (resolved_at - created_at).total_seconds()
+        mttr_hours = Decimal(repr(float(mttr_seconds / 3600.0))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        sla_breached = float(mttr_hours) > target_sla_hours
+    elif status in {"NOUVEAU", "EN_COURS_DE_VALIDATION", "VALIDE", "ASSIGNE", "EN_TRAITEMENT"}:
+        now_dt = datetime.now(timezone.utc)
+        elapsed_hours = (now_dt - created_at).total_seconds() / 3600.0
+        sla_breached = elapsed_hours > target_sla_hours
+
+    time_to_qualify_seconds: int | None = None
+    if validated_at is not None and validated_at >= created_at:
+        time_to_qualify_seconds = max(0, int((validated_at - created_at).total_seconds()))
+
+    time_to_pickup_hours: Decimal | None = None
+    if assigned_at is not None and started_at is not None and started_at >= assigned_at:
+        pickup_seconds = (started_at - assigned_at).total_seconds()
+        time_to_pickup_hours = Decimal(repr(float(pickup_seconds / 3600.0))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
     return FactReportRow(
         report_id=report_id,
         citizen_hash=hash_citizen_id(reporter_id, salt),
         date_created_key=to_date_key(created_at),
-        category_code=_category(doc),
+        category_code=category_code,
         category_suggested=suggested,
         category_validated=validated,
         ai_confidence_score=_ai_score(doc),
@@ -185,4 +238,8 @@ def map_report(doc: Mapping[str, Any], salt: str) -> FactReportRow:
         latitude=round_coordinate(lat),
         created_at=created_at,
         updated_at=updated_at,
+        mttr_hours=mttr_hours,
+        sla_breached=sla_breached,
+        time_to_qualify_seconds=time_to_qualify_seconds,
+        time_to_pickup_hours=time_to_pickup_hours,
     )

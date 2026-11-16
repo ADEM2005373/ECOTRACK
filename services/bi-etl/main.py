@@ -162,11 +162,36 @@ def run_loop(config: EtlConfig) -> int:
     return EXIT_OK if last_ok else EXIT_FAILURE
 
 
+def run_cdc(config: EtlConfig) -> int:
+    """Change Data Capture (CDC) streaming mode (ECO-41 / SCRUM-52).
+    Continuous micro-batch execution (default interval: 5 seconds)."""
+    stop_event = threading.Event()
+
+    def request_stop(signum: int, _frame: object) -> None:
+        logger.info("Signal %s received: graceful CDC shutdown.", signal.Signals(signum).name)
+        stop_event.set()
+
+    signal.signal(signal.SIGINT, request_stop)
+    if hasattr(signal, "SIGTERM"):
+        signal.signal(signal.SIGTERM, request_stop)
+
+    interval = getattr(config, "cdc_interval_seconds", 5)
+    logger.info("CDC continuous mode started: checking updates every %d s (Ctrl+C to stop).", interval)
+    last_ok = True
+    while not stop_event.is_set():
+        last_ok = run_once(config, stop_event)
+        stop_event.wait(interval)
+    logger.info("CDC streaming loop stopped.")
+    return EXIT_OK if last_ok else EXIT_FAILURE
+
+
 def parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="EcoTrack bi-etl: incremental MongoDB reports -> Fact_Reports.")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--once", action="store_true", help="run one cycle and exit (default)")
     mode.add_argument("--loop", action="store_true", help="run every ETL_INTERVAL_SECONDS until stopped")
+    mode.add_argument("--cdc", action="store_true", help="run continuous Change Data Capture mode (ECO-41)")
+    parser.add_argument("--mode", choices=["once", "loop", "cdc"], default=None, help="execution mode: once, loop, or cdc (ECO-41)")
     parser.add_argument("--verbose", action="store_true", help="debug logs for the bi_etl logger only")
     return parser.parse_args(argv)
 
@@ -185,7 +210,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     except ConfigError as exc:
         logger.error("Invalid configuration, refusing to start: %s", exc)
         return EXIT_CONFIG_ERROR
-    if args.loop:
+    if args.cdc or args.mode == "cdc":
+        return run_cdc(config)
+    if args.loop or args.mode == "loop":
         return run_loop(config)
     return EXIT_OK if run_once(config) else EXIT_FAILURE
 
