@@ -54,6 +54,7 @@ export interface IReport {
   reviewedBy?: string;
   completionPhotoUrl?: string;
   rejectionReason?: string;
+  reopenReason?: string;
   statusHistory?: StatusHistoryEntry[];
   validatedAt?: Date;
   assignedAt?: Date;

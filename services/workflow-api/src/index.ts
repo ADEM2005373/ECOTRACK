@@ -17,8 +17,10 @@ app.get('/health', (_req: Request, res: Response) => {
 
 app.use('/api/v1/workflow', workflowRouter);
 app.use('/api/v1/interventions', workflowRouter);
+app.use('/api/v1/reports', workflowRouter);
 app.use('/workflow', workflowRouter);
 app.use('/interventions', workflowRouter);
+app.use('/reports', workflowRouter);
 
 export async function startServer() {
   await connectMongo();
