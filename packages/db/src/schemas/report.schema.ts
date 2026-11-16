@@ -1,5 +1,10 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import { IReport, GeoLocation, ReportStatus } from '@ecotrack/shared';
+import {
+  IReport,
+  GeoLocation,
+  ReportStatus,
+  StatusHistoryEntry
+} from '@ecotrack/shared';
 
 export interface IReportDocument extends Omit<IReport, 'id' | 'reporterId'>, Document {
   reporterId: Types.ObjectId;
@@ -38,10 +43,24 @@ const GeoPointSchema = new Schema<GeoLocation>(
   { _id: false }
 );
 
+const StatusHistorySchema = new Schema<StatusHistoryEntry>(
+  {
+    from: { type: String, enum: Object.values(ReportStatus), required: true },
+    to: { type: String, enum: Object.values(ReportStatus), required: true },
+    transition: { type: String, required: true, trim: true },
+    actorId: { type: String, trim: true },
+    actorRole: { type: String, trim: true },
+    reason: { type: String, trim: true },
+    timestamp: { type: Date, default: Date.now, required: true }
+  },
+  { _id: false }
+);
+
 /**
  * Schéma Mongoose pour les Signalements Citoyens (EcoTrack V2)
  * Indexation spatiale 2dsphere pour requêtes géographiques ($near, $geoWithin)
  * Sprint 2: SCRUM-46 / ECO-20
+ * Sprint 3: SCRUM-50 / ECO-30 - FSM T1-T5, historique et jalons SLA
  */
 export const ReportSchema = new Schema<IReportDocument>(
   {
@@ -93,6 +112,38 @@ export const ReportSchema = new Schema<IReportDocument>(
       enum: Object.values(ReportStatus),
       default: ReportStatus.NOUVEAU,
       required: true
+    },
+    assignedTeamId: {
+      type: String,
+      trim: true
+    },
+    completionPhotoUrl: {
+      type: String,
+      trim: true
+    },
+    rejectionReason: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'Le motif de rejet ne doit pas dépasser 500 caractères']
+    },
+    statusHistory: {
+      type: [StatusHistorySchema],
+      default: []
+    },
+    validatedAt: {
+      type: Date
+    },
+    assignedAt: {
+      type: Date
+    },
+    startedAt: {
+      type: Date
+    },
+    resolvedAt: {
+      type: Date
+    },
+    rejectedAt: {
+      type: Date
     }
   },
   {
