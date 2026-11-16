@@ -29,7 +29,8 @@ INSERT INTO ecotrack_dw.Fact_Reports AS f (
     report_id, citizen_hash, date_created_key, category_code,
     category_suggested_ai_key, category_validated_human_key,
     ai_confidence_score, is_ai_concordant, report_status,
-    longitude, latitude, created_at, updated_at
+    longitude, latitude, created_at, updated_at,
+    mttr_hours, sla_breached, time_to_qualify_seconds, time_to_pickup_hours
 )
 VALUES %s
 ON CONFLICT (report_id) DO UPDATE SET
@@ -39,7 +40,11 @@ ON CONFLICT (report_id) DO UPDATE SET
     category_suggested_ai_key = EXCLUDED.category_suggested_ai_key,
     category_validated_human_key = EXCLUDED.category_validated_human_key,
     ai_confidence_score = EXCLUDED.ai_confidence_score,
-    is_ai_concordant = EXCLUDED.is_ai_concordant
+    is_ai_concordant = EXCLUDED.is_ai_concordant,
+    mttr_hours = EXCLUDED.mttr_hours,
+    sla_breached = EXCLUDED.sla_breached,
+    time_to_qualify_seconds = EXCLUDED.time_to_qualify_seconds,
+    time_to_pickup_hours = EXCLUDED.time_to_pickup_hours
 WHERE f.updated_at IS NULL OR EXCLUDED.updated_at >= f.updated_at
 RETURNING f.report_id
 """
@@ -117,6 +122,10 @@ def build_fact_values(
             row.latitude,
             row.created_at,
             row.updated_at,
+            row.mttr_hours,
+            row.sla_breached,
+            row.time_to_qualify_seconds,
+            row.time_to_pickup_hours,
         ))
     return values, unknown
 
