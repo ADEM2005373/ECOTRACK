@@ -52,6 +52,14 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="roadmap"
+        options={{
+          title: 'Feuille de route',
+          tabBarAccessibilityLabel: 'Feuille de route ouvrier',
+          tabBarIcon: tabIcon('navigate-outline'),
+        }}
+      />
+      <Tabs.Screen
         name="profil"
         options={{
           title: 'Profil',
