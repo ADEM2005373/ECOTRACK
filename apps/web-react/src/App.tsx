@@ -40,11 +40,20 @@ export default function App() {
 
         <div className="flex items-center gap-3">
           <Link
+          <Link
             to="/agent/qualification"
             className="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-emerald-400 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             <ShieldCheck className="w-4 h-4" aria-hidden="true" />
             Qualification Agent (ECO-31)
+          </Link>
+          <Link
+            to="/admin/ai-governance"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-purple-400 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            <Sparkles className="w-4 h-4" aria-hidden="true" />
+            Gouvernance IA (ECO-43)
+          </Link>
           </Link>
           <Link
             to="/supervision"

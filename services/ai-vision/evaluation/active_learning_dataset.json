@@ -1,0 +1,512 @@
+{
+  "datasetName": "EcoTrack-ActiveLearning-Divergences",
+  "exportedAt": "2026-11-15T15:03:59.007108+00:00",
+  "totalDivergences": 56,
+  "sourceModel": "MobileNetV3-Small-EcoTrack-v2",
+  "samples": [
+    {
+      "reportId": "ECO-REP-1004",
+      "imageUrl": "/assets/reports/ECO-REP-1004.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "ENCOMBRANTS",
+      "confidenceScore": 0.6802,
+      "timestamp": "2026-11-15T15:03:59.005086+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1017",
+      "imageUrl": "/assets/reports/ECO-REP-1017.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "ENCOMBRANTS",
+      "confidenceScore": 0.7049,
+      "timestamp": "2026-11-15T15:03:59.005086+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1030",
+      "imageUrl": "/assets/reports/ECO-REP-1030.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "ENCOMBRANTS",
+      "confidenceScore": 0.7058,
+      "timestamp": "2026-11-15T15:03:59.005086+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1035",
+      "imageUrl": "/assets/reports/ECO-REP-1035.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "DECHETS_VERTS",
+      "confidenceScore": 0.6598,
+      "timestamp": "2026-11-15T15:03:59.005086+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1037",
+      "imageUrl": "/assets/reports/ECO-REP-1037.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "ENCOMBRANTS",
+      "confidenceScore": 0.6503,
+      "timestamp": "2026-11-15T15:03:59.005086+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1040",
+      "imageUrl": "/assets/reports/ECO-REP-1040.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "ENCOMBRANTS",
+      "confidenceScore": 0.6417,
+      "timestamp": "2026-11-15T15:03:59.005086+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1041",
+      "imageUrl": "/assets/reports/ECO-REP-1041.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "ENCOMBRANTS",
+      "confidenceScore": 0.6173,
+      "timestamp": "2026-11-15T15:03:59.005086+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1052",
+      "imageUrl": "/assets/reports/ECO-REP-1052.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "DECHETS_VERTS",
+      "confidenceScore": 0.65,
+      "timestamp": "2026-11-15T15:03:59.005086+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1054",
+      "imageUrl": "/assets/reports/ECO-REP-1054.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "DECHETS_VERTS",
+      "confidenceScore": 0.6567,
+      "timestamp": "2026-11-15T15:03:59.005086+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1060",
+      "imageUrl": "/assets/reports/ECO-REP-1060.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "DECHETS_VERTS",
+      "confidenceScore": 0.758,
+      "timestamp": "2026-11-15T15:03:59.005086+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1071",
+      "imageUrl": "/assets/reports/ECO-REP-1071.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "ENCOMBRANTS",
+      "confidenceScore": 0.6832,
+      "timestamp": "2026-11-15T15:03:59.005086+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1077",
+      "imageUrl": "/assets/reports/ECO-REP-1077.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "DECHETS_VERTS",
+      "confidenceScore": 0.6135,
+      "timestamp": "2026-11-15T15:03:59.005086+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1080",
+      "imageUrl": "/assets/reports/ECO-REP-1080.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "ENCOMBRANTS",
+      "confidenceScore": 0.6898,
+      "timestamp": "2026-11-15T15:03:59.005086+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1091",
+      "imageUrl": "/assets/reports/ECO-REP-1091.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "ENCOMBRANTS",
+      "confidenceScore": 0.7637,
+      "timestamp": "2026-11-15T15:03:59.005086+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1093",
+      "imageUrl": "/assets/reports/ECO-REP-1093.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "DECHETS_VERTS",
+      "confidenceScore": 0.7841,
+      "timestamp": "2026-11-15T15:03:59.005086+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1094",
+      "imageUrl": "/assets/reports/ECO-REP-1094.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "DECHETS_VERTS",
+      "confidenceScore": 0.6316,
+      "timestamp": "2026-11-15T15:03:59.005086+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1100",
+      "imageUrl": "/assets/reports/ECO-REP-1100.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "DECHETS_VERTS",
+      "confidenceScore": 0.7056,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1107",
+      "imageUrl": "/assets/reports/ECO-REP-1107.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "ENCOMBRANTS",
+      "confidenceScore": 0.6353,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1110",
+      "imageUrl": "/assets/reports/ECO-REP-1110.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "ENCOMBRANTS",
+      "confidenceScore": 0.713,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1113",
+      "imageUrl": "/assets/reports/ECO-REP-1113.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "ENCOMBRANTS",
+      "confidenceScore": 0.7361,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1118",
+      "imageUrl": "/assets/reports/ECO-REP-1118.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "DECHETS_VERTS",
+      "confidenceScore": 0.6139,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1120",
+      "imageUrl": "/assets/reports/ECO-REP-1120.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "DECHETS_VERTS",
+      "confidenceScore": 0.7671,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1140",
+      "imageUrl": "/assets/reports/ECO-REP-1140.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "ENCOMBRANTS",
+      "confidenceScore": 0.7586,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1143",
+      "imageUrl": "/assets/reports/ECO-REP-1143.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "DECHETS_VERTS",
+      "confidenceScore": 0.7635,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1144",
+      "imageUrl": "/assets/reports/ECO-REP-1144.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "ENCOMBRANTS",
+      "confidenceScore": 0.6474,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1146",
+      "imageUrl": "/assets/reports/ECO-REP-1146.png",
+      "predictedCategory": "DEPOT_SAUVAGE",
+      "actualCategory": "ENCOMBRANTS",
+      "confidenceScore": 0.7179,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1161",
+      "imageUrl": "/assets/reports/ECO-REP-1161.png",
+      "predictedCategory": "ENCOMBRANTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.653,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1163",
+      "imageUrl": "/assets/reports/ECO-REP-1163.png",
+      "predictedCategory": "ENCOMBRANTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.7019,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1164",
+      "imageUrl": "/assets/reports/ECO-REP-1164.png",
+      "predictedCategory": "ENCOMBRANTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.6219,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1165",
+      "imageUrl": "/assets/reports/ECO-REP-1165.png",
+      "predictedCategory": "ENCOMBRANTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.6339,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1166",
+      "imageUrl": "/assets/reports/ECO-REP-1166.png",
+      "predictedCategory": "ENCOMBRANTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.6504,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1182",
+      "imageUrl": "/assets/reports/ECO-REP-1182.png",
+      "predictedCategory": "ENCOMBRANTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.7287,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1183",
+      "imageUrl": "/assets/reports/ECO-REP-1183.png",
+      "predictedCategory": "ENCOMBRANTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.7169,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1210",
+      "imageUrl": "/assets/reports/ECO-REP-1210.png",
+      "predictedCategory": "ENCOMBRANTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.7164,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1213",
+      "imageUrl": "/assets/reports/ECO-REP-1213.png",
+      "predictedCategory": "ENCOMBRANTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.7413,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1248",
+      "imageUrl": "/assets/reports/ECO-REP-1248.png",
+      "predictedCategory": "ENCOMBRANTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.6665,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1251",
+      "imageUrl": "/assets/reports/ECO-REP-1251.png",
+      "predictedCategory": "ENCOMBRANTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.6379,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1261",
+      "imageUrl": "/assets/reports/ECO-REP-1261.png",
+      "predictedCategory": "DECHETS_VERTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.6754,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1280",
+      "imageUrl": "/assets/reports/ECO-REP-1280.png",
+      "predictedCategory": "DECHETS_VERTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.6463,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1303",
+      "imageUrl": "/assets/reports/ECO-REP-1303.png",
+      "predictedCategory": "DECHETS_VERTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.6997,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1308",
+      "imageUrl": "/assets/reports/ECO-REP-1308.png",
+      "predictedCategory": "DECHETS_VERTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.7051,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1314",
+      "imageUrl": "/assets/reports/ECO-REP-1314.png",
+      "predictedCategory": "DECHETS_VERTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.6908,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1319",
+      "imageUrl": "/assets/reports/ECO-REP-1319.png",
+      "predictedCategory": "DECHETS_VERTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.6225,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1324",
+      "imageUrl": "/assets/reports/ECO-REP-1324.png",
+      "predictedCategory": "DECHETS_VERTS",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.658,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1344",
+      "imageUrl": "/assets/reports/ECO-REP-1344.png",
+      "predictedCategory": "GRAVATS_CHANTIER",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.6951,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1350",
+      "imageUrl": "/assets/reports/ECO-REP-1350.png",
+      "predictedCategory": "GRAVATS_CHANTIER",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.7899,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1354",
+      "imageUrl": "/assets/reports/ECO-REP-1354.png",
+      "predictedCategory": "GRAVATS_CHANTIER",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.6345,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1365",
+      "imageUrl": "/assets/reports/ECO-REP-1365.png",
+      "predictedCategory": "GRAVATS_CHANTIER",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.725,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1376",
+      "imageUrl": "/assets/reports/ECO-REP-1376.png",
+      "predictedCategory": "GRAVATS_CHANTIER",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.7735,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1381",
+      "imageUrl": "/assets/reports/ECO-REP-1381.png",
+      "predictedCategory": "GRAVATS_CHANTIER",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.6463,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1383",
+      "imageUrl": "/assets/reports/ECO-REP-1383.png",
+      "predictedCategory": "GRAVATS_CHANTIER",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.6966,
+      "timestamp": "2026-11-15T15:03:59.006089+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1400",
+      "imageUrl": "/assets/reports/ECO-REP-1400.png",
+      "predictedCategory": "GRAFFITI",
+      "actualCategory": "AUTRE",
+      "confidenceScore": 0.6941,
+      "timestamp": "2026-11-15T15:03:59.007108+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1415",
+      "imageUrl": "/assets/reports/ECO-REP-1415.png",
+      "predictedCategory": "GRAFFITI",
+      "actualCategory": "AUTRE",
+      "confidenceScore": 0.7895,
+      "timestamp": "2026-11-15T15:03:59.007108+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1430",
+      "imageUrl": "/assets/reports/ECO-REP-1430.png",
+      "predictedCategory": "AUTRE",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.7287,
+      "timestamp": "2026-11-15T15:03:59.007108+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1438",
+      "imageUrl": "/assets/reports/ECO-REP-1438.png",
+      "predictedCategory": "AUTRE",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.6561,
+      "timestamp": "2026-11-15T15:03:59.007108+00:00",
+      "reannotationPriority": "NORMAL"
+    },
+    {
+      "reportId": "ECO-REP-1439",
+      "imageUrl": "/assets/reports/ECO-REP-1439.png",
+      "predictedCategory": "AUTRE",
+      "actualCategory": "DEPOT_SAUVAGE",
+      "confidenceScore": 0.7251,
+      "timestamp": "2026-11-15T15:03:59.007108+00:00",
+      "reannotationPriority": "NORMAL"
+    }
+  ]
+}
