@@ -12,6 +12,7 @@
     "dev": "nx run-many --target=serve --parallel",
     "build": "nx run-many --target=build",
     "test": "nx run-many --target=test",
+    "test:e2e": "playwright test",
     "lint": "nx run-many --target=lint",
     "review:sprint": "python .agents/scripts/run_sprint_code_review.py",
     "review:sprint:alert": "python .agents/scripts/run_sprint_code_review.py --alert",
@@ -27,7 +28,9 @@
     "@nx/workspace": "^19.8.0",
     "@types/node": "^20.14.0",
     "typescript": "^5.4.5",
-    "prettier": "^3.3.0"
+    "prettier": "^3.3.0",
+    "@axe-core/playwright": "^4.10.2",
+    "@playwright/test": "^1.49.1"
   },
   "engines": {
     "node": ">=20.0.0",
