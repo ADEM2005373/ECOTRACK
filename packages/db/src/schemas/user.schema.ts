@@ -4,8 +4,6 @@ import { UserRole, IUserDocument } from '@ecotrack/shared';
 
 export { IUserDocument };
 
-type UserDocument = IUserDocument & Document;
-
 // Paramètres de hachage Argon2id conformes aux recommandations OWASP et CDCF V2 (ECO-11)
 export const ARGON2_CONFIG: argon2.Options = {
   type: argon2.argon2id,
@@ -14,7 +12,7 @@ export const ARGON2_CONFIG: argon2.Options = {
   parallelism: 4     // 4 threads
 };
 
-export const UserSchema = new Schema<UserDocument>(
+export const UserSchema = new Schema<IUserDocument>(
   {
     email: {
       type: String,
@@ -77,7 +75,7 @@ UserSchema.index({ email: 1 }, { unique: true });
 UserSchema.index({ role: 1, isActive: 1 });
 
 // Hook Mongoose Pre-Save : Hachage automatique avec Argon2id lors de la création ou modification
-UserSchema.pre<UserDocument>('save', async function (next) {
+UserSchema.pre<IUserDocument>('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
   }
@@ -99,4 +97,4 @@ UserSchema.methods.comparePassword = async function (candidatePassword: string):
   return argon2.verify(this.password, candidatePassword);
 };
 
-export const UserModel: Model<UserDocument> = model<UserDocument>('User', UserSchema);
+export const UserModel: Model<IUserDocument> = model<IUserDocument>('User', UserSchema);
