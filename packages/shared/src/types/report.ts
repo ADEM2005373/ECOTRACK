@@ -21,6 +21,16 @@ export interface GeoLocation {
   coordinates: [number, number];
 }
 
+export interface StatusHistoryEntry {
+  from: ReportStatus;
+  to: ReportStatus;
+  transition: string;
+  actorId?: string;
+  actorRole?: string;
+  reason?: string;
+  timestamp: Date;
+}
+
 export interface IReport {
   id: string;
   reporterId: string;
@@ -37,6 +47,19 @@ export interface IReport {
   aiConfidenceScore?: number;
   location: GeoLocation;
   status: ReportStatus;
+  assignedTeamId?: string;
+  assignedWorkerId?: string;
+  priority?: string;
+  reviewValidated?: boolean;
+  reviewedBy?: string;
+  completionPhotoUrl?: string;
+  rejectionReason?: string;
+  statusHistory?: StatusHistoryEntry[];
+  validatedAt?: Date;
+  assignedAt?: Date;
+  startedAt?: Date;
+  resolvedAt?: Date;
+  rejectedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }

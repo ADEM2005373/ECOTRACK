@@ -27,6 +27,7 @@ describe('ReportSchema validation', () => {
 
     expect(report.validateSync()).toBeUndefined();
     expect(report.status).toBe(ReportStatus.NOUVEAU);
+    expect(report.reviewValidated).toBe(false);
     expect(report.location.type).toBe('Point');
     expect([...report.location.coordinates]).toEqual(TUNIS);
   });
@@ -43,6 +44,23 @@ describe('ReportSchema validation', () => {
     for (const status of Object.values(ReportStatus)) {
       expect(errorPaths({ status })).toEqual([]);
     }
+  });
+
+  it('stores workflow assignment and review metadata', () => {
+    const report = new ReportModel(validReport({
+      assignedTeamId: 'brigade-7',
+      assignedWorkerId: 'worker-42',
+      priority: 'HIGH',
+      reviewValidated: true,
+      reviewedBy: 'agent-12'
+    }));
+
+    expect(report.validateSync()).toBeUndefined();
+    expect(report.assignedTeamId).toBe('brigade-7');
+    expect(report.assignedWorkerId).toBe('worker-42');
+    expect(report.priority).toBe('HIGH');
+    expect(report.reviewValidated).toBe(true);
+    expect(report.reviewedBy).toBe('agent-12');
   });
 
   it('exposes id instead of _id and __v in JSON', () => {
