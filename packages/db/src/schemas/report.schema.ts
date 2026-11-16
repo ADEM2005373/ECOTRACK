@@ -126,6 +126,11 @@ export const ReportSchema = new Schema<IReportDocument>(
       trim: true,
       maxlength: [500, 'Le motif de rejet ne doit pas dépasser 500 caractères']
     },
+    reopenReason: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'Le motif de réouverture ne doit pas dépasser 500 caractères']
+    },
     statusHistory: {
       type: [StatusHistorySchema],
       default: []

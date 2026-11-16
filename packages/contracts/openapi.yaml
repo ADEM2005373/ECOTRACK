@@ -214,6 +214,69 @@ paths:
         '400':
           description: Transition illégale ou rôle non autorisé
 
+  /interventions/{id}/resolve:
+    post:
+      tags: [Workflows & Interventions]
+      summary: Clôture du chantier (T4) avec photo après travaux obligatoire
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [completionPhotoUrl]
+              properties:
+                completionPhotoUrl:
+                  type: string
+                  format: uri
+                comment:
+                  type: string
+      responses:
+        '200':
+          description: Signalement résolu avec MTTR calculé et événement report.resolved publié
+        '400':
+          description: Photo de clôture manquante ou transition invalide
+        '403':
+          description: Rôle non autorisé
+
+  /reports/{id}/reopen:
+    post:
+      tags: [Workflows & Interventions]
+      summary: Réouverture administrative d'un signalement résolu
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reopenReason]
+              properties:
+                reopenReason:
+                  type: string
+      responses:
+        '200':
+          description: Signalement réouvert et journalisé dans AuditLogs
+        '403':
+          description: Réservé aux administrateurs
+        '409':
+          description: Le signalement n'est pas au statut RESOLU
+
   /vision/classify:
     post:
       tags: [IA Vision]

@@ -119,6 +119,13 @@ export interface ExecuteTransitionInput {
   categoryValidated?: string;
 }
 
+export interface ReopenReportInput {
+  reportId: string;
+  actorRole: string;
+  actorId?: string;
+  reason?: string;
+}
+
 export class WorkflowError extends Error {
   public readonly statusCode: number;
   public readonly errorCode: string;
@@ -301,6 +308,62 @@ export class StateMachineService {
       report.rejectedAt = now;
       report.rejectionReason = input.reason;
     }
+
+    await report.save();
+
+    return report.toJSON() as unknown as IReport;
+  }
+
+  async reopenReport(input: ReopenReportInput): Promise<IReport> {
+    if (!input.reportId) {
+      throw new WorkflowValidationError('Le reportId est obligatoire.');
+    }
+
+    const actorRole = normalizeRole(input.actorRole);
+    if (actorRole !== UserRole.ADMIN) {
+      throw new WorkflowForbiddenError(
+        'Seul un administrateur peut rouvrir un signalement.'
+      );
+    }
+
+    if (!input.reason?.trim()) {
+      throw new WorkflowValidationError(
+        'Le motif de réouverture (reopenReason) est obligatoire.'
+      );
+    }
+
+    const report = await ReportModel.findById(input.reportId);
+    if (!report) {
+      throw new WorkflowNotFoundError(`Signalement #${input.reportId} introuvable.`);
+    }
+
+    const currentStatus = report.status as ReportStatus;
+    if (currentStatus !== ReportStatus.RESOLU) {
+      throw new InvalidTransitionError(
+        `Impossible de rouvrir un signalement au statut '${currentStatus}'. Statut attendu: '${ReportStatus.RESOLU}'.`
+      );
+    }
+
+    const now = new Date();
+    const history = report.statusHistory || [];
+
+    history.push({
+      from: currentStatus,
+      to: ReportStatus.ASSIGNE,
+      transition: 'REOPEN',
+      actorId: input.actorId,
+      actorRole,
+      reason: input.reason,
+      timestamp: now
+    });
+
+    report.status = ReportStatus.ASSIGNE;
+    report.statusHistory = history;
+    report.reopenReason = input.reason;
+    report.assignedAt = now;
+    report.resolvedAt = undefined;
+    report.startedAt = undefined;
+    report.completionPhotoUrl = undefined;
 
     await report.save();
 

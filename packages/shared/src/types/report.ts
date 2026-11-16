@@ -50,6 +50,7 @@ export interface IReport {
   assignedTeamId?: string;
   completionPhotoUrl?: string;
   rejectionReason?: string;
+  reopenReason?: string;
   statusHistory?: StatusHistoryEntry[];
   validatedAt?: Date;
   assignedAt?: Date;
