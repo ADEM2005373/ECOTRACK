@@ -117,6 +117,22 @@ export const ReportSchema = new Schema<IReportDocument>(
       type: String,
       trim: true
     },
+    assignedWorkerId: {
+      type: String,
+      trim: true
+    },
+    priority: {
+      type: String,
+      trim: true
+    },
+    reviewValidated: {
+      type: Boolean,
+      default: false
+    },
+    reviewedBy: {
+      type: String,
+      trim: true
+    },
     completionPhotoUrl: {
       type: String,
       trim: true
