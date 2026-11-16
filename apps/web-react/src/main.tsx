@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import App from './App';
 import SupervisionPage from './pages/SupervisionPage';
+import QualificationPage from './pages/agent/QualificationPage';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -11,6 +12,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/supervision" element={<SupervisionPage />} />
+        <Route path="/agent/qualification" element={<QualificationPage />} />
+        <Route path="/qualification" element={<QualificationPage />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,
