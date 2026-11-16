@@ -2,14 +2,18 @@ import { ReportModel } from '@ecotrack/db';
 import { IReport, ReportStatus, UserRole } from '@ecotrack/shared';
 
 export type TransitionCode = 'T1' | 'T2' | 'T3' | 'T4' | 'T5';
+export type WorkflowActorRole = UserRole | 'SYSTEM';
 
 export interface TransitionRule {
   code: TransitionCode;
   action: string;
-  from: ReportStatus;
+  from: ReportStatus | ReportStatus[];
   to: ReportStatus;
-  allowedRoles: UserRole[];
+  allowedRoles: WorkflowActorRole[];
   requiresTeam?: boolean;
+  requiresAssignment?: boolean;
+  requiresReview?: boolean;
+  requiresPriority?: boolean;
   requiresReason?: boolean;
   requiresCompletionPhoto?: boolean;
 }
@@ -17,25 +21,28 @@ export interface TransitionRule {
 export const TRANSITIONS: Record<TransitionCode, TransitionRule> = {
   T1: {
     code: 'T1',
-    action: 'VALIDATE',
+    action: 'CLASSIFY',
     from: ReportStatus.NOUVEAU,
-    to: ReportStatus.VALIDE,
-    allowedRoles: [UserRole.AGENT, UserRole.ADMIN]
+    to: ReportStatus.EN_COURS_DE_VALIDATION,
+    allowedRoles: ['SYSTEM']
   },
   T2: {
     code: 'T2',
     action: 'ASSIGN',
-    from: ReportStatus.VALIDE,
+    from: ReportStatus.EN_COURS_DE_VALIDATION,
     to: ReportStatus.ASSIGNE,
     allowedRoles: [UserRole.AGENT, UserRole.ADMIN],
-    requiresTeam: true
+    requiresAssignment: true,
+    requiresReview: true,
+    requiresPriority: true
   },
   T3: {
     code: 'T3',
     action: 'START_WORK',
     from: ReportStatus.ASSIGNE,
     to: ReportStatus.EN_TRAITEMENT,
-    allowedRoles: [UserRole.OUVRIER, UserRole.ADMIN]
+    allowedRoles: [UserRole.OUVRIER, UserRole.ADMIN],
+    requiresAssignment: true
   },
   T4: {
     code: 'T4',
@@ -48,7 +55,7 @@ export const TRANSITIONS: Record<TransitionCode, TransitionRule> = {
   T5: {
     code: 'T5',
     action: 'REJECT',
-    from: ReportStatus.NOUVEAU,
+    from: [ReportStatus.NOUVEAU, ReportStatus.EN_COURS_DE_VALIDATION],
     to: ReportStatus.REJETE,
     allowedRoles: [UserRole.AGENT, UserRole.ADMIN],
     requiresReason: true
@@ -58,6 +65,7 @@ export const TRANSITIONS: Record<TransitionCode, TransitionRule> = {
 const TRANSITION_ALIASES: Record<string, TransitionCode> = {
   T1: 'T1',
   T1_VALIDATE: 'T1',
+  CLASSIFY: 'T1',
   VALIDATE: 'T1',
   VALIDER: 'T1',
   T2: 'T2',
@@ -96,7 +104,7 @@ const TARGET_STATUS_ALIASES: Record<string, ReportStatus> = {
   REJECTED: ReportStatus.REJETE
 };
 
-const ROLE_ALIASES: Record<string, UserRole> = {
+const ROLE_ALIASES: Record<string, WorkflowActorRole> = {
   CITIZEN: UserRole.CITOYEN,
   CITOYEN: UserRole.CITOYEN,
   DISPATCHER: UserRole.AGENT,
@@ -104,7 +112,8 @@ const ROLE_ALIASES: Record<string, UserRole> = {
   WORKER: UserRole.OUVRIER,
   OUVRIER: UserRole.OUVRIER,
   ADMIN: UserRole.ADMIN,
-  ADMINISTRATOR: UserRole.ADMIN
+  ADMINISTRATOR: UserRole.ADMIN,
+  SYSTEM: 'SYSTEM'
 };
 
 export interface ExecuteTransitionInput {
@@ -115,6 +124,9 @@ export interface ExecuteTransitionInput {
   targetStatus?: string;
   reason?: string;
   teamId?: string;
+  assigneeId?: string;
+  priority?: string;
+  reviewValidated?: boolean;
   completionPhotoUrl?: string;
   categoryValidated?: string;
 }
@@ -171,7 +183,7 @@ export function normalizeTransition(input: string): TransitionCode {
   return code;
 }
 
-export function normalizeRole(input: string): UserRole {
+export function normalizeRole(input: string): WorkflowActorRole {
   const key = String(input || '').trim().toUpperCase();
   const role = ROLE_ALIASES[key];
   if (!role) {
@@ -197,19 +209,21 @@ export function canTransition(
     return false;
   }
 
-  let normalizedRole: UserRole;
+  let normalizedRole: WorkflowActorRole;
   try {
     normalizedRole = normalizeRole(role);
   } catch {
     return false;
   }
 
-  return Object.values(TRANSITIONS).some(
-    (rule) =>
-      rule.from === normalizedCurrent &&
+  return Object.values(TRANSITIONS).some((rule) => {
+    const fromStatuses = Array.isArray(rule.from) ? rule.from : [rule.from];
+    return (
+      fromStatuses.includes(normalizedCurrent) &&
       rule.to === normalizedTarget &&
       rule.allowedRoles.includes(normalizedRole)
-  );
+    );
+  });
 }
 
 export class StateMachineService {
@@ -230,16 +244,17 @@ export class StateMachineService {
 
     if (input.targetStatus) {
       const targetStatus = normalizeTargetStatus(input.targetStatus);
-      if (targetStatus && targetStatus !== rule.to) {
+      if (!targetStatus || targetStatus !== rule.to) {
         throw new InvalidTransitionError(
           `La transition ${code} mène obligatoirement au statut '${rule.to}'.`
         );
       }
     }
 
-    if (currentStatus !== rule.from) {
+    const fromStatuses = Array.isArray(rule.from) ? rule.from : [rule.from];
+    if (!fromStatuses.includes(currentStatus)) {
       throw new InvalidTransitionError(
-        `Impossible d'exécuter ${code} depuis le statut '${currentStatus}'. Statut attendu: '${rule.from}'.`
+        `Impossible d'exécuter ${code} depuis le statut '${currentStatus}'.`
       );
     }
 
@@ -252,6 +267,49 @@ export class StateMachineService {
     if (rule.requiresTeam && !input.teamId) {
       throw new WorkflowValidationError(
         `La transition ${code} exige l'identification d'une équipe (teamId).`
+      );
+    }
+
+    if (
+      code === 'T2' &&
+      rule.requiresAssignment &&
+      !input.teamId &&
+      !input.assigneeId
+    ) {
+      throw new WorkflowValidationError(
+        `La transition ${code} exige un ouvrier ou une équipe assignée.`
+      );
+    }
+
+    if (rule.requiresReview && input.reviewValidated !== true) {
+      throw new WorkflowValidationError(
+        `La transition ${code} exige la validation humaine de la classification.`
+      );
+    }
+
+    if (rule.requiresPriority && !input.priority?.trim()) {
+      throw new WorkflowValidationError(
+        `La transition ${code} exige une priorité.`
+      );
+    }
+
+    if (
+      code === 'T3' &&
+      !report.assignedTeamId &&
+      !report.assignedWorkerId
+    ) {
+      throw new WorkflowValidationError(
+        'La transition T3 exige une assignation existante.'
+      );
+    }
+
+    if (
+      (code === 'T3' || code === 'T4') &&
+      actorRole === UserRole.OUVRIER &&
+      (!report.assignedWorkerId || report.assignedWorkerId !== input.actorId)
+    ) {
+      throw new WorkflowForbiddenError(
+        "L'ouvrier n'est pas assigné à ce signalement."
       );
     }
 
@@ -290,12 +348,18 @@ export class StateMachineService {
     if (input.teamId) {
       report.assignedTeamId = input.teamId;
     }
-
-    if (code === 'T1') {
-      report.validatedAt = now;
+    if (input.assigneeId) {
+      report.assignedWorkerId = input.assigneeId;
     }
+    if (input.priority) {
+      report.priority = input.priority.trim();
+    }
+
     if (code === 'T2') {
       report.assignedAt = now;
+      report.validatedAt = now;
+      report.reviewValidated = true;
+      report.reviewedBy = input.actorId;
     }
     if (code === 'T3') {
       report.startedAt = now;

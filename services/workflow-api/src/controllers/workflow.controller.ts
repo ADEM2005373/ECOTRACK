@@ -31,6 +31,14 @@ export class WorkflowController {
         actorId,
         reason: req.body.reason || req.body.reopenReason,
         teamId: req.body.teamId || req.body.assignedTeamId,
+        assigneeId:
+          req.body.assigneeId ||
+          req.body.assignedWorkerId ||
+          req.body.workerId,
+        priority: req.body.priority,
+        reviewValidated:
+          req.body.reviewValidated === true ||
+          req.body.review?.validated === true,
         completionPhotoUrl:
           req.body.completionPhotoUrl ||
           req.body.completionImageUrl ||

@@ -48,6 +48,10 @@ export interface IReport {
   location: GeoLocation;
   status: ReportStatus;
   assignedTeamId?: string;
+  assignedWorkerId?: string;
+  priority?: string;
+  reviewValidated?: boolean;
+  reviewedBy?: string;
   completionPhotoUrl?: string;
   rejectionReason?: string;
   reopenReason?: string;
