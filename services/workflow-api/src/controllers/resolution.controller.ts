@@ -27,7 +27,7 @@ export class ResolutionController {
         req.body.actorId ||
         req.body.userId;
 
-      if (!completionPhotoUrl) {
+      if (typeof completionPhotoUrl !== 'string' || !completionPhotoUrl.trim()) {
         return res.status(400).json({
           statusCode: 400,
           error: 'VALIDATION_ERROR',
@@ -45,14 +45,12 @@ export class ResolutionController {
         completionPhotoUrl
       });
 
-      const startedAt = report.startedAt
-        ? new Date(report.startedAt).getTime()
-        : new Date(report.createdAt).getTime();
+      const createdAt = new Date(report.createdAt).getTime();
       const resolvedAt = report.resolvedAt
         ? new Date(report.resolvedAt).getTime()
         : Date.now();
       const mttrHours = Number(
-        Math.max(0, (resolvedAt - startedAt) / 3600000).toFixed(2)
+        Math.max(0, (resolvedAt - createdAt) / 3600000).toFixed(2)
       );
 
       try {

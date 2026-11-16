@@ -293,6 +293,7 @@ export class StateMachineService {
       );
     }
 
+    const normalizedCompletionPhotoUrl = input.completionPhotoUrl?.trim();
     if (
       code === 'T3' &&
       !report.assignedTeamId &&
@@ -319,7 +320,10 @@ export class StateMachineService {
       );
     }
 
-    if (rule.requiresCompletionPhoto && !input.completionPhotoUrl) {
+    if (
+      rule.requiresCompletionPhoto &&
+      !normalizedCompletionPhotoUrl
+    ) {
       throw new WorkflowValidationError(
         'La photo après travaux est obligatoire pour clôturer le chantier.'
       );
@@ -366,7 +370,7 @@ export class StateMachineService {
     }
     if (code === 'T4') {
       report.resolvedAt = now;
-      report.completionPhotoUrl = input.completionPhotoUrl;
+      report.completionPhotoUrl = normalizedCompletionPhotoUrl;
     }
     if (code === 'T5') {
       report.rejectedAt = now;
@@ -423,7 +427,7 @@ export class StateMachineService {
 
     report.status = ReportStatus.ASSIGNE;
     report.statusHistory = history;
-    report.reopenReason = input.reason;
+    report.reopenReason = input.reason.trim();
     report.assignedAt = now;
     report.resolvedAt = undefined;
     report.startedAt = undefined;
