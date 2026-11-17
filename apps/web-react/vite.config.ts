@@ -9,6 +9,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    css: {
+      postcss: path.resolve(__dirname, 'postcss.config.js'),
+    },
     resolve: {
       alias: [
         { find: /^react$/, replacement: path.resolve(__dirname, 'node_modules/react') },
