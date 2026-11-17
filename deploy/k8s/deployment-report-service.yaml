@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecotrack-report-service
+  namespace: ecotrack-prod
+  labels:
+    app.kubernetes.io/name: ecotrack-report-service
+    app.kubernetes.io/part-of: ecotrack
+    app.kubernetes.io/component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ecotrack-report-service
+  template:
+    metadata:
+      labels:
+        app: ecotrack-report-service
+    spec:
+      containers:
+        - name: report-service
+          image: ghcr.io/adem2005373/ecotrack-report-api:v2.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3002
+              name: http
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          envFrom:
+            - configMapRef:
+                name: ecotrack-config
+            - secretRef:
+                name: ecotrack-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecotrack-report-service
+  namespace: ecotrack-prod
+  labels:
+    app.kubernetes.io/name: ecotrack-report-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3002
+      targetPort: 3002
+      protocol: TCP
+      name: http
+  selector:
+    app: ecotrack-report-service
