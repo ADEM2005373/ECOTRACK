@@ -1,0 +1,7 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@ecotrack/bi-api",
+  "projectType": "application",
+  "sourceRoot": "services/bi-api/src",
+  "tags": ["scope:bi", "type:service"]
+}

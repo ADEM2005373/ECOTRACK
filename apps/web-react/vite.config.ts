@@ -5,7 +5,14 @@ import path from 'path';
 
 export default defineConfig(({ mode }) => {
   // Empty prefix: also reads API_PROXY_TARGET, which is never exposed to the browser.
-  const proxyTarget = loadEnv(mode, __dirname, '').API_PROXY_TARGET;
+  const env = loadEnv(mode, __dirname, '');
+  const proxyTarget = env.API_PROXY_TARGET;
+  // Optional override for bi-api (ECO-42) until the gateway routes /api/v1/bi.
+  const biProxyTarget = env.BI_API_PROXY_TARGET;
+  const proxy = {
+    ...(biProxyTarget ? { '/api/v1/bi': { target: biProxyTarget, changeOrigin: true } } : {}),
+    ...(proxyTarget ? { '/api': { target: proxyTarget, changeOrigin: true } } : {}),
+  };
 
   return {
     plugins: [react()],
@@ -23,7 +30,8 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
       // The backend services send no CORS headers: in development the browser
       // calls /api on the Vite origin and Vite forwards it to the gateway.
-      proxy: proxyTarget ? { '/api': { target: proxyTarget, changeOrigin: true } } : undefined,
+      // First match wins: /api/v1/bi is listed before /api.
+      proxy: Object.keys(proxy).length > 0 ? proxy : undefined,
     },
     test: {
       environment: 'jsdom',

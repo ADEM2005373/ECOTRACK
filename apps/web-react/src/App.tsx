@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from './components/ui/Button';
 import { MAP_STRINGS } from './components/map/strings.fr';
 import { RegisterModal } from './components/RegisterModal';
+import { ANALYTICS_STRINGS } from './components/analytics/strings.fr';
 import { 
   ShieldCheck, 
   Trash2, 
@@ -58,7 +59,7 @@ export default function App() {
             className="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-blue-400 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <Layers className="w-4 h-4" aria-hidden="true" />
-            Power BI (ECO-42)
+            {ANALYTICS_STRINGS.navLink}
           </Link>
           <Link
             to="/supervision"

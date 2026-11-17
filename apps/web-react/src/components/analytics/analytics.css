@@ -1,0 +1,12 @@
+/* The embed fills its flex parent; display:block removes the inline-iframe gap that adds a page scrollbar. */
+.analytics-embed {
+  width: 100%;
+  height: 100%;
+}
+
+.analytics-embed iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
