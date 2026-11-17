@@ -13,7 +13,6 @@ import {
   XCircle,
   Lock,
   Unlock,
-  Maximize2,
   X,
   AlertTriangle,
   ArrowLeft,

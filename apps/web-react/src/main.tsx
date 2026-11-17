@@ -19,6 +19,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Route path="/admin/ai-governance" element={<AiGovernancePage />} />
         <Route path="/ai-governance" element={<AiGovernancePage />} />
         <Route path="/admin/analytics" element={<AnalyticsPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,

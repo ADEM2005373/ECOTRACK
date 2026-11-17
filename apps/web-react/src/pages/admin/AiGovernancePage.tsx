@@ -2,18 +2,15 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Brain,
-  ShieldCheck,
   AlertTriangle,
   Download,
   TrendingUp,
   CheckCircle2,
-  RefreshCw,
   Sparkles,
   ArrowRight,
   Database,
   BarChart3,
   Layers,
-  Info,
 } from 'lucide-react';
 
 // 6 standard CDCF V2 categories
@@ -50,7 +47,7 @@ const INITIAL_CONFUSION_MATRIX: Record<Category, Record<Category, number>> = {
 const CRITICAL_THRESHOLD = 70.0;
 
 export const AiGovernancePage: React.FC = () => {
-  const [matrix, setMatrix] = useState<Record<Category, Record<Category, number>>>(INITIAL_CONFUSION_MATRIX);
+  const [matrix] = useState<Record<Category, Record<Category, number>>>(INITIAL_CONFUSION_MATRIX);
   const [isExporting, setIsExporting] = useState(false);
   const [exportSuccessMessage, setExportSuccessMessage] = useState<string | null>(null);
 

@@ -5,7 +5,6 @@ import { MAP_STRINGS } from './components/map/strings.fr';
 import { RegisterModal } from './components/RegisterModal';
 import { ANALYTICS_STRINGS } from './components/analytics/strings.fr';
 import { 
-  BarChart3,
   ShieldCheck, 
   Trash2, 
   CheckCircle2, 
@@ -46,7 +45,7 @@ export default function App() {
             className="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-emerald-400 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             <ShieldCheck className="w-4 h-4" aria-hidden="true" />
-            Qualification Agent (ECO-31)
+            Qualification (ECO-31)
           </Link>
           <Link
             to="/admin/ai-governance"
@@ -59,7 +58,7 @@ export default function App() {
             to="/admin/analytics"
             className="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-blue-400 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <BarChart3 className="w-4 h-4" aria-hidden="true" />
+            <Layers className="w-4 h-4" aria-hidden="true" />
             {ANALYTICS_STRINGS.navLink}
           </Link>
           <Link
@@ -78,7 +77,7 @@ export default function App() {
             S'inscrire (ECO-12)
           </Button>
           <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-600/20 text-brand-400 border border-brand-600/30">
-            Sprint 3 Actif
+            Sprint 5 Prêt
           </span>
         </div>
       </header>

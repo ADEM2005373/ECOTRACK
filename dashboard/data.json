@@ -4,16 +4,16 @@
     "key": "SCRUM",
     "site": "ouerhaniadem0805.atlassian.net",
     "lead": "Adem Ouerhani",
-    "lastSync": "2026-11-15 15:29:32"
+    "lastSync": "2026-11-17 14:29:00"
   },
   "kpis": {
     "totalIssues": 33,
     "totalTasks": 27,
-    "doneIssues": 16,
+    "doneIssues": 27,
     "inReviewIssues": 0,
-    "inProgressIssues": 3,
-    "toDoIssues": 11,
-    "completionRate": 59.3,
+    "inProgressIssues": 0,
+    "toDoIssues": 0,
+    "completionRate": 100.0,
     "totalEpics": 6,
     "criticalWarningsCount": 2,
     "teamSize": 4
@@ -51,36 +51,36 @@
       "name": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)",
       "owner": "Sara Sahih",
       "total": 4,
-      "done": 1,
-      "rate": 25.0,
-      "status": "En cours"
+      "done": 4,
+      "rate": 100.0,
+      "status": "Terminé"
     },
     {
       "key": "SCRUM-37",
       "name": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)",
       "owner": "Adem / Sara",
       "total": 4,
-      "done": 0,
-      "rate": 0.0,
-      "status": "À démarrer"
+      "done": 4,
+      "rate": 100.0,
+      "status": "Terminé"
     },
     {
       "key": "SCRUM-54",
       "name": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)",
       "owner": "Adem Ouerhani",
       "total": 4,
-      "done": 0,
-      "rate": 0.0,
-      "status": "À démarrer"
+      "done": 4,
+      "rate": 100.0,
+      "status": "Terminé"
     }
   ],
   "assignees": {
     "Adem Ouerhani": {
       "total": 9,
-      "done": 6,
+      "done": 9,
       "in_progress": 0,
       "in_review": 0,
-      "to_do": 3,
+      "to_do": 0,
       "issues": [
         {
           "key": "SCRUM-38",
@@ -117,7 +117,7 @@
         {
           "key": "SCRUM-52",
           "summary": "ECO-41 | [BI-Data] Pipeline CDC Anonymisé (SHA-256) & Modèle DAX Power BI",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "High",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-52"
@@ -141,7 +141,7 @@
         {
           "key": "SCRUM-62",
           "summary": "ECO-50 | [QA-DevOps] Tests de Charge k6 validant la latence API P95 < 300 ms (NFR-01)",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "Highest",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-62"
@@ -149,18 +149,18 @@
         {
           "key": "SCRUM-65",
           "summary": "ECO-53 | [DevOps] Déploiement K8s avec HPA, Scripts de Seed 500 Signalements & Répétition Soutenance",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "Highest",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-65"
         }
       ],
-      "completion_rate": 66.7
+      "completion_rate": 100.0
     },
     "Ahmed Salah": {
       "total": 6,
-      "done": 5,
-      "in_progress": 1,
+      "done": 6,
+      "in_progress": 0,
       "in_review": 0,
       "to_do": 0,
       "issues": [
@@ -191,7 +191,7 @@
         {
           "key": "SCRUM-53",
           "summary": "ECO-42 | [BI-Web] API Power BI Embed Token & Intégration React du Rapport Décisionnel",
-          "status": "En cours",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "Medium",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-53"
@@ -213,14 +213,14 @@
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-59"
         }
       ],
-      "completion_rate": 83.3
+      "completion_rate": 100.0
     },
     "Hiba Dhouib": {
       "total": 6,
-      "done": 3,
+      "done": 6,
       "in_progress": 0,
       "in_review": 0,
-      "to_do": 3,
+      "to_do": 0,
       "issues": [
         {
           "key": "SCRUM-40",
@@ -249,7 +249,7 @@
         {
           "key": "SCRUM-51",
           "summary": "ECO-31 | [UI-WEB] Build Agent Qualification Split-Screen",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "Medium",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-51"
@@ -257,7 +257,7 @@
         {
           "key": "SCRUM-61",
           "summary": "ECO-43 | [AI-MLOps] Suivi de la Concordance IA/Humain, Export Active Learning & Matrice de Confusion BI",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "High",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-61"
@@ -265,20 +265,20 @@
         {
           "key": "SCRUM-63",
           "summary": "ECO-51 | [AI-MLOps] Évaluation Scientifique du Modèle IA sur Jeu Étiqueté (Précision, Rappel, F1-Score)",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "High",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-63"
         }
       ],
-      "completion_rate": 50.0
+      "completion_rate": 100.0
     },
     "Sara Sahih": {
       "total": 6,
-      "done": 2,
-      "in_progress": 1,
+      "done": 6,
+      "in_progress": 0,
       "in_review": 0,
-      "to_do": 3,
+      "to_do": 0,
       "issues": [
         {
           "key": "SCRUM-43",
@@ -299,7 +299,7 @@
         {
           "key": "SCRUM-50",
           "summary": "ECO-30 | [API] Build Workflow Guard Service (T1 - T4)",
-          "status": "En cours",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "High",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-50"
@@ -307,7 +307,7 @@
         {
           "key": "SCRUM-58",
           "summary": "ECO-32 | [UI-MOB] Feuille de Route Mobile Ouvrier par Proximité ($near) & Démarrage Chantier (T3)",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "High",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-58"
@@ -315,7 +315,7 @@
         {
           "key": "SCRUM-60",
           "summary": "ECO-40 | [Workflow] Clôture Chantier T4 avec Photo après travaux (EXIF Purgé) & Réouverture Admin",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "High",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-60"
@@ -323,13 +323,13 @@
         {
           "key": "SCRUM-64",
           "summary": "ECO-52 | [QA-E2E] Recette Complète E2E Multi-Acteurs (Playwright) & Audit Accessibilité WCAG 2.1 AA",
-          "status": "À faire",
+          "status": "Terminé",
           "type": "Tâche",
           "priority": "High",
           "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-64"
         }
       ],
-      "completion_rate": 33.3
+      "completion_rate": 100.0
     }
   },
   "types": {
@@ -337,10 +337,10 @@
     "Tâche": 27
   },
   "statusStats": {
-    "Done": 19,
+    "Done": 33,
     "InReview": 0,
-    "InProgress": 3,
-    "ToDo": 11
+    "InProgress": 0,
+    "ToDo": 0
   },
   "warnings": [
     {
@@ -408,15 +408,15 @@
     {
       "key": "SCRUM-34",
       "summary": "EPIC 1: Identity, JWT & RBAC (Sprint 1)",
-      "status": "En cours",
-      "rawStatus": "En cours",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Epic",
       "priority": "High",
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:40.138+0100",
-      "updated": "2026-11-10T13:00:25.640+0100",
+      "updated": "2026-11-17T14:28:52.364+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-34",
       "epicKey": "SCRUM-34",
       "epicName": "EPIC 1: Identity, JWT & RBAC (Sprint 1)"
@@ -456,15 +456,15 @@
     {
       "key": "SCRUM-37",
       "summary": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Epic",
       "priority": "High",
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:14:50.379+0100",
-      "updated": "2026-11-10T13:00:36.235+0100",
+      "updated": "2026-11-17T14:28:42.039+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-37",
       "epicKey": "SCRUM-37",
       "epicName": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)"
@@ -656,7 +656,7 @@
       "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:31.932+0100",
-      "updated": "2026-11-15T15:16:16.719+0100",
+      "updated": "2026-11-16T09:01:36.358+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-49",
       "epicKey": "SCRUM-35",
       "epicName": "EPIC 2: Core Report & Media Service (Sprint 2)"
@@ -664,15 +664,15 @@
     {
       "key": "SCRUM-50",
       "summary": "ECO-30 | [API] Build Workflow Guard Service (T1 - T4)",
-      "status": "En cours",
-      "rawStatus": "En cours",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "High",
       "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:35.621+0100",
-      "updated": "2026-11-14T07:42:05.742+0100",
+      "updated": "2026-11-16T09:01:42.404+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-50",
       "epicKey": "SCRUM-36",
       "epicName": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)"
@@ -680,15 +680,15 @@
     {
       "key": "SCRUM-51",
       "summary": "ECO-31 | [UI-WEB] Build Agent Qualification Split-Screen",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "Medium",
       "assignee": "Hiba Dhouib",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:39.222+0100",
-      "updated": "2026-11-10T13:13:51.644+0100",
+      "updated": "2026-11-16T09:01:49.123+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-51",
       "epicKey": "SCRUM-36",
       "epicName": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)"
@@ -696,15 +696,15 @@
     {
       "key": "SCRUM-52",
       "summary": "ECO-41 | [BI-Data] Pipeline CDC Anonymisé (SHA-256) & Modèle DAX Power BI",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "High",
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:42.612+0100",
-      "updated": "2026-11-10T13:14:28.123+0100",
+      "updated": "2026-11-16T09:24:44.040+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-52",
       "epicKey": "SCRUM-37",
       "epicName": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)"
@@ -712,15 +712,15 @@
     {
       "key": "SCRUM-53",
       "summary": "ECO-42 | [BI-Web] API Power BI Embed Token & Intégration React du Rapport Décisionnel",
-      "status": "En cours",
-      "rawStatus": "En cours",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "Medium",
       "assignee": "Ahmed Salah",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T20:15:46.062+0100",
-      "updated": "2026-11-15T12:02:06.417+0100",
+      "updated": "2026-11-17T14:28:28.982+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-53",
       "epicKey": "SCRUM-37",
       "epicName": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)"
@@ -728,15 +728,15 @@
     {
       "key": "SCRUM-54",
       "summary": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Epic",
       "priority": "High",
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:06:18.772+0100",
-      "updated": "2026-11-10T13:00:41.897+0100",
+      "updated": "2026-11-17T14:25:02.852+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-54",
       "epicKey": "SCRUM-54",
       "epicName": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)"
@@ -792,15 +792,15 @@
     {
       "key": "SCRUM-58",
       "summary": "ECO-32 | [UI-MOB] Feuille de Route Mobile Ouvrier par Proximité ($near) & Démarrage Chantier (T3)",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "High",
       "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:07:16.862+0100",
-      "updated": "2026-11-10T16:44:32.490+0100",
+      "updated": "2026-11-16T09:01:54.853+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-58",
       "epicKey": "SCRUM-36",
       "epicName": "EPIC 3: Workflow State Machine & Dispatch (Sprint 3)"
@@ -824,15 +824,15 @@
     {
       "key": "SCRUM-60",
       "summary": "ECO-40 | [Workflow] Clôture Chantier T4 avec Photo après travaux (EXIF Purgé) & Réouverture Admin",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "High",
       "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:07:43.191+0100",
-      "updated": "2026-11-10T16:44:22.402+0100",
+      "updated": "2026-11-16T09:02:02.237+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-60",
       "epicKey": "SCRUM-37",
       "epicName": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)"
@@ -840,15 +840,15 @@
     {
       "key": "SCRUM-61",
       "summary": "ECO-43 | [AI-MLOps] Suivi de la Concordance IA/Humain, Export Active Learning & Matrice de Confusion BI",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "High",
       "assignee": "Hiba Dhouib",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:07:57.014+0100",
-      "updated": "2026-11-10T13:14:37.920+0100",
+      "updated": "2026-11-16T09:02:09.076+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-61",
       "epicKey": "SCRUM-37",
       "epicName": "EPIC 4: Clôture Terrain & Tableaux de Bord Power BI (Sprint 4)"
@@ -856,15 +856,15 @@
     {
       "key": "SCRUM-62",
       "summary": "ECO-50 | [QA-DevOps] Tests de Charge k6 validant la latence API P95 < 300 ms (NFR-01)",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "Highest",
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:08:11.060+0100",
-      "updated": "2026-11-10T13:14:43.779+0100",
+      "updated": "2026-11-17T14:20:36.984+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-62",
       "epicKey": "SCRUM-54",
       "epicName": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)"
@@ -872,15 +872,15 @@
     {
       "key": "SCRUM-63",
       "summary": "ECO-51 | [AI-MLOps] Évaluation Scientifique du Modèle IA sur Jeu Étiqueté (Précision, Rappel, F1-Score)",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "High",
       "assignee": "Hiba Dhouib",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:08:23.027+0100",
-      "updated": "2026-11-10T13:14:49.176+0100",
+      "updated": "2026-11-17T14:08:41.808+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-63",
       "epicKey": "SCRUM-54",
       "epicName": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)"
@@ -888,15 +888,15 @@
     {
       "key": "SCRUM-64",
       "summary": "ECO-52 | [QA-E2E] Recette Complète E2E Multi-Acteurs (Playwright) & Audit Accessibilité WCAG 2.1 AA",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "High",
       "assignee": "Sara Sahih",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:08:30.028+0100",
-      "updated": "2026-11-10T16:44:13.483+0100",
+      "updated": "2026-11-16T09:02:15.482+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-64",
       "epicKey": "SCRUM-54",
       "epicName": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)"
@@ -904,15 +904,15 @@
     {
       "key": "SCRUM-65",
       "summary": "ECO-53 | [DevOps] Déploiement K8s avec HPA, Scripts de Seed 500 Signalements & Répétition Soutenance",
-      "status": "À faire",
-      "rawStatus": "À faire",
-      "isDone": false,
+      "status": "Terminé",
+      "rawStatus": "Terminé(e)",
+      "isDone": true,
       "type": "Tâche",
       "priority": "Highest",
       "assignee": "Adem Ouerhani",
       "reporter": "Adem Ouerhani",
       "created": "2026-11-02T22:08:36.379+0100",
-      "updated": "2026-11-10T13:15:06.073+0100",
+      "updated": "2026-11-17T14:24:45.555+0100",
       "url": "https://ouerhaniadem0805.atlassian.net/browse/SCRUM-65",
       "epicKey": "SCRUM-54",
       "epicName": "EPIC 5: Tests E2E, Charge k6, MLOps & Déploiement K8s (Sprint 5)"
