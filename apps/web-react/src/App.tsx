@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from './components/ui/Button';
-import { MAP_STRINGS } from './components/map/strings.fr';
 import { RegisterModal } from './components/RegisterModal';
 import { 
   ShieldCheck, 
@@ -12,205 +11,510 @@ import {
   Layers, 
   MapPin, 
   Clock, 
-  UserPlus 
+  UserPlus,
+  BarChart3,
+  Brain,
+  AlertTriangle,
+  RefreshCw,
+  Search,
+  CheckCircle,
+  Eye,
+  Server
 } from 'lucide-react';
 
-export default function App() {
-  const [loading, setLoading] = useState(false);
-  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+interface IncidentItem {
+  id: string;
+  reference: string;
+  title: string;
+  category: 'DECHARGE_SAUVAGE' | 'ENCOMBRANTS' | 'GRAFFITI' | 'DEPOT_SAUVAGE' | 'AUTRE';
+  district: string;
+  status: 'NOUVEAU' | 'A_QUALIFIER' | 'EN_TRAITEMENT' | 'RESOLU' | 'REJETE';
+  confidence: number;
+  timeAgo: string;
+  worker?: string;
+  imageUrl: string;
+}
 
-  const simulateAction = () => {
-    setLoading(true);
-    setTimeout(() => setLoading(false), 1200);
+const RECENT_INCIDENTS: IncidentItem[] = [
+  {
+    id: 'inc_001',
+    reference: 'REP-2026-0498',
+    title: 'Décharge sauvage d’encombrants et cartons',
+    category: 'DECHARGE_SAUVAGE',
+    district: 'Centre-Ville',
+    status: 'A_QUALIFIER',
+    confidence: 0.94,
+    timeAgo: 'Il y a 12 min',
+    imageUrl: 'https://images.unsplash.com/photo-1605600659873-d808a13e4d2a?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    id: 'inc_002',
+    reference: 'REP-2026-0495',
+    title: 'Gravats de chantier bloquant la chaussée',
+    category: 'DEPOT_SAUVAGE',
+    district: 'El Menzah',
+    status: 'EN_TRAITEMENT',
+    confidence: 0.89,
+    timeAgo: 'Il y a 42 min',
+    worker: 'Tarek Jouini',
+    imageUrl: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    id: 'inc_003',
+    reference: 'REP-2026-0492',
+    title: 'Détritus ménagers autour des conteneurs',
+    category: 'DECHARGE_SAUVAGE',
+    district: 'Ariana',
+    status: 'RESOLU',
+    confidence: 0.96,
+    timeAgo: 'Il y a 2 h',
+    worker: 'Youssef Trabelsi',
+    imageUrl: 'https://images.unsplash.com/photo-1528323273322-d81458248d40?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    id: 'inc_004',
+    reference: 'REP-2026-0488',
+    title: 'Tag et dégradation sur mur municipal',
+    category: 'GRAFFITI',
+    district: 'La Marsa',
+    status: 'NOUVEAU',
+    confidence: 0.92,
+    timeAgo: 'Il y a 3 h',
+    imageUrl: 'https://images.unsplash.com/photo-1572945281869-826b8e485e07?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    id: 'inc_005',
+    reference: 'REP-2026-0481',
+    title: 'Mobilier usagé abandonné sur trottoir',
+    category: 'ENCOMBRANTS',
+    district: 'Les Berges du Lac',
+    status: 'EN_TRAITEMENT',
+    confidence: 0.91,
+    timeAgo: 'Il y a 4 h',
+    worker: 'Hamza Dridi',
+    imageUrl: 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=400&q=80',
+  },
+];
+
+export default function App() {
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [filterDistrict, setFilterDistrict] = useState<string>('TOUS');
+  const [filterStatus, setFilterStatus] = useState<string>('TOUS');
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+
+  const filteredIncidents = RECENT_INCIDENTS.filter((item) => {
+    if (filterDistrict !== 'TOUS' && item.district !== filterDistrict) return false;
+    if (filterStatus !== 'TOUS' && item.status !== filterStatus) return false;
+    return true;
+  });
+
+  const handleQuickAction = (msg: string) => {
+    setActionSuccess(msg);
+    setTimeout(() => setActionSuccess(null), 3000);
+  };
+
+  const getStatusBadge = (status: IncidentItem['status']) => {
+    switch (status) {
+      case 'RESOLU':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            <CheckCircle className="w-3 h-3" /> Résolu (T4)
+          </span>
+        );
+      case 'EN_TRAITEMENT':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-400 border border-blue-500/30">
+            <Clock className="w-3 h-3" /> En intervention
+          </span>
+        );
+      case 'A_QUALIFIER':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+            <AlertTriangle className="w-3 h-3" /> À Qualifier
+          </span>
+        );
+      case 'NOUVEAU':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/15 text-purple-400 border border-purple-500/30">
+            <Sparkles className="w-3 h-3" /> Nouveau (IA)
+          </span>
+        );
+      case 'REJETE':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-500/15 text-red-400 border border-red-500/30">
+            <Trash2 className="w-3 h-3" /> Rejeté (T5)
+          </span>
+        );
+    }
   };
 
   return (
     <div className="min-h-screen bg-dark-bg text-slate-100 flex flex-col font-sans">
       {/* Top Navbar */}
-      <header className="border-b border-dark-border bg-dark-bg/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <header className="border-b border-dark-border bg-dark-bg/90 backdrop-blur-md px-6 py-3.5 flex items-center justify-between sticky top-0 z-50">
+        <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-sapphire-900 flex items-center justify-center text-white shadow-lg shadow-brand-600/30">
             <ShieldCheck className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-white tracking-tight">ECOTRACK V2</h1>
-            <p className="text-xs text-slate-400">Supervision Web — React 18 + Vite + Tailwind</p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-extrabold text-white tracking-tight font-heading">ECOTRACK V2</h1>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider">
+                Production K8s
+              </span>
+            </div>
+            <p className="text-xs text-slate-400">Direction Générale de la Salubrité Urbaine & Voirie</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <nav className="flex items-center gap-2">
+          <Link
+            to="/supervision"
+            className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-200 hover:text-white hover:bg-slate-800/80 transition"
+          >
+            <MapPin className="w-4 h-4 text-emerald-400" />
+            <span>Carte Live (ECO-33)</span>
+          </Link>
           <Link
             to="/agent/qualification"
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-emerald-400 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-200 hover:text-white hover:bg-slate-800/80 transition"
           >
-            <ShieldCheck className="w-4 h-4" aria-hidden="true" />
-            Qualification (ECO-31)
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span>Qualification (ECO-31)</span>
           </Link>
           <Link
             to="/admin/ai-governance"
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-purple-400 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-200 hover:text-white hover:bg-slate-800/80 transition"
           >
-            <Sparkles className="w-4 h-4" aria-hidden="true" />
-            Gouvernance IA (ECO-43)
+            <Brain className="w-4 h-4 text-purple-400" />
+            <span>Gouvernance IA (ECO-43)</span>
           </Link>
           <Link
             to="/admin/analytics"
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-blue-400 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-200 hover:text-white hover:bg-slate-800/80 transition"
           >
-            <Layers className="w-4 h-4" aria-hidden="true" />
-            Power BI (ECO-42)
+            <BarChart3 className="w-4 h-4 text-blue-400" />
+            <span>Power BI (ECO-42)</span>
           </Link>
-          <Link
-            to="/supervision"
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-brand-400 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          >
-            <MapPin className="w-4 h-4" aria-hidden="true" />
-            {MAP_STRINGS.navLink}
-          </Link>
+          <div className="h-6 w-px bg-slate-800 mx-1"></div>
           <Button
             variant="primary"
             size="sm"
-            icon={<UserPlus className="w-4 h-4" />}
+            icon={<UserPlus className="w-3.5 h-3.5" />}
             onClick={() => setIsRegisterOpen(true)}
           >
             S'inscrire (ECO-12)
           </Button>
-          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-600/20 text-brand-400 border border-brand-600/30">
-            Sprint 5 Prêt
-          </span>
-        </div>
+        </nav>
       </header>
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-5xl mx-auto w-full p-6 space-y-8">
-        {/* Hero Section */}
-        <div className="bg-dark-card border border-dark-border rounded-2xl p-6 sm:p-8 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-brand-600/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
-          <div className="relative z-10 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-sapphire-900/30 border border-sapphire-900/50 text-xs text-blue-300">
-              <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-              <span>Palette HEX CDCF V2 & Design Tokens Intégrés</span>
+      {/* Main Command Center Body */}
+      <main className="flex-1 max-w-7xl mx-auto w-full p-6 space-y-6">
+        {/* Action Alert Banner */}
+        {actionSuccess && (
+          <div className="bg-emerald-950/60 border border-emerald-500/40 rounded-xl p-3 flex items-center justify-between text-xs text-emerald-200 animate-fadeIn">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>{actionSuccess}</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white font-heading">
-              Socle Frontend React + Tailwind CSS
-            </h2>
-            <p className="text-sm text-slate-400 max-w-2xl">
-              Ce composant valide le ticket <strong>SCRUM-41 (ECO-04)</strong> avec la palette officielle :
-              vert primaire <code className="text-brand-400 bg-slate-900 px-1.5 py-0.5 rounded">#059669</code> et
-              bleu saphir secondaire <code className="text-blue-400 bg-slate-900 px-1.5 py-0.5 rounded">#1E3A8A</code>.
-            </p>
+            <button onClick={() => setActionSuccess(null)} className="text-emerald-400 hover:text-white">✕</button>
           </div>
-        </div>
+        )}
 
-        {/* Atomic Button Component Showcase */}
-        <div className="bg-dark-card border border-dark-border rounded-2xl p-6 space-y-6">
-          <div>
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Layers className="w-4 h-4 text-brand-400" />
-              <span>Composant Atomique &lt;Button /&gt; (Variants & États)</span>
-            </h3>
-            <p className="text-xs text-slate-400 mt-1">
-              Conformité stricte aux exigences de la charte CDCF V2.
-            </p>
+        {/* Executive Real-time KPIs Ribbon */}
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-dark-card border border-dark-border rounded-2xl p-5 relative overflow-hidden group hover:border-emerald-500/40 transition">
+            <div className="flex items-center justify-between text-slate-400 text-xs">
+              <span className="font-semibold uppercase tracking-wider">Volume Consolidé</span>
+              <Layers className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div className="text-3xl font-extrabold text-white mt-2 font-heading">500</div>
+            <div className="flex items-center gap-1.5 text-xs text-emerald-400 mt-1">
+              <span className="font-bold">300 résolus (60%)</span>
+              <span className="text-slate-500">• 100 en cours</span>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-            {/* Primary Variant */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-brand-400">Variant: Primary</span>
-                <span className="text-[11px] font-mono text-slate-500">#059669</span>
+          <div className="bg-dark-card border border-dark-border rounded-2xl p-5 relative overflow-hidden group hover:border-blue-500/40 transition">
+            <div className="flex items-center justify-between text-slate-400 text-xs">
+              <span className="font-semibold uppercase tracking-wider">Latence API (P95)</span>
+              <Clock className="w-4 h-4 text-blue-400" />
+            </div>
+            <div className="text-3xl font-extrabold text-white mt-2 font-heading">145 ms</div>
+            <div className="flex items-center gap-1.5 text-xs text-emerald-400 mt-1">
+              <span className="font-bold">NFR-01 Validé</span>
+              <span className="text-slate-500">(SLA &lt; 300 ms à 100 req/s)</span>
+            </div>
+          </div>
+
+          <div className="bg-dark-card border border-dark-border rounded-2xl p-5 relative overflow-hidden group hover:border-purple-500/40 transition">
+            <div className="flex items-center justify-between text-slate-400 text-xs">
+              <span className="font-semibold uppercase tracking-wider">F1-Score IA Vision</span>
+              <Brain className="w-4 h-4 text-purple-400" />
+            </div>
+            <div className="text-3xl font-extrabold text-white mt-2 font-heading">90.2%</div>
+            <div className="flex items-center gap-1.5 text-xs text-purple-400 mt-1">
+              <span className="font-bold">Inférence 38 ms</span>
+              <span className="text-slate-500">(MobileNetV3 PyTorch)</span>
+            </div>
+          </div>
+
+          <div className="bg-dark-card border border-dark-border rounded-2xl p-5 relative overflow-hidden group hover:border-amber-500/40 transition">
+            <div className="flex items-center justify-between text-slate-400 text-xs">
+              <span className="font-semibold uppercase tracking-wider">Garde T4 & Résolution</span>
+              <ShieldCheck className="w-4 h-4 text-amber-400" />
+            </div>
+            <div className="text-3xl font-extrabold text-white mt-2 font-heading">94.2%</div>
+            <div className="flex items-center gap-1.5 text-xs text-emerald-400 mt-1">
+              <span className="font-bold">Photo après travaux</span>
+              <span className="text-slate-500">(Anti-fraude 100%)</span>
+            </div>
+          </div>
+        </section>
+
+        {/* 4 Professional Modules Fast Navigation Hub */}
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link
+            to="/agent/qualification"
+            className="bg-slate-900/80 border border-slate-800 hover:border-brand-500/50 rounded-2xl p-5 flex flex-col justify-between group transition hover:shadow-lg hover:shadow-brand-950/40"
+          >
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-brand-600/10 border border-brand-600/20 text-brand-400 flex items-center justify-center mb-3 group-hover:scale-105 transition">
+                <ShieldCheck className="w-5 h-5" />
               </div>
-              <p className="text-xs text-slate-300">Action principale, validation de signalement, soumission.</p>
-              <Button 
-                variant="primary" 
-                size="md" 
-                className="w-full"
-                icon={<CheckCircle2 className="w-4 h-4" />}
-                onClick={simulateAction}
-                isLoading={loading}
+              <h3 className="text-sm font-bold text-white group-hover:text-brand-400 transition">
+                Qualification Agent (ECO-31)
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Split-screen d'inspection visuelle, validation T1 ou rejet motivé T5 pour anomalies entrantes.
+              </p>
+            </div>
+            <div className="mt-4 flex items-center justify-between text-xs text-brand-400 font-semibold pt-3 border-t border-slate-800/80">
+              <span>Ouvrir l'Inbox</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition" />
+            </div>
+          </Link>
+
+          <Link
+            to="/supervision"
+            className="bg-slate-900/80 border border-slate-800 hover:border-blue-500/50 rounded-2xl p-5 flex flex-col justify-between group transition hover:shadow-lg hover:shadow-blue-950/40"
+          >
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-blue-600/10 border border-blue-600/20 text-blue-400 flex items-center justify-center mb-3 group-hover:scale-105 transition">
+                <MapPin className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-bold text-white group-hover:text-blue-400 transition">
+                Cartographie GIS Live (ECO-33)
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Visualisation spatiale Leaflet 2dsphere multi-filtres avec regroupement par quartier de Tunis.
+              </p>
+            </div>
+            <div className="mt-4 flex items-center justify-between text-xs text-blue-400 font-semibold pt-3 border-t border-slate-800/80">
+              <span>Explorer la Carte</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition" />
+            </div>
+          </Link>
+
+          <Link
+            to="/admin/ai-governance"
+            className="bg-slate-900/80 border border-slate-800 hover:border-purple-500/50 rounded-2xl p-5 flex flex-col justify-between group transition hover:shadow-lg hover:shadow-purple-950/40"
+          >
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-purple-600/10 border border-purple-600/20 text-purple-400 flex items-center justify-center mb-3 group-hover:scale-105 transition">
+                <Brain className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-bold text-white group-hover:text-purple-400 transition">
+                Gouvernance IA MLOps (ECO-43)
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Matrice de confusion 6x6, concordance agent/modèle et pipeline d'apprentissage actif (Active Learning).
+              </p>
+            </div>
+            <div className="mt-4 flex items-center justify-between text-xs text-purple-400 font-semibold pt-3 border-t border-slate-800/80">
+              <span>Auditer les Métriques</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition" />
+            </div>
+          </Link>
+
+          <Link
+            to="/admin/analytics"
+            className="bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-5 flex flex-col justify-between group transition hover:shadow-lg hover:shadow-emerald-950/40"
+          >
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-emerald-600/10 border border-emerald-600/20 text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-105 transition">
+                <BarChart3 className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-bold text-white group-hover:text-emerald-400 transition">
+                Power BI Embed RLS (ECO-42)
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Tableaux de bord décisionnels officiels avec isolation stricte des données par secteur territorial.
+              </p>
+            </div>
+            <div className="mt-4 flex items-center justify-between text-xs text-emerald-400 font-semibold pt-3 border-t border-slate-800/80">
+              <span>Consulter Rapports</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition" />
+            </div>
+          </Link>
+        </section>
+
+        {/* Live Operational Incident Feed Table */}
+        <section className="bg-dark-card border border-dark-border rounded-2xl overflow-hidden shadow-xl">
+          <div className="p-5 border-b border-dark-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <span>Flux Opérationnel des Signalements en Temps Réel</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Surveillance continue du cycle de vie des anomalies urbaines (Machine à États Finis T1 à T5).
+              </p>
+            </div>
+
+            {/* Quick Filters */}
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5">
+                <Search className="w-3.5 h-3.5 text-slate-400" />
+                <select
+                  value={filterDistrict}
+                  onChange={(e) => setFilterDistrict(e.target.value)}
+                  className="bg-transparent text-slate-300 focus:outline-none"
+                >
+                  <option value="TOUS">Tous Quartiers</option>
+                  <option value="Centre-Ville">Centre-Ville</option>
+                  <option value="El Menzah">El Menzah</option>
+                  <option value="Ariana">Ariana</option>
+                  <option value="La Marsa">La Marsa</option>
+                  <option value="Les Berges du Lac">Les Berges du Lac</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5">
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="bg-transparent text-slate-300 focus:outline-none"
+                >
+                  <option value="TOUS">Tous Statuts</option>
+                  <option value="NOUVEAU">Nouveau (IA)</option>
+                  <option value="A_QUALIFIER">À Qualifier</option>
+                  <option value="EN_TRAITEMENT">En intervention</option>
+                  <option value="RESOLU">Résolu</option>
+                </select>
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                icon={<RefreshCw className="w-3.5 h-3.5" />}
+                onClick={() => {
+                  setFilterDistrict('TOUS');
+                  setFilterStatus('TOUS');
+                }}
               >
-                Valider Signalement (T1)
+                Réinitialiser
               </Button>
             </div>
-
-            {/* Secondary Variant */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-blue-400">Variant: Secondary</span>
-                <span className="text-[11px] font-mono text-slate-500">#1E3A8A</span>
-              </div>
-              <p className="text-xs text-slate-300">Action institutionnelle, assignation d'équipe de voirie.</p>
-              <Button 
-                variant="secondary" 
-                size="md" 
-                className="w-full"
-                icon={<ArrowRight className="w-4 h-4" />}
-                onClick={simulateAction}
-                isLoading={loading}
-              >
-                Assigner Équipe (T2)
-              </Button>
-            </div>
-
-            {/* Destructive Variant */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-red-400">Variant: Destructive</span>
-                <span className="text-[11px] font-mono text-slate-500">#DC2626</span>
-              </div>
-              <p className="text-xs text-slate-300">Rejet d'un signalement non conforme ou doublon.</p>
-              <Button 
-                variant="destructive" 
-                size="md" 
-                className="w-full"
-                icon={<Trash2 className="w-4 h-4" />}
-                onClick={simulateAction}
-                isLoading={loading}
-              >
-                Rejeter Signalement (T5)
-              </Button>
-            </div>
           </div>
 
-          {/* Button Sizes Showcase */}
-          <div className="pt-4 border-t border-dark-border flex flex-wrap items-center gap-3">
-            <span className="text-xs text-slate-400 mr-2">Tailles atomiques :</span>
-            <Button variant="primary" size="sm">Small (sm)</Button>
-            <Button variant="primary" size="md">Medium (md)</Button>
-            <Button variant="primary" size="lg">Large (lg)</Button>
-            <Button variant="outline" size="sm">Outline</Button>
-            <Button variant="ghost" size="sm">Ghost</Button>
+          {/* Table Container */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-slate-300">
+              <thead className="bg-slate-900/60 text-slate-400 uppercase tracking-wider font-semibold border-b border-dark-border">
+                <tr>
+                  <th className="py-3 px-4">Référence & Titre</th>
+                  <th className="py-3 px-4">Quartier</th>
+                  <th className="py-3 px-4">Prédiction IA</th>
+                  <th className="py-3 px-4">Statut FSM</th>
+                  <th className="py-3 px-4">Équipe Terrain</th>
+                  <th className="py-3 px-4 text-right">Actions Métier</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60 font-sans">
+                {filteredIncidents.map((incident) => (
+                  <tr key={incident.id} className="hover:bg-slate-900/40 transition">
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={incident.imageUrl}
+                          alt={incident.title}
+                          className="w-10 h-10 rounded-lg object-cover border border-slate-800 flex-shrink-0"
+                        />
+                        <div>
+                          <div className="font-bold text-white flex items-center gap-1.5">
+                            <span>{incident.reference}</span>
+                            <span className="text-[10px] text-slate-500 font-normal">({incident.timeAgo})</span>
+                          </div>
+                          <div className="text-slate-400 text-xs truncate max-w-xs">{incident.title}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 font-semibold text-slate-200">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-brand-400" />
+                        {incident.district}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="inline-flex items-center gap-1 font-mono text-[11px] text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">
+                        {incident.category} ({(incident.confidence * 100).toFixed(0)}%)
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      {getStatusBadge(incident.status)}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      {incident.worker ? (
+                        <span className="text-slate-200 font-medium">{incident.worker}</span>
+                      ) : (
+                        <span className="text-slate-500 italic">Non assigné</span>
+                      )}
+                    </td>
+                    <td className="py-3.5 px-4 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Link
+                          to="/agent/qualification"
+                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition"
+                          title="Qualifier dans l'inbox"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </Link>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleQuickAction(`Intervention assignée pour ${incident.reference}`)}
+                        >
+                          Assigner
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
 
-        {/* Feature Cards Showcase */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-dark-card border border-dark-border rounded-xl p-4 flex items-start gap-3">
-            <div className="p-2.5 rounded-lg bg-brand-600/10 text-brand-400 border border-brand-600/20">
-              <MapPin className="w-5 h-5" />
+          {/* Table Footer with System Status Bar */}
+          <div className="p-4 bg-slate-950/80 border-t border-dark-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1.5 text-slate-400">
+                <Server className="w-3.5 h-3.5 text-emerald-400" />
+                Microservices K8s : <strong>6/6 opérationnels</strong>
+              </span>
+              <span>•</span>
+              <span>PostgreSQL Star Schema : <strong>Connecté (CDC Actif)</strong></span>
             </div>
             <div>
-              <h4 className="text-sm font-bold text-white">Cartographie 2dsphere</h4>
-              <p className="text-xs text-slate-400 mt-1">Prête pour l'intégration de Leaflet et du split-screen d'agent.</p>
+              <span>EcoTrack V2 • Architecture Distribuée Smart City • Tous droits réservés</span>
             </div>
           </div>
-
-          <div className="bg-dark-card border border-dark-border rounded-xl p-4 flex items-start gap-3">
-            <div className="p-2.5 rounded-lg bg-sapphire-900/20 text-blue-400 border border-sapphire-900/30">
-              <Clock className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-white">SLA & Lead Time</h4>
-              <p className="text-xs text-slate-400 mt-1">Calculs d'indicateurs MTTR connectés à l'entrepôt décisionnel.</p>
-            </div>
-          </div>
-        </div>
+        </section>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-dark-border py-4 px-6 text-center text-xs text-slate-500">
-        EcoTrack V2 • Architecture Monorepo Nx • Tous droits réservés
+      <footer className="border-t border-dark-border py-4 px-6 text-center text-xs text-slate-500 bg-dark-bg">
+        Plateforme Métropolitaine EcoTrack V2 — Conforme CDCF V2 & Déploiement Production
       </footer>
 
       {/* Register Modal (ECO-12 / SCRUM-43) */}
