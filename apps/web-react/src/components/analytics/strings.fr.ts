@@ -1,6 +1,6 @@
 /** French UI strings of the decision analytics page and its admin login (ECO-42 / SCRUM-53). */
 export const ANALYTICS_STRINGS = {
-  navLink: 'Analytique / Décisionnel',
+  navLink: 'Analytique / Décisionnel (ECO-42)',
   pageTitle: 'Analytique / Décisionnel',
   pageSubtitle: 'Rapports Power BI officiels de la municipalité',
   homeLink: 'Accueil',
