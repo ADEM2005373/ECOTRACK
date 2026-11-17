@@ -1,0 +1,35 @@
+/* Status markers of the supervision map (SCRUM-59). */
+
+/* Replaces Leaflet's default white .leaflet-div-icon box: the 44 px icon is the click target. */
+.eco-marker-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 9999px;
+}
+
+.eco-marker-icon:focus-visible {
+  outline: 3px solid #1e3a8a;
+  outline-offset: -3px;
+}
+
+.eco-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #ffffff;
+  border-radius: 9999px;
+  box-shadow: 0 0 0 1px #0f172a, 0 1px 4px rgba(15, 23, 42, 0.45);
+  font: 700 14px/1 'Inter', sans-serif;
+}
+
+.eco-marker--legend {
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+  flex-shrink: 0;
+}

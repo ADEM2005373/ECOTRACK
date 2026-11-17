@@ -1,0 +1,7 @@
+# bi-etl local artefacts (never commit)
+venv/
+.venv/
+__pycache__/
+.pytest_cache/
+.env
+*.log

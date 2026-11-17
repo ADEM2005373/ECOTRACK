@@ -1,84 +1,103 @@
+/**
+ * ECOTRACK V2 - Contrôleur HTTP Signalements (SCRUM-49 / ECO-23)
+ * Développé par Sara Sahih
+ * 
+ * Expose les endpoints REST pour la création et la consultation géospatiale des signalements.
+ * - POST /reports (ou /api/v1/reports) : Création et émission 'report.created'
+ * - GET /reports (ou /api/v1/reports)  : Recherche spatiale $near et liste filtrée
+ * - GET /reports/:id (ou /api/v1/reports/:id) : Consultation d'un signalement
+ */
+
 import { Request, Response } from 'express';
 import { reportService } from '../services/report.service';
-import { ReportStatus } from '@ecotrack/shared';
 
 export class ReportController {
   /**
    * POST /reports
-   * Création d'un signalement d'anomalie environnementale (SCRUM-49 / ECO-23)
+   * Création d'un signalement citoyen (SCRUM-49 / ECO-23)
+   * Émet l'événement asynchrone 'report.created' vers RabbitMQ
    */
-  async createReport(req: Request, res: Response) {
+  async createReport(req: Request, res: Response): Promise<Response> {
     try {
-      const {
-        citizenId,
-        title,
-        description,
-        latitude,
-        longitude,
-        photoUrl,
-        thumbnailUrl,
-        categorySuggested,
-        aiConfidenceScore
-      } = req.body;
+      const { description, location, latitude, longitude, imageUrl, photoUrl, reporterId, citizenId, category } = req.body;
 
-      if (latitude === undefined || longitude === undefined) {
+      // 1. Validation de la description
+      if (!description || typeof description !== 'string' || description.trim().length === 0) {
         return res.status(400).json({
           error: 'VALIDATION_ERROR',
-          message: 'Les coordonnées GPS (latitude et longitude) sont obligatoires.'
+          message: 'La description du signalement est obligatoire.'
         });
       }
 
-      if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+      // 2. Validation de l'image (imageUrl ou photoUrl)
+      const validImageUrl = imageUrl || photoUrl;
+      if (!validImageUrl || typeof validImageUrl !== 'string') {
         return res.status(400).json({
           error: 'VALIDATION_ERROR',
-          message: 'Les coordonnées GPS doivent être des nombres valides.'
+          message: 'Une URL d\'image valide est obligatoire pour attester de l\'anomalie.'
         });
       }
 
+      // 3. Validation de la géolocalisation (location.coordinates ou latitude & longitude)
+      const hasCoordinates = location && Array.isArray(location.coordinates) && location.coordinates.length === 2;
+      const hasLatLng = latitude !== undefined && longitude !== undefined;
+
+      if (!hasCoordinates && !hasLatLng) {
+        return res.status(400).json({
+          error: 'VALIDATION_ERROR',
+          message: 'La localisation géographique (location.coordinates ou latitude/longitude) est obligatoire.'
+        });
+      }
+
+      // 4. Appel du service de persistance et émission de l'événement 'report.created'
       const report = await reportService.createReport({
-        citizenId: citizenId || 'anonymous_citizen',
-        title,
-        description: description || 'Signalement citoyen',
-        latitude,
-        longitude,
-        photoUrl: photoUrl || '/storage/reports/default-placeholder.webp',
-        thumbnailUrl,
-        categorySuggested,
-        aiConfidenceScore
+        description: description.trim(),
+        imageUrl: validImageUrl,
+        location: hasCoordinates ? location : undefined,
+        latitude: hasLatLng ? Number(latitude) : undefined,
+        longitude: hasLatLng ? Number(longitude) : undefined,
+        reporterId: reporterId || citizenId,
+        category: category || 'DEPOT_SAUVAGE'
       });
 
-      return res.status(201).json(report);
+      return res.status(201).json({
+        message: 'Signalement créé avec succès',
+        eventEmitted: 'report.created',
+        report
+      });
+
     } catch (err: any) {
       return res.status(400).json({
         error: 'BAD_REQUEST',
-        message: err.message || 'Impossible de créer le signalement.'
+        message: err.message || 'Données de signalement invalides.'
       });
     }
   }
 
   /**
    * GET /reports
-   * Recherche spatiale (2dsphere $near) ou filtrage (OpenAPI 3.1.0)
+   * Recherche géospatiale et filtrage des signalements
    */
-  async getReports(req: Request, res: Response) {
+  async getReports(req: Request, res: Response): Promise<Response> {
     try {
-      const lat = req.query.lat ? parseFloat(req.query.lat as string) : undefined;
-      const lng = req.query.lng ? parseFloat(req.query.lng as string) : undefined;
-      const radiusMeters = req.query.radiusMeters
-        ? parseInt(req.query.radiusMeters as string, 10)
-        : undefined;
-      const status = req.query.status as ReportStatus | undefined;
-      const citizenId = req.query.citizenId as string | undefined;
+      const { lat, lng, near, radius, radiusMeters, status, citizenId, reporterId, category, limit } = req.query;
 
       const reports = await reportService.findReports({
-        lat,
-        lng,
-        radiusMeters,
-        status,
-        citizenId
+        lat: lat ? parseFloat(String(lat)) : undefined,
+        lng: lng ? parseFloat(String(lng)) : undefined,
+        near: near ? String(near) : undefined,
+        radiusMeters: radiusMeters ? parseInt(String(radiusMeters)) : radius ? parseInt(String(radius)) : undefined,
+        status: status as any,
+        citizenId: citizenId ? String(citizenId) : undefined,
+        reporterId: reporterId ? String(reporterId) : undefined,
+        category: category ? String(category) : undefined,
+        limit: limit ? parseInt(String(limit)) : undefined
       });
 
-      return res.status(200).json(reports);
+      return res.status(200).json({
+        count: reports.length,
+        reports
+      });
     } catch (err: any) {
       return res.status(500).json({
         error: 'INTERNAL_SERVER_ERROR',
@@ -89,16 +108,17 @@ export class ReportController {
 
   /**
    * GET /reports/:id
+   * Consultation d'un signalement par son identifiant unique
    */
-  async getReportById(req: Request, res: Response) {
+  async getReportById(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      const report = await reportService.findById(id);
+      const report = await reportService.getReportById(id);
 
       if (!report) {
         return res.status(404).json({
           error: 'NOT_FOUND',
-          message: `Signalement #${id} introuvable.`
+          message: `Le signalement avec l'identifiant ${id} est introuvable.`
         });
       }
 
@@ -106,7 +126,7 @@ export class ReportController {
     } catch (err: any) {
       return res.status(500).json({
         error: 'INTERNAL_SERVER_ERROR',
-        message: err.message
+        message: err.message || 'Erreur lors de la consultation du signalement.'
       });
     }
   }

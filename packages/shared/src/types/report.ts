@@ -21,18 +21,46 @@ export interface GeoLocation {
   coordinates: [number, number];
 }
 
+export interface StatusHistoryEntry {
+  from: ReportStatus;
+  to: ReportStatus;
+  transition: string;
+  actorId?: string;
+  actorRole?: string;
+  reason?: string;
+  timestamp: Date;
+}
+
 export interface IReport {
   id: string;
-  citizenId: string;
-  title: string;
-  description: string;
-  location: GeoLocation;
-  photoUrl: string;
+  reporterId: string;
+  /**
+   * Code catégorie CDCF (ex: DEPOT_SAUVAGE). Chaîne libre tant que le référentiel
+   * des catégories n'est pas figé entre le DW (Dim_Category) et le service IA.
+   */
+  category: string;
+  description?: string;
+  imageUrl: string;
   thumbnailUrl?: string;
   categorySuggested?: string;
   categoryValidated?: string;
   aiConfidenceScore?: number;
+  location: GeoLocation;
   status: ReportStatus;
+  assignedTeamId?: string;
+  assignedWorkerId?: string;
+  priority?: string;
+  reviewValidated?: boolean;
+  reviewedBy?: string;
+  completionPhotoUrl?: string;
+  rejectionReason?: string;
+  reopenReason?: string;
+  statusHistory?: StatusHistoryEntry[];
+  validatedAt?: Date;
+  assignedAt?: Date;
+  startedAt?: Date;
+  resolvedAt?: Date;
+  rejectedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }

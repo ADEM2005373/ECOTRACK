@@ -1,6 +1,6 @@
 # Dependencies & Nx
 node_modules/
-.nx/cache
+.nx/
 .pnpm-store
 
 # Python
@@ -8,6 +8,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
+*.pth
+*.pt
 .Python
 env/
 build/

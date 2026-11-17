@@ -1,19 +1,23 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from './components/ui/Button';
+import { MAP_STRINGS } from './components/map/strings.fr';
+import { RegisterModal } from './components/RegisterModal';
 import { 
   ShieldCheck, 
   Trash2, 
   CheckCircle2, 
-  AlertTriangle, 
   ArrowRight, 
   Sparkles, 
-  Layers,
-  MapPin,
-  Clock
+  Layers, 
+  MapPin, 
+  Clock, 
+  UserPlus 
 } from 'lucide-react';
 
 export default function App() {
   const [loading, setLoading] = useState(false);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
   const simulateAction = () => {
     setLoading(true);
@@ -34,9 +38,45 @@ export default function App() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <Link
+            to="/agent/qualification"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-emerald-400 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+            <ShieldCheck className="w-4 h-4" aria-hidden="true" />
+            Qualification (ECO-31)
+          </Link>
+          <Link
+            to="/admin/ai-governance"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-purple-400 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            <Sparkles className="w-4 h-4" aria-hidden="true" />
+            Gouvernance IA (ECO-43)
+          </Link>
+          <Link
+            to="/admin/analytics"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-blue-400 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <Layers className="w-4 h-4" aria-hidden="true" />
+            Power BI (ECO-42)
+          </Link>
+          <Link
+            to="/supervision"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-brand-400 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+            <MapPin className="w-4 h-4" aria-hidden="true" />
+            {MAP_STRINGS.navLink}
+          </Link>
+          <Button
+            variant="primary"
+            size="sm"
+            icon={<UserPlus className="w-4 h-4" />}
+            onClick={() => setIsRegisterOpen(true)}
+          >
+            S'inscrire (ECO-12)
+          </Button>
           <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-600/20 text-brand-400 border border-brand-600/30">
-            Sprint 0 — Socles Prêts
+            Sprint 5 Prêt
           </span>
         </div>
       </header>
@@ -172,6 +212,9 @@ export default function App() {
       <footer className="border-t border-dark-border py-4 px-6 text-center text-xs text-slate-500">
         EcoTrack V2 • Architecture Monorepo Nx • Tous droits réservés
       </footer>
+
+      {/* Register Modal (ECO-12 / SCRUM-43) */}
+      <RegisterModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
     </div>
   );
 }

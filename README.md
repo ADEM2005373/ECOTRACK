@@ -41,12 +41,15 @@ Ce dossier contient le tableau de bord exécutif inspiré de Power BI pour la su
 ## ⚡ Démarrage Automatique dans Antigravity
 
 Le tableau de bord est configuré pour se lancer automatiquement dès que vous ouvrez le projet dans Antigravity via le hook `.agents/hooks.json` (`SessionStart`) :
+
 - Il synchronise automatiquement les derniers tickets Jira via TWG.
 - Il met à jour `dashboard/data.json` et `dashboard/index.html`.
 - Il ouvre le tableau de bord dans votre navigateur par défaut.
 
 ### Lancement Manuel
+
 Vous pouvez également synchroniser ou ouvrir le dashboard manuellement :
+
 ```powershell
 # Synchroniser les données depuis Jira
 python .agents/scripts/sync_jira.py
@@ -54,3 +57,22 @@ python .agents/scripts/sync_jira.py
 # Ouvrir le dashboard
 Start-Process dashboard/index.html
 ```
+
+## Tests E2E Playwright
+
+Les scénarios de validation du parcours citoyen-agent-ouvrier et l'audit WCAG 2.1 AA
+sont dans `tests/e2e`. Ils ciblent les services déjà démarrés et sont désactivés par
+défaut pour ne pas rendre la CI dépendante d'un environnement local.
+
+```powershell
+$env:E2E_RUN = "true"
+$env:E2E_API_URL = "http://127.0.0.1:8080/api/v1"
+$env:E2E_REPORTER_ID = "<citizen-id>"
+$env:E2E_AGENT_ID = "<agent-id>"
+$env:E2E_WORKER_ID = "<worker-id>"
+$env:E2E_WEB_URL = "http://127.0.0.1:5173"
+npm run test:e2e
+```
+
+`E2E_A11Y_PATHS` accepte une liste de routes séparées par des virgules pour étendre
+l'audit d'accessibilité.

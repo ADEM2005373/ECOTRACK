@@ -2,6 +2,8 @@ import torch
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from routers.classify import router as classify_router
+
 app = FastAPI(
     title="EcoTrack AI Vision Service",
     description="Microservice IA pour la classification d'incidents et de déchets urbains",
@@ -15,6 +17,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(classify_router)
 
 @app.get("/health")
 def health():

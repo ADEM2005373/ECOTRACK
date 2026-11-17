@@ -1,10 +1,26 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import App from './App';
+import SupervisionPage from './pages/SupervisionPage';
+import QualificationPage from './pages/agent/QualificationPage';
+import AiGovernancePage from './pages/admin/AiGovernancePage';
+import AnalyticsPage from './pages/admin/AnalyticsPage';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<App />} />
+        <Route path="/supervision" element={<SupervisionPage />} />
+        <Route path="/agent/qualification" element={<QualificationPage />} />
+        <Route path="/qualification" element={<QualificationPage />} />
+        <Route path="/admin/ai-governance" element={<AiGovernancePage />} />
+        <Route path="/ai-governance" element={<AiGovernancePage />} />
+        <Route path="/admin/analytics" element={<AnalyticsPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
+      </Routes>
+    </BrowserRouter>
   </React.StrictMode>,
 );

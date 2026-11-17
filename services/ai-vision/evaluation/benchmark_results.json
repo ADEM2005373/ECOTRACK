@@ -1,0 +1,142 @@
+{
+  "benchmarkName": "EcoTrack-Vision-Scientific-Evaluation-200",
+  "evaluatedAt": "2026-11-16T13:08:15.587025+00:00",
+  "modelName": "MobileNetV3-Small-EcoTrack-v2",
+  "datasetSize": 200,
+  "summary": {
+    "accuracy": "90.00%",
+    "macroPrecision": "90.55%",
+    "macroRecall": "89.83%",
+    "macroF1": "90.03%",
+    "weightedPrecision": "90.62%",
+    "weightedRecall": "90.00%",
+    "weightedF1": "90.17%",
+    "f1Threshold": "80.0%",
+    "thresholdPassed": true,
+    "meanInferenceTimeMs": "38.04 ms"
+  },
+  "perClassMetrics": {
+    "DEPOT_SAUVAGE": {
+      "category": "DEPOT_SAUVAGE",
+      "label": "Dépôt Sauvage",
+      "support": 50,
+      "tp": 45,
+      "fp": 10,
+      "fn": 5,
+      "tn": 140,
+      "precision": 0.8182,
+      "recall": 0.9,
+      "f1_score": 0.8571
+    },
+    "ENCOMBRANTS": {
+      "category": "ENCOMBRANTS",
+      "label": "Encombrants",
+      "support": 45,
+      "tp": 40,
+      "fp": 4,
+      "fn": 5,
+      "tn": 151,
+      "precision": 0.9091,
+      "recall": 0.8889,
+      "f1_score": 0.8989
+    },
+    "DECHETS_VERTS": {
+      "category": "DECHETS_VERTS",
+      "label": "Déchets Verts",
+      "support": 35,
+      "tp": 32,
+      "fp": 2,
+      "fn": 3,
+      "tn": 163,
+      "precision": 0.9412,
+      "recall": 0.9143,
+      "f1_score": 0.9275
+    },
+    "GRAVATS_CHANTIER": {
+      "category": "GRAVATS_CHANTIER",
+      "label": "Gravats Chantier",
+      "support": 30,
+      "tp": 27,
+      "fp": 0,
+      "fn": 3,
+      "tn": 170,
+      "precision": 1.0,
+      "recall": 0.9,
+      "f1_score": 0.9474
+    },
+    "GRAFFITI": {
+      "category": "GRAFFITI",
+      "label": "Tags / Graffiti",
+      "support": 25,
+      "tp": 23,
+      "fp": 0,
+      "fn": 2,
+      "tn": 175,
+      "precision": 1.0,
+      "recall": 0.92,
+      "f1_score": 0.9583
+    },
+    "AUTRE": {
+      "category": "AUTRE",
+      "label": "Autre / Mobilier",
+      "support": 15,
+      "tp": 13,
+      "fp": 4,
+      "fn": 2,
+      "tn": 181,
+      "precision": 0.7647,
+      "recall": 0.8667,
+      "f1_score": 0.8125
+    }
+  },
+  "confusionMatrix": {
+    "DEPOT_SAUVAGE": {
+      "DEPOT_SAUVAGE": 45,
+      "ENCOMBRANTS": 3,
+      "DECHETS_VERTS": 2,
+      "GRAVATS_CHANTIER": 0,
+      "GRAFFITI": 0,
+      "AUTRE": 0
+    },
+    "ENCOMBRANTS": {
+      "DEPOT_SAUVAGE": 4,
+      "ENCOMBRANTS": 40,
+      "DECHETS_VERTS": 0,
+      "GRAVATS_CHANTIER": 0,
+      "GRAFFITI": 0,
+      "AUTRE": 1
+    },
+    "DECHETS_VERTS": {
+      "DEPOT_SAUVAGE": 2,
+      "ENCOMBRANTS": 0,
+      "DECHETS_VERTS": 32,
+      "GRAVATS_CHANTIER": 0,
+      "GRAFFITI": 0,
+      "AUTRE": 1
+    },
+    "GRAVATS_CHANTIER": {
+      "DEPOT_SAUVAGE": 3,
+      "ENCOMBRANTS": 0,
+      "DECHETS_VERTS": 0,
+      "GRAVATS_CHANTIER": 27,
+      "GRAFFITI": 0,
+      "AUTRE": 0
+    },
+    "GRAFFITI": {
+      "DEPOT_SAUVAGE": 0,
+      "ENCOMBRANTS": 0,
+      "DECHETS_VERTS": 0,
+      "GRAVATS_CHANTIER": 0,
+      "GRAFFITI": 23,
+      "AUTRE": 2
+    },
+    "AUTRE": {
+      "DEPOT_SAUVAGE": 1,
+      "ENCOMBRANTS": 1,
+      "DECHETS_VERTS": 0,
+      "GRAVATS_CHANTIER": 0,
+      "GRAFFITI": 0,
+      "AUTRE": 13
+    }
+  }
+}
