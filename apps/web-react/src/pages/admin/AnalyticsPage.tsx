@@ -1,19 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   BarChart3, 
   ShieldCheck, 
   Filter, 
   RefreshCw, 
-  ExternalLink, 
   PieChart, 
   TrendingUp, 
   CheckCircle2, 
-  AlertTriangle, 
   Lock, 
   Sparkles,
   ArrowLeft,
-  Calendar,
   Layers,
   Clock
 } from 'lucide-react';
@@ -73,7 +70,6 @@ export default function AnalyticsPage() {
   const [selectedDistrict, setSelectedDistrict] = useState<string>('Tous Quartiers (Vue Globale)');
   const [tokenStatus, setTokenStatus] = useState<'GENERATING' | 'READY' | 'REFRESHED'>('READY');
   const [tokenExpiresIn, setTokenExpiresIn] = useState<number>(3600);
-  const [activeTab, setActiveTab] = useState<'VISUAL' | 'METRICS' | 'CONFIG'>('VISUAL');
 
   const selectedReport = REPORTS.find((r) => r.id === selectedReportId) || REPORTS[0];
 
