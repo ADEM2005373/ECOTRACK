@@ -30,61 +30,69 @@ def test(name):
 # SCRUM-53 (ECO-42) TESTS: POWER BI EMBED TOKEN & REACT CONTAINER (US-10)
 # ==============================================================================
 
-@test("SCRUM-53: Power BI Embed Controller (bi_embed.controller.ts) structure & RLS logic")
+def _read_eco42(*parts):
+    path = os.path.join(*parts)
+    assert os.path.exists(path), f"File {path} does not exist"
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
+
+
+@test("SCRUM-53: bi-api embed controller (services/bi-api) with JWT check, fail-closed RLS & GenerateToken identities")
 def test_bi_embed_controller():
-    path = os.path.join("services", "bi-etl", "controllers", "bi_embed.controller.ts")
-    assert os.path.exists(path), f"File {path} does not exist"
-    with open(path, "r", encoding="utf-8") as f:
-        content = f.read()
-    assert "class BiEmbedController" in content, "Missing BiEmbedController class"
-    assert "generateEmbedToken" in content, "Missing generateEmbedToken method"
-    assert "PowerBiIdentity" in content, "Missing PowerBiIdentity interface"
-    assert "roles" in content and "datasets" in content, "Missing RLS identity attributes"
-    assert "District_" in content or "rlsIdentity" in content, "Missing district RLS role mapping"
+    controller = _read_eco42("services", "bi-api", "src", "controllers", "bi-embed.controller.ts")
+    assert "createEmbedTokenHandler" in controller, "Missing createEmbedTokenHandler"
+    assert "verifyAccessToken" in controller, "The controller must verify the identity-api JWT"
+    assert "rlsRolesFor" in controller and "buildEffectiveIdentity" in controller, "Missing RLS role mapping"
+    assert "no-store" in controller, "Embed token response must be Cache-Control: no-store"
+    rls = _read_eco42("services", "bi-api", "src", "rls.ts")
+    assert "username" in rls and "roles" in rls and "datasets" in rls, "Missing RLS identity attributes"
+    client = _read_eco42("services", "bi-api", "src", "powerbi", "powerbi-client.ts")
+    assert "/GenerateToken" in client, "Missing Power BI GenerateToken call"
+    assert "identities" in client, "GenerateToken body must carry RLS identities"
+    assert "accessLevel:" not in client, "GenerateToken V2 must not send accessLevel"
+    mock = os.path.join("services", "bi-etl", "controllers", "bi_embed.controller.ts")
+    assert not os.path.exists(mock), f"Mock controller {mock} must be removed"
 
 
-@test("SCRUM-53: 4 Official Power BI Reports Metadata (OFFICIAL_REPORTS)")
+@test("SCRUM-53: 4 official reports server whitelist (REPORT_KEYS) mapped to env report IDs")
 def test_bi_official_reports():
-    path = os.path.join("services", "bi-etl", "controllers", "bi_embed.controller.ts")
-    with open(path, "r", encoding="utf-8") as f:
-        content = f.read()
-    assert "OFFICIAL_REPORTS" in content, "Missing OFFICIAL_REPORTS definition"
-    assert "OPERATIONAL" in content, "Missing OPERATIONAL report"
-    assert "MLOPS" in content, "Missing MLOPS report"
-    assert "TEAMS" in content, "Missing TEAMS report"
-    assert "SLA" in content, "Missing SLA report"
+    content = _read_eco42("services", "bi-api", "src", "reports.ts")
+    assert "REPORT_KEYS" in content, "Missing REPORT_KEYS whitelist"
+    for key in ("operationnel", "mlops", "performance-equipes", "sla"):
+        assert f"'{key}'" in content, f"Missing report key {key}"
+    for env in ("OPERATIONNEL", "MLOPS", "PERFORMANCE_EQUIPES", "SLA"):
+        assert f"POWERBI_REPORT_ID_{env}" in content, f"Missing env variable POWERBI_REPORT_ID_{env}"
 
 
-@test("SCRUM-53: AnalyticsPage.tsx React Component with Report & District RLS Selectors")
+@test("SCRUM-53: AnalyticsPage.tsx with the 4 report tabs and PowerBIEmbed (TokenType.Embed)")
 def test_analytics_page():
-    path = os.path.join("apps", "web-react", "src", "pages", "admin", "AnalyticsPage.tsx")
-    assert os.path.exists(path), f"File {path} does not exist"
-    with open(path, "r", encoding="utf-8") as f:
-        content = f.read()
-    assert "AnalyticsPage" in content, "Missing AnalyticsPage export"
-    assert "selectedReportId" in content, "Missing report selection state"
-    assert "selectedDistrict" in content, "Missing district RLS filter state"
-    assert "DISTRICTS" in content, "Missing districts list"
-    assert "REPORTS" in content, "Missing reports options list"
+    page = _read_eco42("apps", "web-react", "src", "pages", "admin", "AnalyticsPage.tsx")
+    assert "export default function AnalyticsPage" in page, "Missing AnalyticsPage export"
+    assert "ReportTabs" in page and "ReportEmbed" in page, "Missing report tabs or embed container"
+    assert "selectedDistrict" not in page, "RLS scope must be decided server-side, not chosen in the browser"
+    reports = _read_eco42("apps", "web-react", "src", "components", "analytics", "reports.ts")
+    for label in ("Opérationnel", "MLOps", "Performance Équipes", "SLA"):
+        assert label in reports, f"Missing report tab {label}"
+    embed = _read_eco42("apps", "web-react", "src", "components", "analytics", "ReportEmbed.tsx")
+    assert "PowerBIEmbed" in embed, "Missing PowerBIEmbed component"
+    assert "models.TokenType.Embed" in embed, "Embed must use TokenType.Embed"
+    assert "setAccessToken" in embed, "Missing embed token refresh"
 
 
-@test("SCRUM-53: Web Routing for /admin/analytics and /analytics in main.tsx")
+@test("SCRUM-53: Web Routing for /admin/analytics in main.tsx")
 def test_analytics_routing():
-    path = os.path.join("apps", "web-react", "src", "main.tsx")
-    with open(path, "r", encoding="utf-8") as f:
-        content = f.read()
-    assert "AnalyticsPage" in content, "AnalyticsPage must be imported in main.tsx"
-    assert "/admin/analytics" in content, "Missing /admin/analytics route"
-    assert "/analytics" in content, "Missing /analytics route"
+    content = _read_eco42("apps", "web-react", "src", "main.tsx")
+    assert "import AnalyticsPage from './pages/admin/AnalyticsPage'" in content, "AnalyticsPage must be imported in main.tsx"
+    assert '<Route path="/admin/analytics" element={<AnalyticsPage />} />' in content, "Missing /admin/analytics route"
 
 
-@test("SCRUM-53: Navigation Link in App.tsx")
+@test("SCRUM-53: Navigation Link in App.tsx (Analytique / Décisionnel, ECO-42)")
 def test_analytics_nav_link():
-    path = os.path.join("apps", "web-react", "src", "App.tsx")
-    with open(path, "r", encoding="utf-8") as f:
-        content = f.read()
-    assert "/admin/analytics" in content, "Missing /admin/analytics link in navbar"
-    assert "ECO-42" in content, "Navbar link must mention ECO-42"
+    app = _read_eco42("apps", "web-react", "src", "App.tsx")
+    assert 'to="/admin/analytics"' in app, "Missing /admin/analytics link in navbar"
+    assert "ANALYTICS_STRINGS.navLink" in app, "Navbar label must come from ANALYTICS_STRINGS.navLink"
+    strings = _read_eco42("apps", "web-react", "src", "components", "analytics", "strings.fr.ts")
+    assert "navLink: 'Analytique / Décisionnel (ECO-42)'" in strings, "Navbar link must read 'Analytique / Décisionnel (ECO-42)'"
 
 
 # ==============================================================================
