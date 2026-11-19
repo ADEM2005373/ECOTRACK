@@ -78,11 +78,17 @@ export const AdminMairieDashboard: React.FC = () => {
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [newUserName, setNewUserName] = useState('');
   const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
   const [newUserRole, setNewUserRole] = useState('AGENT_MAIRIE');
 
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUserName || !newUserEmail) return;
+
+    if (newUserPassword && newUserPassword.length < 8) {
+      alert('Le mot de passe doit comporter au moins 8 caractères.');
+      return;
+    }
 
     try {
       const res = await fetch('/api/v1/auth/users', {
@@ -90,7 +96,7 @@ export const AdminMairieDashboard: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: newUserEmail.trim(),
-          password: 'Agent2026!',
+          password: newUserPassword.trim() || 'Agent2026!',
           fullName: newUserName.trim(),
           role: newUserRole,
           municipality
@@ -105,6 +111,7 @@ export const AdminMairieDashboard: React.FC = () => {
       setShowAddUserModal(false);
       setNewUserName('');
       setNewUserEmail('');
+      setNewUserPassword('');
       fetchAgents();
     } catch (err: any) {
       alert(`Erreur: ${err.message}`);
@@ -423,6 +430,19 @@ export const AdminMairieDashboard: React.FC = () => {
                   placeholder="moncef@mairie.tn"
                   value={newUserEmail}
                   onChange={e => setNewUserEmail(e.target.value)}
+                  className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#0f172a] mb-1">Mot de passe de connexion</label>
+                <input
+                  type="password"
+                  required
+                  minLength={8}
+                  placeholder="•••••••• (min. 8 caractères, ex: Agent2026!)"
+                  value={newUserPassword}
+                  onChange={e => setNewUserPassword(e.target.value)}
                   className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
                 />
               </div>

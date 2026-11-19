@@ -121,6 +121,7 @@ export const AdminSaasDashboard: React.FC = () => {
   const [newMunRegion, setNewMunRegion] = useState('');
   const [newMunAdminName, setNewMunAdminName] = useState('');
   const [newMunAdminEmail, setNewMunAdminEmail] = useState('');
+  const [newMunPassword, setNewMunPassword] = useState('');
 
   // Reopen Modal
   const [reopenModalOpen, setReopenModalOpen] = useState(false);
@@ -188,6 +189,11 @@ export const AdminSaasDashboard: React.FC = () => {
     e.preventDefault();
     if (!newMunName.trim() || !newMunAdminEmail.trim()) return;
 
+    if (newMunPassword && newMunPassword.length < 8) {
+      alert("Le mot de passe du compte maire/administrateur doit comporter au moins 8 caractères.");
+      return;
+    }
+
     setIsSubmittingMun(true);
     try {
       const res = await fetch('/api/v1/auth/users', {
@@ -195,8 +201,8 @@ export const AdminSaasDashboard: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: newMunAdminEmail.trim(),
-          password: 'Mairie2026!',
-          fullName: newMunAdminName.trim() || `Directeur Services ${newMunName.trim()}`,
+          password: newMunPassword.trim() || 'Mairie2026!',
+          fullName: newMunAdminName.trim() || `Maire / Directeur ${newMunName.trim()}`,
           role: 'ADMIN_MUNICIPALITE',
           municipality: newMunName.trim()
         })
@@ -214,6 +220,7 @@ export const AdminSaasDashboard: React.FC = () => {
       setNewMunRegion('');
       setNewMunAdminName('');
       setNewMunAdminEmail('');
+      setNewMunPassword('');
       fetchRealData();
     } catch (err: any) {
       alert(`Erreur: ${err.message}`);
@@ -1019,13 +1026,13 @@ export const AdminSaasDashboard: React.FC = () => {
 
             <div className="pt-2 border-t border-[#e2e8f0]">
               <span className="text-xs font-bold text-[#0f172a] block mb-2">
-                Compte Administrateur Municipalité (ADMIN_MUNICIPALITE)
+                Compte Administrateur / Maire (ADMIN_MUNICIPALITE)
               </span>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-[#475569] mb-1">
-                    Nom du Directeur / Responsable
+                    Nom du Maire / Directeur
                   </label>
                   <input
                     type="text"
@@ -1049,6 +1056,24 @@ export const AdminSaasDashboard: React.FC = () => {
                     className="w-full bg-white border border-[#e2e8f0] rounded-lg p-2.5 text-xs text-[#0f172a]"
                   />
                 </div>
+              </div>
+
+              <div className="mt-3">
+                <label className="block text-xs font-semibold text-[#475569] mb-1">
+                  Mot de passe du compte Maire / Administrateur *
+                </label>
+                <input
+                  type="password"
+                  required
+                  minLength={8}
+                  placeholder="•••••••• (min. 8 caractères, ex: Mairie2026!)"
+                  value={newMunPassword}
+                  onChange={(e) => setNewMunPassword(e.target.value)}
+                  className="w-full bg-white border border-[#e2e8f0] rounded-lg p-2.5 text-xs text-[#0f172a] focus:border-[#059669] focus:outline-none"
+                />
+                <p className="text-[11px] text-[#64748b] mt-1">
+                  Ce mot de passe permettra à l'administrateur de cette mairie de se connecter sur son espace de direction municipale.
+                </p>
               </div>
             </div>
 
