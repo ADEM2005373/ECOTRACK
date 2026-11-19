@@ -92,11 +92,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
+const defaultAuthContextValue: AuthContextValue = {
+  state: { user: null, accessToken: null, isAuthenticated: false },
+  loginSuccess: () => {},
+  logout: () => {},
+};
+
 // ── Hook ──────────────────────────────────────────────────────────────────────
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error('useAuth must be used inside <AuthProvider>');
-  }
-  return ctx;
+  return ctx || defaultAuthContextValue;
 }
