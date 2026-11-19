@@ -39,79 +39,15 @@ export interface ReportItem {
 // ── Mock fallback data ─────────────────────────────────────────────────────────
 
 export const MOCK_STATS: ReportStats = {
-  total: 500,
-  resolved: 300,
-  inProgress: 100,
-  averageLatencyMs: 145,
-  aiF1Score: 0.902,
-  resolutionRate: 0.942,
+  total: 0,
+  resolved: 0,
+  inProgress: 0,
+  averageLatencyMs: 0,
+  aiF1Score: 0,
+  resolutionRate: 0,
 };
 
-export const MOCK_REPORTS: ReportItem[] = [
-  {
-    id: 'inc_001',
-    reference: 'REP-2026-0498',
-    title: 'Décharge sauvage d\u2019encombrants et cartons',
-    category: 'DECHARGE_SAUVAGE',
-    district: 'Centre-Ville',
-    status: 'A_QUALIFIER',
-    confidence: 0.94,
-    timeAgo: 'Il y a 12 min',
-    imageUrl:
-      'https://images.unsplash.com/photo-1605600659873-d808a13e4d2a?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 'inc_002',
-    reference: 'REP-2026-0495',
-    title: 'Gravats de chantier bloquant la chaussée',
-    category: 'DEPOT_SAUVAGE',
-    district: 'El Menzah',
-    status: 'EN_TRAITEMENT',
-    confidence: 0.89,
-    timeAgo: 'Il y a 42 min',
-    worker: 'Tarek Jouini',
-    imageUrl:
-      'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 'inc_003',
-    reference: 'REP-2026-0492',
-    title: 'Détritus ménagers autour des conteneurs',
-    category: 'DECHARGE_SAUVAGE',
-    district: 'Ariana',
-    status: 'RESOLU',
-    confidence: 0.96,
-    timeAgo: 'Il y a 2 h',
-    worker: 'Youssef Trabelsi',
-    imageUrl:
-      'https://images.unsplash.com/photo-1528323273322-d81458248d40?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 'inc_004',
-    reference: 'REP-2026-0488',
-    title: 'Tag et dégradation sur mur municipal',
-    category: 'GRAFFITI',
-    district: 'La Marsa',
-    status: 'NOUVEAU',
-    confidence: 0.92,
-    timeAgo: 'Il y a 3 h',
-    imageUrl:
-      'https://images.unsplash.com/photo-1572945281869-826b8e485e07?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 'inc_005',
-    reference: 'REP-2026-0481',
-    title: 'Mobilier usagé abandonné sur trottoir',
-    category: 'ENCOMBRANTS',
-    district: 'Les Berges du Lac',
-    status: 'EN_TRAITEMENT',
-    confidence: 0.91,
-    timeAgo: 'Il y a 4 h',
-    worker: 'Hamza Dridi',
-    imageUrl:
-      'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=400&q=80',
-  },
-];
+export const MOCK_REPORTS: ReportItem[] = [];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -150,7 +86,7 @@ function normalizeReport(raw: Record<string, unknown>, idx: number): ReportItem 
         if (hrs < 24) return `Il y a ${hrs} h`;
         return `Il y a ${Math.floor(hrs / 24)} j`;
       })()
-    : MOCK_REPORTS[idx % MOCK_REPORTS.length].timeAgo;
+    : 'Récemment';
 
   return {
     id: String(raw.id ?? `api_${idx}`),
@@ -162,9 +98,7 @@ function normalizeReport(raw: Record<string, unknown>, idx: number): ReportItem 
     confidence: typeof raw.confidence === 'number' ? raw.confidence : 0.9,
     timeAgo,
     worker: raw.workerName ? String(raw.workerName) : undefined,
-    imageUrl:
-      String(raw.thumbnailUrl ?? raw.imageUrl ?? '') ||
-      MOCK_REPORTS[idx % MOCK_REPORTS.length].imageUrl,
+    imageUrl: String(raw.thumbnailUrl ?? raw.imageUrl ?? ''),
   };
 }
 

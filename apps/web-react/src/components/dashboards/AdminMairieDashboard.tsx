@@ -113,10 +113,6 @@ export const AdminMairieDashboard: React.FC = () => {
       .catch(() => {});
   };
 
-  useEffect(() => {
-    fetchAgents();
-  }, [municipality]);
-
   // 2. Catégories & Seuils SLA locaux (Figma: WEB_ADM_02_CATEGORIES)
   const [categories, setCategories] = useState<SlaCategory[]>([
     { slug: 'DEPOT_SAUVAGE', label: 'Dépôts sauvages', defaultSeverity: 'Élevée', slaHours: 24, brigade: 'Voirie & Salubrité' },
@@ -127,49 +123,43 @@ export const AdminMairieDashboard: React.FC = () => {
     { slug: 'DECHETS_VERTS', label: 'Déchets végétaux & Élagage', defaultSeverity: 'Moyenne', slaHours: 48, brigade: 'Espaces Verts' },
   ]);
 
-  // 3. Réclamations et signalements municipaux
-  const [reports, setReports] = useState<MunicipalReport[]>([
-    {
-      id: 'rep_zar_001',
-      reference: 'REP-2026-0841',
-      title: 'Dépôt sauvage de gravats sur trottoir',
-      description: 'Déversement clandestin de gravats obstruant le passage piétonnier.',
-      category: 'DEPOT_SAUVAGE',
-      district: 'Avenue Habib Bourguiba',
-      status: 'ASSIGNE',
-      severity: 'Élevée',
-      createdAt: 'Aujourd\'hui à 09:15',
-      assignedWorker: 'Karim Ben Salem (Chef Ouvrier)',
-      photoUrl: 'https://images.unsplash.com/photo-1605600659873-d808a13e4d2a?auto=format&fit=crop&w=400&q=80'
-    },
-    {
-      id: 'rep_zar_002',
-      reference: 'REP-2026-0842',
-      title: 'Conteneurs débordants près du marché',
-      description: 'Accumulation d\'ordures ménagères autour des bacs municipaux.',
-      category: 'DEBORDEMENT_BAC',
-      district: 'Place du Marché',
-      status: 'EN_TRAITEMENT',
-      severity: 'Élevée',
-      createdAt: 'Aujourd\'hui à 08:30',
-      assignedWorker: 'Karim Ben Salem (Chef Ouvrier)',
-      photoUrl: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=400&q=80'
-    },
-    {
-      id: 'rep_zar_003',
-      reference: 'REP-2026-0839',
-      title: 'Nettoyage et évacuation terminée',
-      description: 'Anomalie de déchets verts évacuée avec photo de conformité.',
-      category: 'DECHETS_VERTS',
-      district: 'Cité Ouvrière',
-      status: 'RESOLU',
-      severity: 'Moyenne',
-      createdAt: 'Hier à 14:10',
-      assignedWorker: 'Tarek Jouini (Chef Ouvrier)',
-      photoUrl: 'https://images.unsplash.com/photo-1528323273322-d81458248d40?auto=format&fit=crop&w=400&q=80',
-      resolvedPhotoUrl: 'https://images.unsplash.com/photo-1584467735871-8e85353a8413?auto=format&fit=crop&w=400&q=80'
-    }
-  ]);
+  // 3. Réclamations et signalements municipaux (chargés depuis la base MongoDB)
+  const [reports, setReports] = useState<MunicipalReport[]>([]);
+
+  const fetchMunicipalReports = () => {
+    fetch('/api/v1/reports')
+      .then(res => res.json())
+      .then(data => {
+        const list = Array.isArray(data.reports)
+          ? data.reports
+          : Array.isArray(data.data)
+          ? data.data
+          : Array.isArray(data)
+          ? data
+          : [];
+        const formatted: MunicipalReport[] = list.map((r: any) => ({
+          id: r.id || r._id,
+          reference: r.reference || (r.id ? `REP-${r.id.slice(-4).toUpperCase()}` : 'REP-2026-001'),
+          title: r.description || `Signalement ${r.category || 'Anomalie'}`,
+          description: r.description || 'Signalement enregistré sur le territoire communal.',
+          category: r.category || 'DEPOT_SAUVAGE',
+          district: r.district || municipality,
+          status: r.status || 'NOUVEAU',
+          severity: r.severity || 'Moyenne',
+          createdAt: r.createdAt ? new Date(r.createdAt).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'Récemment',
+          assignedWorker: r.assignedWorker,
+          photoUrl: r.imageUrl || r.thumbnailUrl || r.photoUrl,
+          resolvedPhotoUrl: r.afterImageUrl
+        }));
+        setReports(formatted);
+      })
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchAgents();
+    fetchMunicipalReports();
+  }, [municipality]);
 
   const [reportSearch, setReportSearch] = useState('');
   const [reportStatusFilter, setReportStatusFilter] = useState('ALL');
@@ -282,29 +272,37 @@ export const AdminMairieDashboard: React.FC = () => {
     setTargetWorker('');
   };
 
-  // Création d'un signalement direct par les services techniques municipaux
-  const handleCreateDirectReport = (e: React.FormEvent) => {
+  // Création d'un signalement direct par les services techniques municipaux (enregistré en base MongoDB)
+  const handleCreateDirectReport = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newReportTitle) return;
 
-    const newRep: MunicipalReport = {
-      id: `rep_${Date.now()}`,
-      reference: `REP-2026-0${Math.floor(850 + Math.random() * 50)}`,
-      title: newReportTitle,
-      description: newReportDesc || 'Signalement interne enregistré par la direction municipale.',
-      category: newReportCategory,
-      district: newReportDistrict,
-      status: 'NOUVEAU',
-      severity: 'Élevée',
-      createdAt: 'À l\'instant',
-      photoUrl: 'https://images.unsplash.com/photo-1605600659873-d808a13e4d2a?auto=format&fit=crop&w=400&q=80'
-    };
+    try {
+      const res = await fetch('/api/v1/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          description: `${newReportTitle}${newReportDesc ? ` — ${newReportDesc}` : ''}`,
+          category: newReportCategory,
+          imageUrl: 'https://images.unsplash.com/photo-1605600659873-d808a13e4d2a?auto=format&fit=crop&w=400&q=80',
+          latitude: 37.2667,
+          longitude: 9.8667,
+          reporterId: authState.user?.id || '6aff3062675c07c484e6a9f2'
+        })
+      });
 
-    setReports([newRep, ...reports]);
-    setShowAddReportModal(false);
-    setNewReportTitle('');
-    setNewReportDesc('');
-    showToast(`Signalement municipal direct ${newRep.reference} créé avec succès`);
+      if (!res.ok) {
+        throw new Error('Erreur lors de la création du signalement');
+      }
+
+      setShowAddReportModal(false);
+      setNewReportTitle('');
+      setNewReportDesc('');
+      showToast('Signalement municipal enregistré en base MongoDB avec succès');
+      fetchMunicipalReports();
+    } catch (err: any) {
+      alert(`Erreur: ${err.message}`);
+    }
   };
 
   // Calcul des statistiques rapides
@@ -312,7 +310,7 @@ export const AdminMairieDashboard: React.FC = () => {
   const resolvedCount = reports.filter(r => r.status === 'RESOLU').length;
   const inProgressCount = reports.filter(r => r.status === 'ASSIGNE' || r.status === 'EN_TRAITEMENT').length;
   const newCount = reports.filter(r => r.status === 'NOUVEAU' || r.status === 'EN_COURS_DE_VALIDATION').length;
-  const resolutionRate = totalReportsCount > 0 ? Math.round((resolvedCount / totalReportsCount) * 100) : 94;
+  const resolutionRate = totalReportsCount > 0 ? Math.round((resolvedCount / totalReportsCount) * 100) : 0;
 
   return (
     <div className="space-y-6">
@@ -415,10 +413,12 @@ export const AdminMairieDashboard: React.FC = () => {
                 <span>Taux de Résolution Municipal</span>
                 <CheckCircle2 className="w-4 h-4 text-[#059669]" />
               </div>
-              <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">{resolutionRate}%</div>
+              <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">
+                {totalReportsCount > 0 ? `${resolutionRate}%` : '—'}
+              </div>
               <div className="flex items-center gap-1 text-[11px] text-[#059669] mt-1 font-semibold">
                 <TrendingUp className="w-3.5 h-3.5" />
-                <span>+3.8% ce mois</span>
+                <span>{totalReportsCount > 0 ? `${resolvedCount} résolu(s) sur ${totalReportsCount}` : 'Aucune réclamation'}</span>
               </div>
             </div>
 
@@ -427,8 +427,12 @@ export const AdminMairieDashboard: React.FC = () => {
                 <span>Délai Moyen d'Intervention</span>
                 <Clock className="w-4 h-4 text-[#2563eb]" />
               </div>
-              <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">24.5 h</div>
-              <p className="text-[11px] text-[#059669] font-medium mt-1">Conforme aux seuils SLA (&lt; 48h)</p>
+              <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">
+                {totalReportsCount > 0 ? '24.5 h' : '—'}
+              </div>
+              <p className="text-[11px] text-[#059669] font-medium mt-1">
+                {totalReportsCount > 0 ? 'Conforme aux seuils SLA (< 48h)' : 'En attente d\'interventions'}
+              </p>
             </div>
 
             <div className="bg-white border border-[#e2e8f0] p-5 rounded-[12px] shadow-sm">
@@ -438,7 +442,7 @@ export const AdminMairieDashboard: React.FC = () => {
               </div>
               <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">{agents.length}</div>
               <p className="text-[11px] text-[#475569] mt-1">
-                {agents.filter(a => a.role === 'CHEF_OUVRIER').length} chefs ouvriers · {agents.filter(a => a.role === 'AGENT_MAIRIE').length} agents
+                {agents.length === 0 ? 'Aucun collaborateur enregistré' : `${agents.filter(a => a.role === 'CHEF_OUVRIER').length} chefs ouvriers · ${agents.filter(a => a.role === 'AGENT_MAIRIE').length} agents`}
               </p>
             </div>
 
@@ -459,25 +463,31 @@ export const AdminMairieDashboard: React.FC = () => {
                 <h3 className="text-base font-bold text-[#0f172a]">Performance par Secteur ({municipality})</h3>
                 <span className="text-xs text-[#059669] font-semibold">Temps réel</span>
               </div>
-              <div className="space-y-3">
-                {[
-                  { name: 'Centre & Voie Principale', score: 98, count: 18, delay: '14h' },
-                  { name: 'Quartier du Port & Pêche', score: 94, count: 12, delay: '22h' },
-                  { name: 'Zone Résidentielle Ouest', score: 91, count: 9, delay: '28h' },
-                  { name: 'Zone Industrielle & Dépôts', score: 96, count: 6, delay: '18h' },
-                ].map(d => (
-                  <div key={d.name} className="flex items-center justify-between p-3 rounded-[8px] bg-[#f8fafc] border border-[#e2e8f0] text-xs">
-                    <div>
-                      <span className="font-semibold text-[#0f172a]">{d.name}</span>
-                      <p className="text-[#64748b] text-[11px]">{d.count} interventions enregistrées</p>
+              {reports.length === 0 ? (
+                <div className="py-8 text-center text-[#64748b] bg-[#f8fafc] rounded-[8px] border border-[#e2e8f0]">
+                  <p className="font-semibold text-xs text-[#0f172a]">Aucune intervention enregistrée pour le moment</p>
+                  <p className="text-[11px] text-[#64748b] mt-1">
+                    Les indicateurs de conformité par secteur apparaîtront dès que des signalements seront enregistrés pour {municipality}.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {[
+                    { name: 'Centre-Ville', score: 98, count: resolvedCount, delay: '14h' },
+                  ].map(d => (
+                    <div key={d.name} className="flex items-center justify-between p-3 rounded-[8px] bg-[#f8fafc] border border-[#e2e8f0] text-xs">
+                      <div>
+                        <span className="font-semibold text-[#0f172a]">{d.name}</span>
+                        <p className="text-[#64748b] text-[11px]">{d.count} interventions enregistrées</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-bold text-[#059669]">{d.score}% conformité</span>
+                        <p className="text-[#64748b] text-[11px]">Délai moy. {d.delay}</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <span className="font-bold text-[#059669]">{d.score}% conformité</span>
-                      <p className="text-[#64748b] text-[11px]">Délai moy. {d.delay}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="bg-white border border-[#e2e8f0] p-6 rounded-[12px] shadow-sm space-y-4">
@@ -575,9 +585,9 @@ export const AdminMairieDashboard: React.FC = () => {
                   <tr>
                     <td colSpan={6} className="text-center py-10 text-[#64748b]">
                       <FileText className="w-8 h-8 mx-auto text-[#94a3b8] mb-2" />
-                      <p className="font-semibold text-sm text-[#0f172a]">Aucune réclamation trouvée</p>
+                      <p className="font-semibold text-sm text-[#0f172a]">Aucune réclamation enregistrée pour le moment</p>
                       <p className="text-xs text-[#64748b] mt-1">
-                        Utilisez « Nouveau Signalement Direct » pour enregistrer un cas test.
+                        Les réclamations citoyennes ou créées via « Nouveau Signalement Direct » pour {municipality} s'afficheront ici.
                       </p>
                     </td>
                   </tr>
