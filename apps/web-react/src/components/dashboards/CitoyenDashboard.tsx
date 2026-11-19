@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { getReports, type ReportItem } from '../../services/reportApi';
 import { 
   PlusCircle, 
@@ -7,13 +8,14 @@ import {
   MapPin, 
   Camera, 
   FileText, 
-  Sparkles,
+  Sparkles, 
   Send
 } from 'lucide-react';
 
 export const CitoyenDashboard: React.FC = () => {
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [showNewModal, setShowNewModal] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Formulaire nouveau signalement
   const [title, setTitle] = useState('');
@@ -22,6 +24,12 @@ export const CitoyenDashboard: React.FC = () => {
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (searchParams.get('tab') === 'new') {
+      setShowNewModal(true);
+    }
+  }, [searchParams]);
 
   const fetchCitizenReports = async () => {
     try {
@@ -57,6 +65,7 @@ export const CitoyenDashboard: React.FC = () => {
       setReports(prev => [newReport, ...prev]);
       setSubmitSuccess(`Votre signalement ${newReport.reference} a été transmis aux services municipaux avec succès !`);
       setShowNewModal(false);
+      setSearchParams({});
       setTitle('');
       setDescription('');
     } finally {
@@ -198,7 +207,10 @@ export const CitoyenDashboard: React.FC = () => {
                 <h3 className="text-base font-bold text-[#0f172a]">Nouveau Signalement Citoyen</h3>
               </div>
               <button
-                onClick={() => setShowNewModal(false)}
+                onClick={() => {
+                  setShowNewModal(false);
+                  setSearchParams({});
+                }}
                 className="text-[#94a3b8] hover:text-[#0f172a]"
               >
                 ✕

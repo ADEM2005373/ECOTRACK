@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../store/authStore';
 import {
   Users,
@@ -15,6 +15,28 @@ import {
 export const AdminMairieDashboard: React.FC = () => {
   const { state: authState } = useAuth();
   const municipality = authState.user?.municipality || 'Municipalité de Tunis';
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentTabParam = searchParams.get('tab') as 'overview' | 'users' | 'categories' | null;
+
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'categories'>(
+    currentTabParam && ['overview', 'users', 'categories'].includes(currentTabParam)
+      ? currentTabParam
+      : 'overview'
+  );
+
+  useEffect(() => {
+    if (currentTabParam && ['overview', 'users', 'categories'].includes(currentTabParam)) {
+      setActiveTab(currentTabParam);
+    } else if (!currentTabParam) {
+      setActiveTab('overview');
+    }
+  }, [currentTabParam]);
+
+  const switchTab = (tab: 'overview' | 'users' | 'categories') => {
+    setActiveTab(tab);
+    setSearchParams(tab === 'overview' ? {} : { tab });
+  };
 
   // Liste locale des agents & brigades (Figma: WEB_ADM_01_USERS)
   const [agents, setAgents] = useState([
@@ -32,7 +54,6 @@ export const AdminMairieDashboard: React.FC = () => {
     { slug: 'GRAFFITI', label: 'Dégradations & Graffitis', defaultSeverity: 'Faible', slaHours: 72, brigade: 'Peinture & Nettoyage' },
   ]);
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'categories'>('overview');
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [newUserName, setNewUserName] = useState('');
   const [newUserEmail, setNewUserEmail] = useState('');
@@ -91,7 +112,7 @@ export const AdminMairieDashboard: React.FC = () => {
       {/* Onglets de navigation interne (Figma: Users / Categories / KPIs) */}
       <div className="flex items-center gap-2 border-b border-[#e2e8f0] pb-2">
         <button
-          onClick={() => setActiveTab('overview')}
+          onClick={() => switchTab('overview')}
           className={`px-4 py-2 rounded-[8px] text-[13px] font-semibold transition ${
             activeTab === 'overview'
               ? 'bg-[#102c35] text-white'
@@ -101,7 +122,7 @@ export const AdminMairieDashboard: React.FC = () => {
           Vue d'ensemble & KPIs
         </button>
         <button
-          onClick={() => setActiveTab('users')}
+          onClick={() => switchTab('users')}
           className={`px-4 py-2 rounded-[8px] text-[13px] font-semibold transition ${
             activeTab === 'users'
               ? 'bg-[#102c35] text-white'
@@ -111,7 +132,7 @@ export const AdminMairieDashboard: React.FC = () => {
           Utilisateurs & Brigades ({agents.length})
         </button>
         <button
-          onClick={() => setActiveTab('categories')}
+          onClick={() => switchTab('categories')}
           className={`px-4 py-2 rounded-[8px] text-[13px] font-semibold transition ${
             activeTab === 'categories'
               ? 'bg-[#102c35] text-white'

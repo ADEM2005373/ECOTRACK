@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Brain,
   ShieldCheck,
@@ -156,8 +156,28 @@ const INITIAL_ALERTS: TechnicalAlert[] = [
 ];
 
 export const AdminSaasDashboard: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentTabParam = searchParams.get('tab') as 'overview' | 'municipalities' | 'infrastructure' | 'alerts' | 'audit' | null;
+
   // Tabs State: 'overview' | 'municipalities' | 'infrastructure' | 'alerts' | 'audit'
-  const [activeTab, setActiveTab] = useState<'overview' | 'municipalities' | 'infrastructure' | 'alerts' | 'audit'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'municipalities' | 'infrastructure' | 'alerts' | 'audit'>(
+    currentTabParam && ['overview', 'municipalities', 'infrastructure', 'alerts', 'audit'].includes(currentTabParam)
+      ? currentTabParam
+      : 'overview'
+  );
+
+  useEffect(() => {
+    if (currentTabParam && ['overview', 'municipalities', 'infrastructure', 'alerts', 'audit'].includes(currentTabParam)) {
+      setActiveTab(currentTabParam);
+    } else if (!currentTabParam) {
+      setActiveTab('overview');
+    }
+  }, [currentTabParam]);
+
+  const switchTab = (tab: 'overview' | 'municipalities' | 'infrastructure' | 'alerts' | 'audit') => {
+    setActiveTab(tab);
+    setSearchParams(tab === 'overview' ? {} : { tab });
+  };
 
   // Municipalities State
   const [municipalities, setMunicipalities] = useState<MunicipalityItem[]>(INITIAL_MUNICIPALITIES);
@@ -300,7 +320,7 @@ export const AdminSaasDashboard: React.FC = () => {
       {/* 2. Onglets de Navigation Métier Admin SaaS */}
       <div className="border-b border-[#e2e8f0] flex items-center gap-2 overflow-x-auto pb-px">
         <button
-          onClick={() => setActiveTab('overview')}
+          onClick={() => switchTab('overview')}
           className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'overview'
               ? 'border-[#059669] text-[#059669]'
@@ -312,7 +332,7 @@ export const AdminSaasDashboard: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveTab('municipalities')}
+          onClick={() => switchTab('municipalities')}
           className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'municipalities'
               ? 'border-[#059669] text-[#059669]'
@@ -324,7 +344,7 @@ export const AdminSaasDashboard: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveTab('infrastructure')}
+          onClick={() => switchTab('infrastructure')}
           className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'infrastructure'
               ? 'border-[#059669] text-[#059669]'
@@ -336,7 +356,7 @@ export const AdminSaasDashboard: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveTab('alerts')}
+          onClick={() => switchTab('alerts')}
           className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'alerts'
               ? 'border-[#059669] text-[#059669]'
@@ -348,7 +368,7 @@ export const AdminSaasDashboard: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveTab('audit')}
+          onClick={() => switchTab('audit')}
           className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'audit'
               ? 'border-[#059669] text-[#059669]'

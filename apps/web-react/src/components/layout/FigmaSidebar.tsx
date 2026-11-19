@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../../store/authStore';
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth, type AuthUser } from '../../store/authStore';
 import {
   Leaf,
   Inbox,
@@ -11,13 +11,14 @@ import {
   ShieldCheck,
   Brain,
   Wrench,
-  Camera,
   PlusCircle,
   FileText,
   LogOut,
   AlertTriangle,
-  Clock,
-  HelpCircle
+  Building2,
+  Server,
+  HelpCircle,
+  Repeat
 } from 'lucide-react';
 
 interface FigmaSidebarProps {
@@ -25,19 +26,88 @@ interface FigmaSidebarProps {
   onSelectTab?: (tab: string) => void;
 }
 
-export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ currentTab, onSelectTab }) => {
+const DEMO_PRESETS: { label: string; role: string; desc: string; user: AuthUser }[] = [
+  {
+    label: '👑 Admin SaaS',
+    role: 'ADMIN_SAAS',
+    desc: 'Superviseur Global Multi-Mairies',
+    user: {
+      id: 'usr_admin_saas',
+      email: 'admin@ecotrack.tn',
+      fullName: 'Administrateur Principal',
+      role: 'ADMIN_SAAS',
+      municipality: 'Plateforme Métropolitaine',
+    },
+  },
+  {
+    label: '🏛️ Admin Mairie',
+    role: 'ADMIN_MUNICIPALITE',
+    desc: 'Directeur Services Urbains',
+    user: {
+      id: 'usr_admin_mairie',
+      email: 'mairie.tunis@ecotrack.tn',
+      fullName: 'Mondher Ben Amor',
+      role: 'ADMIN_MUNICIPALITE',
+      municipality: 'Ville de Tunis',
+    },
+  },
+  {
+    label: '📋 Agent Mairie',
+    role: 'AGENT_MAIRIE',
+    desc: 'Modération & Tri IA',
+    user: {
+      id: 'usr_agent_mairie',
+      email: 'agent.tunis@ecotrack.tn',
+      fullName: 'Camille Durand',
+      role: 'AGENT_MAIRIE',
+      municipality: 'Ville de Tunis',
+    },
+  },
+  {
+    label: '👷 Chef Ouvrier',
+    role: 'CHEF_OUVRIER',
+    desc: 'Interventions & Preuve Photo',
+    user: {
+      id: 'usr_chef_ouvrier',
+      email: 'chef.ouvrier@ecotrack.tn',
+      fullName: 'Karim Ben Salem',
+      role: 'CHEF_OUVRIER',
+      municipality: 'Ville de Tunis',
+    },
+  },
+  {
+    label: '📱 Citoyen',
+    role: 'CITOYEN',
+    desc: 'Déclaration & Suivi',
+    user: {
+      id: 'usr_citoyen',
+      email: 'citoyen@ecotrack.tn',
+      fullName: 'Anis Mahjoub',
+      role: 'CITOYEN',
+      municipality: 'Ville de Tunis',
+    },
+  },
+];
+
+export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
   let user: any = null;
   let role = 'ADMIN_SAAS';
   let logout = () => {};
+  let loginSuccess = (_u: AuthUser, _token: string) => {};
+
   try {
     const auth = useAuth();
     user = auth.state?.user;
     role = user?.role || 'ADMIN_SAAS';
     logout = auth.logout;
+    loginSuccess = auth.loginSuccess;
   } catch {
     // Graceful fallback when outside AuthProvider in isolated tests
   }
+
   const location = useLocation();
+  const navigate = useNavigate();
+  const [showRoleModal, setShowRoleModal] = useState(false);
 
   const getRoleConfig = () => {
     switch (role) {
@@ -80,62 +150,68 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ currentTab, onSelect
 
   const roleConfig = getRoleConfig();
 
-  // Navigation stricte par rôle (100% conforme aux flux Figma 05_Flow_Agent_Web et 06_Flow_Admin_Web)
+  // Navigation stricte par rôle (100% conforme Figma et exigences utilisateur)
   const getNavItems = () => {
     if (role === 'CITOYEN') {
       return [
-        { id: 'my-reports', label: 'Mes Réclamations', icon: <FileText className="w-4 h-4" />, path: '/' },
-        { id: 'new-report', label: 'Nouveau Signalement', icon: <PlusCircle className="w-4 h-4 text-emerald-400" />, path: '/' },
-        { id: 'map', label: 'Carte des Incidents', icon: <MapPin className="w-4 h-4" />, path: '/supervision' },
+        { id: 'my-reports', label: 'Mes Réclamations', icon: <FileText className="w-4 h-4 text-emerald-400" />, path: '/' },
+        { id: 'new-report', label: 'Nouveau Signalement', icon: <PlusCircle className="w-4 h-4 text-emerald-400" />, path: '/?tab=new' },
+        { id: 'map', label: 'Carte des Incidents', icon: <MapPin className="w-4 h-4 text-blue-400" />, path: '/supervision' },
       ];
     }
 
     if (role === 'CHEF_OUVRIER' || role === 'OUVRIER') {
       return [
         { id: 'missions', label: 'Feuille de Route (Missions)', icon: <Wrench className="w-4 h-4 text-amber-400" />, path: '/', count: '3' },
-        { id: 'active-jobs', label: 'Chantiers en cours', icon: <Clock className="w-4 h-4 text-blue-400" />, path: '/' },
-        { id: 'proof-upload', label: 'Clôture & Preuve Photo', icon: <Camera className="w-4 h-4 text-emerald-400" />, path: '/' },
-        { id: 'map', label: 'Carte des Chantiers', icon: <MapPin className="w-4 h-4" />, path: '/supervision' },
+        { id: 'map', label: 'Carte des Chantiers', icon: <MapPin className="w-4 h-4 text-blue-400" />, path: '/supervision' },
       ];
     }
 
     if (role === 'AGENT_MAIRIE' || role === 'AGENT') {
       return [
-        { id: 'inbox', label: 'Boîte de réception', icon: <Inbox className="w-4 h-4" />, path: '/', count: '24' },
+        { id: 'inbox', label: 'Boîte de réception', icon: <Inbox className="w-4 h-4 text-emerald-400" />, path: '/', count: '24' },
         { id: 'qualification', label: 'Atelier de Qualification', icon: <ShieldCheck className="w-4 h-4 text-purple-400" />, path: '/agent/qualification' },
-        { id: 'map', label: 'Carte opérationnelle', icon: <MapPin className="w-4 h-4" />, path: '/supervision' },
-        { id: 'alerts', label: 'Alertes prioritaires', icon: <AlertTriangle className="w-4 h-4 text-amber-400" />, path: '/' },
+        { id: 'map', label: 'Carte opérationnelle', icon: <MapPin className="w-4 h-4 text-blue-400" />, path: '/supervision' },
       ];
     }
 
     if (role === 'ADMIN_MUNICIPALITE') {
       return [
-        { id: 'overview', label: 'Vue d’ensemble', icon: <Inbox className="w-4 h-4" />, path: '/', count: '14' },
-        { id: 'users', label: 'Utilisateurs & Brigades', icon: <Users className="w-4 h-4" />, path: '/' },
-        { id: 'categories', label: 'Catégories & Seuils SLA', icon: <Tags className="w-4 h-4" />, path: '/' },
-        { id: 'powerbi', label: 'Pilotage & Analyses', icon: <BarChart3 className="w-4 h-4 text-blue-400" />, path: '/admin/analytics' },
-        { id: 'map', label: 'Carte opérationnelle', icon: <MapPin className="w-4 h-4" />, path: '/supervision' },
+        { id: 'overview', label: 'Direction Municipale', icon: <Inbox className="w-4 h-4 text-blue-400" />, path: '/', count: '14' },
+        { id: 'users', label: 'Utilisateurs & Brigades', icon: <Users className="w-4 h-4 text-emerald-400" />, path: '/?tab=users', count: '4' },
+        { id: 'categories', label: 'Catégories & Seuils SLA', icon: <Tags className="w-4 h-4 text-purple-400" />, path: '/?tab=categories' },
+        { id: 'powerbi', label: 'Pilotage & Analyses', icon: <BarChart3 className="w-4 h-4 text-indigo-400" />, path: '/admin/analytics' },
+        { id: 'map', label: 'Carte Territoriale', icon: <MapPin className="w-4 h-4 text-teal-400" />, path: '/supervision' },
       ];
     }
 
-    // ADMIN_SAAS
+    // ADMIN_SAAS : TOUTES LES FONCTIONNALITÉS DEMANDÉES DIRECTEMENT DANS LE MENU
     return [
-      { id: 'overview', label: 'Tour de Contrôle SaaS', icon: <Inbox className="w-4 h-4" />, path: '/', count: '48' },
+      { id: 'overview', label: 'Tour de Contrôle SaaS', icon: <Inbox className="w-4 h-4 text-emerald-400" />, path: '/', count: '48' },
+      { id: 'municipalities', label: 'Supervision des Mairies', icon: <Building2 className="w-4 h-4 text-blue-400" />, path: '/?tab=municipalities', count: '5' },
+      { id: 'infrastructure', label: 'Serveurs & Flux K8s', icon: <Server className="w-4 h-4 text-cyan-400" />, path: '/?tab=infrastructure', count: '99.9%' },
+      { id: 'alerts', label: 'Alertes Techniques', icon: <AlertTriangle className="w-4 h-4 text-amber-400" />, path: '/?tab=alerts', count: '3' },
       { id: 'ai-governance', label: 'Gouvernance IA & MLOps', icon: <Brain className="w-4 h-4 text-purple-400" />, path: '/admin/ai-governance' },
-      { id: 'powerbi', label: 'Analyses Multi-Villes', icon: <BarChart3 className="w-4 h-4 text-blue-400" />, path: '/admin/analytics' },
-      { id: 'map', label: 'Carte Métropolitaine', icon: <MapPin className="w-4 h-4 text-cyan-400" />, path: '/supervision' },
-      { id: 'audit', label: 'Journal d’Audit Immuable', icon: <ShieldCheck className="w-4 h-4 text-emerald-400" />, path: '/admin/audit' },
+      { id: 'powerbi', label: 'Analyses Multi-Villes', icon: <BarChart3 className="w-4 h-4 text-indigo-400" />, path: '/admin/analytics' },
+      { id: 'map', label: 'Carte Métropolitaine', icon: <MapPin className="w-4 h-4 text-emerald-400" />, path: '/supervision' },
+      { id: 'audit', label: 'Journal d’Audit & Backup', icon: <ShieldCheck className="w-4 h-4 text-teal-400" />, path: '/admin/audit' },
     ];
   };
 
   const navItems = getNavItems();
   const userInitials = user?.fullName
-    ? user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+    ? user.fullName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
     : 'ET';
 
+  const handleSwitchRole = (preset: typeof DEMO_PRESETS[0]) => {
+    loginSuccess(preset.user, 'demo_access_token_2026');
+    setShowRoleModal(false);
+    navigate('/');
+  };
+
   return (
-    <aside className="bg-[#102c35] flex flex-col justify-between h-screen w-[240px] px-[16px] py-[24px] shrink-0 text-white select-none z-30">
-      <div className="flex flex-col gap-[24px]">
+    <aside className="bg-[#102c35] flex flex-col justify-between h-screen w-[240px] px-[16px] py-[20px] shrink-0 text-white select-none z-30 overflow-y-auto">
+      <div className="flex flex-col gap-[18px]">
         {/* Figma: Logo & Marque ECOTRACK CONSOLE V2 */}
         <div className="flex items-center gap-[10px] px-[8px]">
           <div className="bg-[#059669] flex items-center justify-center rounded-[9px] size-[34px] shadow-sm">
@@ -152,61 +228,70 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ currentTab, onSelect
         </div>
 
         {/* Figma: Territoire & Collectivité */}
-        <div className="bg-[#1b4449] rounded-[8px] p-[12px] flex flex-col gap-[4px]">
-          <p className="font-semibold text-[13px] text-white leading-tight">
+        <div className="bg-[#1b4449] rounded-[8px] p-[10px] flex flex-col gap-[3px]">
+          <p className="font-semibold text-[12px] text-white leading-tight">
             {user?.municipality || 'Ville de Tunis'}
           </p>
-          <p className="text-[#aec5cb] text-[11px] leading-tight">
+          <p className="text-[#aec5cb] text-[10px] leading-tight">
             {roleConfig.roleSubtitle}
           </p>
         </div>
 
+        {/* Bouton Testeur Rapide de Rôles */}
+        <button
+          onClick={() => setShowRoleModal(true)}
+          className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#059669]/20 hover:bg-[#059669]/30 border border-[#059669]/40 text-[#6ee7b7] text-[11px] font-medium transition cursor-pointer"
+          title="Changer de compte pour tester tous les rôles"
+        >
+          <span className="flex items-center gap-1.5 truncate">
+            <Repeat className="w-3.5 h-3.5" />
+            <span>Tester les 5 Rôles</span>
+          </span>
+          <span className="text-[10px] font-bold bg-[#059669] text-white px-1.5 py-0.2 rounded">5/5</span>
+        </button>
+
         {/* Figma: Section Navigation */}
-        <div className="flex flex-col gap-[8px]">
+        <div className="flex flex-col gap-[6px]">
           <p className="text-[#aec5cb] text-[10px] font-semibold tracking-[1.2px] uppercase px-[4px]">
             {roleConfig.sectionTitle}
           </p>
 
-          <nav className="flex flex-col gap-[4px]">
+          <nav className="flex flex-col gap-[3px]">
             {navItems.map(item => {
-              const isActive = (item.path !== '/' && location.pathname === item.path) || 
-                               (item.path === '/' && location.pathname === '/' && (!currentTab || currentTab === item.id || (item.id === 'inbox' && currentTab === 'overview')));
+              const isMatch = (() => {
+                if (item.path === '/') {
+                  return location.pathname === '/' && (!location.search || location.search === '' || location.search === '?tab=overview');
+                }
+                if (item.path.includes('?tab=')) {
+                  const tabParam = item.path.split('?tab=')[1];
+                  return location.pathname === '/' && location.search === `?tab=${tabParam}`;
+                }
+                return location.pathname === item.path;
+              })();
 
-              const content = (
-                <div
-                  className={`flex items-center justify-between h-[44px] px-[12px] rounded-[8px] transition-colors cursor-pointer ${
-                    isActive 
+              return (
+                <Link
+                  key={item.id}
+                  to={item.path}
+                  onClick={() => onSelectTab && onSelectTab(item.id)}
+                  className={`flex items-center justify-between h-[40px] px-[10px] rounded-[8px] transition-colors cursor-pointer ${
+                    isMatch 
                       ? 'bg-[#1b4449] text-white font-semibold' 
                       : 'text-[#aec5cb] hover:bg-[#1b4449]/50 hover:text-white font-normal'
                   }`}
-                  onClick={() => onSelectTab && onSelectTab(item.id)}
                 >
-                  <div className="flex items-center gap-[10px] min-w-0">
-                    <span className="shrink-0 size-[18px] flex items-center justify-center">
+                  <div className="flex items-center gap-[9px] min-w-0">
+                    <span className="shrink-0 size-[16px] flex items-center justify-center">
                       {item.icon}
                     </span>
-                    <span className="text-[12px] truncate">{item.label}</span>
+                    <span className="text-[11px] truncate">{item.label}</span>
                   </div>
                   {item.count && (
-                    <span className="text-[#6ee7b7] text-[11px] font-semibold shrink-0 ml-2">
+                    <span className="text-[#6ee7b7] text-[10px] font-semibold shrink-0 ml-1.5">
                       {item.count}
                     </span>
                   )}
-                </div>
-              );
-
-              if (item.path.startsWith('/admin') || item.path.startsWith('/agent') || item.path.startsWith('/supervision')) {
-                return (
-                  <Link key={item.id} to={item.path} className="block">
-                    {content}
-                  </Link>
-                );
-              }
-
-              return (
-                <div key={item.id}>
-                  {content}
-                </div>
+                </Link>
               );
             })}
           </nav>
@@ -214,36 +299,96 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ currentTab, onSelect
       </div>
 
       {/* Figma: Pied de navigation & Profil */}
-      <div className="flex flex-col gap-[16px] pt-[16px] border-t border-[#355259]">
-        <div className="flex items-center gap-[10px] px-[8px] text-[#aec5cb] hover:text-white text-[12px] cursor-pointer transition">
-          <HelpCircle className="size-[18px]" />
-          <span>Centre d'aide & Manuel</span>
+      <div className="flex flex-col gap-[12px] pt-[12px] border-t border-[#355259]">
+        <div className="flex items-center gap-[8px] px-[6px] text-[#aec5cb] hover:text-white text-[11px] cursor-pointer transition">
+          <HelpCircle className="size-[16px]" />
+          <span>Centre d'aide &amp; Documentation</span>
         </div>
 
-        <div className="flex items-center justify-between pt-[12px] border-t border-[#1b4449]">
-          <div className="flex items-center gap-[10px] min-w-0">
-            <div className="bg-[#355259] rounded-full size-[34px] flex items-center justify-center text-white font-semibold text-[11px] shrink-0">
+        <div className="flex items-center justify-between pt-[8px] border-t border-[#1b4449]">
+          <div className="flex items-center gap-[8px] min-w-0">
+            <div className="bg-[#355259] rounded-full size-[30px] flex items-center justify-center text-white font-semibold text-[10px] shrink-0">
               {userInitials}
             </div>
             <div className="flex flex-col min-w-0">
-              <p className="font-semibold text-[12px] text-white truncate leading-tight">
+              <p className="font-semibold text-[11px] text-white truncate leading-tight">
                 {user?.fullName || 'Utilisateur'}
               </p>
-              <p className="text-[#aec5cb] text-[10px] truncate leading-tight">
+              <p className="text-[10px] text-[#aec5cb] truncate leading-tight">
                 {roleConfig.roleLabel}
               </p>
             </div>
           </div>
 
           <button
-            onClick={logout}
-            className="p-1.5 rounded-lg text-[#aec5cb] hover:text-rose-400 hover:bg-[#1b4449] transition shrink-0"
+            onClick={() => { logout(); navigate('/login'); }}
             title="Se déconnecter"
+            className="text-[#aec5cb] hover:text-rose-400 p-1 rounded transition"
           >
-            <LogOut className="size-4" />
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       </div>
+
+      {/* Modal Changement Rapide de Rôle pour Démonstration */}
+      {showRoleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white border border-[#e2e8f0] rounded-xl p-5 max-w-md w-full shadow-2xl space-y-3 text-[#0f172a]">
+            <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-2.5">
+              <div className="flex items-center gap-2">
+                <Repeat className="w-5 h-5 text-[#059669]" />
+                <h3 className="text-sm font-bold text-[#0f172a]">
+                  Tester un autre compte (5 Rôles)
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowRoleModal(false)}
+                className="text-[#94a3b8] hover:text-[#0f172a] font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-[#475569]">
+              Sélectionnez un rôle pour basculer instantanément de profil et tester ses fonctionnalités et droits d'accès spécifiques :
+            </p>
+
+            <div className="space-y-2">
+              {DEMO_PRESETS.map((preset) => (
+                <button
+                  key={preset.role}
+                  onClick={() => handleSwitchRole(preset)}
+                  className={`w-full text-left p-3 rounded-lg border transition flex items-center justify-between ${
+                    role === preset.role
+                      ? 'bg-emerald-50 border-[#059669] text-[#065f46]'
+                      : 'bg-slate-50 border-[#e2e8f0] hover:bg-slate-100 text-[#0f172a]'
+                  }`}
+                >
+                  <div>
+                    <span className="font-bold text-xs block">{preset.label}</span>
+                    <span className="text-[11px] text-[#64748b]">{preset.desc}</span>
+                  </div>
+                  {role === preset.role && (
+                    <span className="text-[10px] font-bold bg-[#059669] text-white px-2 py-0.5 rounded">Actuel</span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowRoleModal(false)}
+                className="px-3 py-1.5 text-xs text-[#475569] hover:bg-slate-100 rounded-lg"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 };
+
+export default FigmaSidebar;
