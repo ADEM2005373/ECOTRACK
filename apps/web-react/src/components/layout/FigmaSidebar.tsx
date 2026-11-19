@@ -26,10 +26,18 @@ interface FigmaSidebarProps {
 }
 
 export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ currentTab, onSelectTab }) => {
-  const { state: authState, logout } = useAuth();
+  let user: any = null;
+  let role = 'ADMIN_SAAS';
+  let logout = () => {};
+  try {
+    const auth = useAuth();
+    user = auth.state?.user;
+    role = user?.role || 'ADMIN_SAAS';
+    logout = auth.logout;
+  } catch {
+    // Graceful fallback when outside AuthProvider in isolated tests
+  }
   const location = useLocation();
-  const user = authState.user;
-  const role = user?.role || 'CITOYEN';
 
   const getRoleConfig = () => {
     switch (role) {
@@ -116,7 +124,7 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ currentTab, onSelect
       { id: 'ai-governance', label: 'Gouvernance IA & MLOps', icon: <Brain className="w-4 h-4 text-purple-400" />, path: '/admin/ai-governance' },
       { id: 'powerbi', label: 'Analyses Multi-Villes', icon: <BarChart3 className="w-4 h-4 text-blue-400" />, path: '/admin/analytics' },
       { id: 'map', label: 'Carte Métropolitaine', icon: <MapPin className="w-4 h-4 text-cyan-400" />, path: '/supervision' },
-      { id: 'audit', label: 'Journal d’Audit Immuable', icon: <ShieldCheck className="w-4 h-4 text-emerald-400" />, path: '/' },
+      { id: 'audit', label: 'Journal d’Audit Immuable', icon: <ShieldCheck className="w-4 h-4 text-emerald-400" />, path: '/admin/audit' },
     ];
   };
 

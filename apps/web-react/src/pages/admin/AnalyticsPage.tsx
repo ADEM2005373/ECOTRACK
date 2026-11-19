@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { 
-  BarChart3, 
   ShieldCheck, 
   Filter, 
   RefreshCw, 
@@ -10,11 +8,10 @@ import {
   CheckCircle2, 
   Lock, 
   Sparkles,
-  ArrowLeft,
   Layers,
   Clock
 } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
+import { FigmaLayout } from '../../components/layout/FigmaLayout';
 
 interface ReportOption {
   id: string;
@@ -48,10 +45,10 @@ const REPORTS: ReportOption[] = [
   },
   {
     id: 'rpt_sla_004',
-    name: 'Respect des Engagements (SLA)',
+    name: 'Respect des Engagements SLA',
     category: 'Qualité de Service',
-    description: 'Taux de dépassement SLA, MTTR historique et comparatif par zone municipale.',
-    dataset: 'Fact_Reports & SLA_Measures',
+    description: 'Taux de dépassement SLA, MTTR moyen par quartier et satisfaction usagers.',
+    dataset: 'Fact_Reports & Dim_Category',
   },
 ];
 
@@ -59,23 +56,23 @@ const DISTRICTS = [
   'Tous Quartiers (Vue Globale)',
   'Centre-Ville',
   'El Menzah',
-  'Ariana',
+  'Bab Bhar',
   'La Marsa',
-  'Les Berges du Lac',
   'Carthage',
+  'Ariana',
 ];
 
-export default function AnalyticsPage() {
+export function AnalyticsPage() {
   const [selectedReportId, setSelectedReportId] = useState<string>('rpt_op_001');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('Tous Quartiers (Vue Globale)');
-  const [tokenStatus, setTokenStatus] = useState<'GENERATING' | 'READY' | 'REFRESHED'>('READY');
+  const [tokenStatus, setTokenStatus] = useState<'VALID' | 'GENERATING' | 'FAILED'>('VALID');
   const [tokenExpiresIn, setTokenExpiresIn] = useState<number>(3600);
 
   const selectedReport = REPORTS.find((r) => r.id === selectedReportId) || REPORTS[0];
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTokenExpiresIn((prev) => (prev > 1 ? prev - 1 : 3600));
+      setTokenExpiresIn((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -83,9 +80,9 @@ export default function AnalyticsPage() {
   const handleRefresh = () => {
     setTokenStatus('GENERATING');
     setTimeout(() => {
-      setTokenStatus('REFRESHED');
+      setTokenStatus('VALID');
       setTokenExpiresIn(3600);
-    }, 600);
+    }, 800);
   };
 
   const formatMinutes = (seconds: number) => {
@@ -95,62 +92,46 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      {/* Top Header */}
-      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link
-            to="/"
-            className="p-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition"
-            title="Retour à l'accueil"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-blue-700 flex items-center justify-center text-white shadow-lg shadow-brand-600/30">
-            <BarChart3 className="w-5 h-5 text-white" />
-          </div>
+    <FigmaLayout pageSpace="Pilotage &amp; Décisionnel" pageTitle="Analyses Multi-Collectivités Power BI">
+      <div className="space-y-6">
+        {/* Header Title */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-base font-bold text-white tracking-tight">
-                Tableaux de Bord Décisionnels Power BI
-              </h1>
-            </div>
-            <p className="text-xs text-slate-400">
-              Intégration Sécurisée Azure AD & Row-Level Security (RLS)
+            <h1 className="text-[26px] font-bold text-[#0f172a] font-heading tracking-tight">
+              Tableaux de Bord Décisionnels Power BI
+            </h1>
+            <p className="text-[13px] text-[#475569] mt-0.5">
+              Intégration sécurisée Azure AD &amp; Row-Level Security (RLS) multi-collectivités.
             </p>
           </div>
-        </div>
 
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2 text-xs bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-slate-300">
-            <Lock className="w-3.5 h-3.5 text-emerald-400" />
-            <span>RLS Actif : <strong>{selectedDistrict}</strong></span>
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-2 text-xs bg-white border border-[#e2e8f0] rounded-lg px-3 py-2 text-[#475569] shadow-sm">
+              <Lock className="w-3.5 h-3.5 text-[#059669]" />
+              <span>RLS Actif : <strong>{selectedDistrict}</strong></span>
+            </div>
+            <button
+              onClick={handleRefresh}
+              className="inline-flex items-center gap-2 px-3.5 h-[40px] rounded-lg border border-[#e2e8f0] bg-white hover:bg-slate-50 text-xs font-semibold text-[#0f172a] shadow-sm transition"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-[#059669] ${tokenStatus === 'GENERATING' ? 'animate-spin' : ''}`} />
+              <span>Actualiser le Token</span>
+            </button>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            icon={<RefreshCw className={`w-3.5 h-3.5 ${tokenStatus === 'GENERATING' ? 'animate-spin' : ''}`} />}
-            onClick={handleRefresh}
-          >
-            Actualiser le Token
-          </Button>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="flex-1 max-w-7xl mx-auto w-full p-6 space-y-6">
         {/* Controls Bar: Report Selector & RLS District Filter */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           {/* Report Tabs */}
           <div className="flex flex-wrap items-center gap-2">
             {REPORTS.map((rpt) => (
               <button
                 key={rpt.id}
                 onClick={() => setSelectedReportId(rpt.id)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 ${
+                className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2 ${
                   selectedReportId === rpt.id
-                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-750 hover:text-white'
+                    ? 'bg-[#059669] text-white shadow-sm'
+                    : 'bg-slate-50 text-[#475569] hover:bg-slate-100'
                 }`}
               >
                 <PieChart className="w-3.5 h-3.5" />
@@ -161,14 +142,14 @@ export default function AnalyticsPage() {
 
           {/* District RLS Selector */}
           <div className="flex items-center gap-2 w-full md:w-auto">
-            <span className="text-xs text-slate-400 whitespace-nowrap flex items-center gap-1.5">
-              <Filter className="w-3.5 h-3.5 text-brand-400" />
+            <span className="text-xs text-[#475569] whitespace-nowrap flex items-center gap-1.5">
+              <Filter className="w-3.5 h-3.5 text-[#059669]" />
               Secteur RLS :
             </span>
             <select
               value={selectedDistrict}
               onChange={(e) => setSelectedDistrict(e.target.value)}
-              className="bg-slate-950 border border-slate-800 text-xs text-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 w-full md:w-56"
+              className="bg-white border border-[#e2e8f0] text-xs text-[#0f172a] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#059669] w-full md:w-56"
             >
               {DISTRICTS.map((d) => (
                 <option key={d} value={d}>
@@ -181,73 +162,76 @@ export default function AnalyticsPage() {
 
         {/* KPI Strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
-            <span className="text-xs text-slate-400 flex items-center gap-1">
-              <Layers className="w-3.5 h-3.5 text-blue-400" />
+          <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
+            <span className="text-xs text-[#475569] flex items-center gap-1">
+              <Layers className="w-3.5 h-3.5 text-blue-500" />
               Total Signalements
             </span>
-            <div className="text-2xl font-bold text-white mt-1">500</div>
-            <span className="text-[11px] text-emerald-400">Dataset historique consolidé</span>
+            <div className="text-2xl font-bold text-[#0f172a] mt-1 font-heading">500</div>
+            <span className="text-[11px] text-[#059669] font-medium">Dataset historique consolidé</span>
           </div>
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
-            <span className="text-xs text-slate-400 flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5 text-amber-400" />
+
+          <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
+            <span className="text-xs text-[#475569] flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5 text-amber-500" />
               MTTR Moyen
             </span>
-            <div className="text-2xl font-bold text-white mt-1">28.4 h</div>
-            <span className="text-[11px] text-slate-400">Objectif SLA &lt; 48.0 h</span>
+            <div className="text-2xl font-bold text-[#0f172a] mt-1 font-heading">28.4 h</div>
+            <span className="text-[11px] text-[#64748b]">Objectif SLA &lt; 48.0 h</span>
           </div>
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
-            <span className="text-xs text-slate-400 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+
+          <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
+            <span className="text-xs text-[#475569] flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" />
               Conformité SLA
             </span>
-            <div className="text-2xl font-bold text-white mt-1">94.2%</div>
-            <span className="text-[11px] text-emerald-400">+3.1% vs mois précédent</span>
+            <div className="text-2xl font-bold text-[#0f172a] mt-1 font-heading">94.2%</div>
+            <span className="text-[11px] text-[#059669] font-medium">+3.1% vs mois précédent</span>
           </div>
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
-            <span className="text-xs text-slate-400 flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+
+          <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
+            <span className="text-xs text-[#475569] flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 text-[#7c3aed]" />
               Concordance IA / Humain
             </span>
-            <div className="text-2xl font-bold text-white mt-1">91.8%</div>
-            <span className="text-[11px] text-purple-400">F1-score 90.2% validé</span>
+            <div className="text-2xl font-bold text-[#0f172a] mt-1 font-heading">91.8%</div>
+            <span className="text-[11px] text-[#7c3aed] font-medium">F1-score 90.2% validé</span>
           </div>
         </div>
 
         {/* Embedded Report Container */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+        <div className="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden shadow-sm flex flex-col">
           {/* Subheader with Report Info & Security State */}
-          <div className="px-6 py-4 border-b border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-900/50">
+          <div className="px-6 py-4 border-b border-[#e2e8f0] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50">
             <div>
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
+              <h2 className="text-base font-bold text-[#0f172a] flex items-center gap-2">
                 {selectedReport.name}
-                <span className="text-xs font-normal text-slate-400">
+                <span className="text-xs font-normal text-[#64748b]">
                   (Modèle : {selectedReport.dataset})
                 </span>
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">{selectedReport.description}</p>
+              <p className="text-xs text-[#475569] mt-0.5">{selectedReport.description}</p>
             </div>
 
             <div className="flex items-center gap-3 text-xs">
-              <div className="flex items-center gap-1.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Embed Token Valide ({formatMinutes(tokenExpiresIn)})</span>
+              <div className="flex items-center gap-1.5 text-[#065f46] bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#059669]" />
+                <span className="font-semibold">Embed Token Valide ({formatMinutes(tokenExpiresIn)})</span>
               </div>
             </div>
           </div>
 
-          {/* Interactive Report Canvas / Iframe Simulation Container */}
-          <div className="p-6 bg-slate-950/70 min-h-[520px] flex flex-col justify-between">
+          {/* Interactive Report Canvas */}
+          <div className="p-6 bg-slate-50/50 min-h-[480px] flex flex-col justify-between">
             {/* Visual Header of Embed */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800/60">
+            <div className="flex items-center justify-between pb-4 border-b border-[#e2e8f0]">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-xs font-mono text-slate-300">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#059669] animate-pulse"></span>
+                <span className="text-xs font-mono text-[#0f172a]">
                   PowerBI Workspace: <strong>ecotrack_production</strong>
                 </span>
               </div>
-              <span className="text-xs text-slate-500 font-mono">
+              <span className="text-xs text-[#64748b] font-mono">
                 RLS Filter: {selectedDistrict === 'Tous Quartiers (Vue Globale)' ? 'No restriction (Admin)' : `Quartier = '${selectedDistrict}'`}
               </span>
             </div>
@@ -255,85 +239,85 @@ export default function AnalyticsPage() {
             {/* Dashboard Visual Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-6">
               {/* Card 1: Breakdown by Category */}
-              <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-5 space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+              <div className="bg-white border border-[#e2e8f0] rounded-xl p-5 space-y-3 shadow-sm">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#475569] flex items-center justify-between">
                   <span>Répartition par Type</span>
-                  <PieChart className="w-4 h-4 text-brand-400" />
+                  <PieChart className="w-4 h-4 text-[#059669]" />
                 </h3>
                 <div className="space-y-2 pt-2">
                   <div className="flex justify-between text-xs">
-                    <span className="text-slate-300">Décharge Sauvage</span>
-                    <span className="font-bold text-white">42%</span>
+                    <span className="text-[#475569]">Décharge Sauvage</span>
+                    <span className="font-bold text-[#0f172a]">42%</span>
                   </div>
-                  <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                    <div className="bg-emerald-500 h-full w-[42%]"></div>
+                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div className="bg-[#059669] h-full w-[42%]"></div>
                   </div>
 
                   <div className="flex justify-between text-xs">
-                    <span className="text-slate-300">Encombrant</span>
-                    <span className="font-bold text-white">28%</span>
+                    <span className="text-[#475569]">Encombrant</span>
+                    <span className="font-bold text-[#0f172a]">28%</span>
                   </div>
-                  <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                     <div className="bg-blue-500 h-full w-[28%]"></div>
                   </div>
 
                   <div className="flex justify-between text-xs">
-                    <span className="text-slate-300">Graffiti / Végétation</span>
-                    <span className="font-bold text-white">18%</span>
+                    <span className="text-[#475569]">Graffiti / Végétation</span>
+                    <span className="font-bold text-[#0f172a]">18%</span>
                   </div>
-                  <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                     <div className="bg-purple-500 h-full w-[18%]"></div>
                   </div>
 
                   <div className="flex justify-between text-xs">
-                    <span className="text-slate-300">Autre / Dépôt</span>
-                    <span className="font-bold text-white">12%</span>
+                    <span className="text-[#475569]">Autre / Dépôt</span>
+                    <span className="font-bold text-[#0f172a]">12%</span>
                   </div>
-                  <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                     <div className="bg-amber-500 h-full w-[12%]"></div>
                   </div>
                 </div>
               </div>
 
               {/* Card 2: Resolution Funnel */}
-              <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-5 space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+              <div className="bg-white border border-[#e2e8f0] rounded-xl p-5 space-y-3 shadow-sm">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#475569] flex items-center justify-between">
                   <span>Statuts des 500 Signalements</span>
-                  <TrendingUp className="w-4 h-4 text-blue-400" />
+                  <TrendingUp className="w-4 h-4 text-blue-500" />
                 </h3>
                 <div className="space-y-3 pt-2">
-                  <div className="flex items-center justify-between bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs">
-                    <span className="text-emerald-400 font-semibold">Résolus avec Preuve Photo</span>
-                    <span className="text-white font-bold">300 (60%)</span>
+                  <div className="flex items-center justify-between bg-emerald-50/60 p-2.5 rounded-lg border border-emerald-100 text-xs">
+                    <span className="text-[#065f46] font-semibold">Résolus avec Preuve Photo</span>
+                    <span className="text-[#0f172a] font-bold">300 (60%)</span>
                   </div>
-                  <div className="flex items-center justify-between bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs">
-                    <span className="text-blue-400 font-semibold">En Traitement / Chantier</span>
-                    <span className="text-white font-bold">100 (20%)</span>
+                  <div className="flex items-center justify-between bg-blue-50/60 p-2.5 rounded-lg border border-blue-100 text-xs">
+                    <span className="text-blue-700 font-semibold">En Traitement / Chantier</span>
+                    <span className="text-[#0f172a] font-bold">100 (20%)</span>
                   </div>
-                  <div className="flex items-center justify-between bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs">
-                    <span className="text-amber-400 font-semibold">Nouveaux / À Qualifier</span>
-                    <span className="text-white font-bold">75 (15%)</span>
+                  <div className="flex items-center justify-between bg-amber-50/60 p-2.5 rounded-lg border border-amber-100 text-xs">
+                    <span className="text-amber-700 font-semibold">Nouveaux / À Qualifier</span>
+                    <span className="text-[#0f172a] font-bold">75 (15%)</span>
                   </div>
-                  <div className="flex items-center justify-between bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs">
-                    <span className="text-red-400 font-semibold">Rejetés (Doublons/Flous)</span>
-                    <span className="text-white font-bold">25 (5%)</span>
+                  <div className="flex items-center justify-between bg-rose-50/60 p-2.5 rounded-lg border border-rose-100 text-xs">
+                    <span className="text-rose-700 font-semibold">Rejetés (Doublons/Flous)</span>
+                    <span className="text-[#0f172a] font-bold">25 (5%)</span>
                   </div>
                 </div>
               </div>
 
               {/* Card 3: District Performance Matrix */}
-              <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-5 space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+              <div className="bg-white border border-[#e2e8f0] rounded-xl p-5 space-y-3 shadow-sm">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#475569] flex items-center justify-between">
                   <span>Indice de Salubrité par Secteur</span>
-                  <ShieldCheck className="w-4 h-4 text-purple-400" />
+                  <ShieldCheck className="w-4 h-4 text-[#7c3aed]" />
                 </h3>
                 <div className="space-y-2.5 pt-2 text-xs">
                   {['Centre-Ville', 'El Menzah', 'Ariana', 'La Marsa'].map((d) => (
-                    <div key={d} className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-                      <span className="text-slate-300">{d}</span>
+                    <div key={d} className="flex items-center justify-between border-b border-[#e2e8f0] pb-2">
+                      <span className="text-[#475569]">{d}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-emerald-400 font-bold">92/100</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
+                        <span className="text-[#059669] font-bold">92/100</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-[#059669] border border-emerald-200 font-semibold">
                           Optimal
                         </span>
                       </div>
@@ -344,15 +328,17 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Embed Footer Info */}
-            <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <div className="pt-4 border-t border-[#e2e8f0] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#64748b]">
               <span className="font-mono">
-                API Endpoint: <code>POST /api/bi/embed-token</code> â€¢ Azure AD Tenant: <code>msal-ecotrack-auth</code>
+                API Endpoint: <code className="bg-slate-100 px-1 py-0.5 rounded">POST /api/bi/embed-token</code> · Azure AD Tenant: <code className="bg-slate-100 px-1 py-0.5 rounded">msal-ecotrack-auth</code>
               </span>
-              <span>PropulsÃ© par Power BI Embedded & Star Schema PostgreSQL</span>
+              <span>Propulsé par Power BI Embedded &amp; Star Schema PostgreSQL DW</span>
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </FigmaLayout>
   );
 }
+
+export default AnalyticsPage;

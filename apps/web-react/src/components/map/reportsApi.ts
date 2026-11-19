@@ -49,15 +49,31 @@ export function parseReport(raw: unknown): ParsedReport {
     return { ok: false };
   }
   const item = raw as Record<string, unknown>;
-  const id = nonEmptyString(item.id);
+  const id = nonEmptyString(item.id) ?? nonEmptyString(item._id);
   const category = nonEmptyString(item.categoryValidated) ?? nonEmptyString(item.category);
-  const position = geoJsonPointToLatLng(item.location);
-  const createdAt = typeof item.createdAt === 'string' ? new Date(item.createdAt) : null;
+  let position = geoJsonPointToLatLng(item.location);
+  if (!position && typeof item.latitude === 'number' && typeof item.longitude === 'number') {
+    position = [item.latitude, item.longitude];
+  }
+
+  let status = item.status;
+  if (status === 'A_QUALIFIER') status = 'EN_COURS_DE_VALIDATION';
+  if (status === 'EN_COURS') status = 'EN_TRAITEMENT';
+
+  let createdAt: Date | null = null;
+  if (typeof item.createdAt === 'string') {
+    createdAt = new Date(item.createdAt);
+  } else if (item.createdAt instanceof Date) {
+    createdAt = item.createdAt;
+  } else {
+    createdAt = new Date();
+  }
+
   if (
     id === null ||
     category === null ||
     position === null ||
-    !isReportStatus(item.status) ||
+    !isReportStatus(status) ||
     createdAt === null ||
     Number.isNaN(createdAt.getTime())
   ) {
@@ -67,24 +83,36 @@ export function parseReport(raw: unknown): ParsedReport {
     ok: true,
     report: {
       id,
-      status: item.status,
+      status,
       category,
       description: nonEmptyString(item.description),
-      photoUrl: safeHttpUrl(item.thumbnailUrl) ?? safeHttpUrl(item.imageUrl),
+      photoUrl: safeHttpUrl(item.thumbnailUrl) ?? safeHttpUrl(item.imageUrl) ?? safeHttpUrl(item.photoUrl),
       position,
       createdAt,
     },
   };
 }
 
-/** GET /reports returns an array of Report (packages/contracts/openapi.yaml). */
+/** GET /reports returns an array of Report or an object { count, reports } */
 export function parseReportsPayload(body: unknown): ReportsPayload {
-  if (!Array.isArray(body)) {
+  let list: unknown[] | null = null;
+  if (Array.isArray(body)) {
+    list = body;
+  } else if (body && typeof body === 'object') {
+    const obj = body as Record<string, unknown>;
+    if (Array.isArray(obj.reports)) {
+      list = obj.reports;
+    } else if (Array.isArray(obj.data)) {
+      list = obj.data;
+    }
+  }
+
+  if (!list) {
     throw new ReportsApiError('invalid_payload');
   }
   const reports: MapReport[] = [];
   let skipped = 0;
-  for (const item of body) {
+  for (const item of list) {
     const parsed = parseReport(item);
     if (parsed.ok) {
       reports.push(parsed.report);

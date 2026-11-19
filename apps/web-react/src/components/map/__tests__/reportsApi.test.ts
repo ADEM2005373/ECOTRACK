@@ -68,8 +68,15 @@ describe('parseReportsPayload', () => {
     expect(parseReportsPayload([])).toEqual({ reports: [], skipped: 0 });
   });
 
-  it('rejects a body that is not an array', () => {
-    expect(() => parseReportsPayload({ data: [] })).toThrow(ReportsApiError);
+  it('accepts an object with reports array like report-api returns', () => {
+    const payload = parseReportsPayload({ count: 1, reports: [makeApiReport()] });
+    expect(payload.reports).toHaveLength(1);
+    expect(payload.skipped).toBe(0);
+  });
+
+  it('rejects an invalid payload', () => {
+    expect(() => parseReportsPayload('invalid')).toThrow(ReportsApiError);
+    expect(() => parseReportsPayload(null)).toThrow(ReportsApiError);
   });
 });
 

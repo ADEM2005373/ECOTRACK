@@ -10,6 +10,7 @@ import SupervisionPage from './pages/SupervisionPage';
 import QualificationPage from './pages/agent/QualificationPage';
 import AiGovernancePage from './pages/admin/AiGovernancePage';
 import AnalyticsPage from './pages/admin/AnalyticsPage';
+import AuditTrailPage from './pages/admin/AuditTrailPage';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -31,6 +32,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <Route path="/ai-governance" element={<AiGovernancePage />} />
             <Route path="/admin/analytics" element={<AnalyticsPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/admin/audit" element={<AuditTrailPage />} />
+            <Route path="/audit" element={<AuditTrailPage />} />
           </Route>
         </Routes>
       </AuthProvider>

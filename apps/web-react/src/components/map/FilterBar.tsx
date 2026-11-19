@@ -14,8 +14,8 @@ interface FilterBarProps {
 }
 
 const SELECT_CLASS =
-  'min-h-[44px] w-full rounded-lg border border-dark-borderLight bg-slate-900 px-3 text-sm text-slate-100 ' +
-  'focus:outline-none focus:ring-2 focus:ring-brand-400 disabled:cursor-not-allowed disabled:text-slate-400';
+  'min-h-[42px] w-full rounded-lg border border-[#e2e8f0] bg-white px-3 text-xs text-[#0f172a] ' +
+  'focus:outline-none focus:ring-2 focus:ring-[#059669] disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400';
 
 export function FilterBar({ categories, filters, onChange, onReset, disabled = false }: FilterBarProps) {
   const id = useId();
@@ -25,11 +25,11 @@ export function FilterBar({ categories, filters, onChange, onReset, disabled = f
   const urgencyHelpId = `${id}-urgency-help`;
 
   return (
-    <fieldset className="grid grid-cols-1 gap-4 rounded-2xl border border-dark-border bg-dark-card p-4 md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
+    <fieldset className="grid grid-cols-1 gap-4 rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-sm md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
       <legend className="sr-only">{MAP_STRINGS.filtersTitle}</legend>
 
       <div className="space-y-1.5">
-        <label htmlFor={categoryId} className="block text-xs font-semibold text-slate-300">
+        <label htmlFor={categoryId} className="block text-xs font-semibold text-[#475569]">
           {MAP_STRINGS.categoryLabel}
         </label>
         <select
@@ -49,7 +49,7 @@ export function FilterBar({ categories, filters, onChange, onReset, disabled = f
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor={statusId} className="block text-xs font-semibold text-slate-300">
+        <label htmlFor={statusId} className="block text-xs font-semibold text-[#475569]">
           {MAP_STRINGS.statusLabel}
         </label>
         <select
@@ -72,13 +72,13 @@ export function FilterBar({ categories, filters, onChange, onReset, disabled = f
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor={urgencyId} className="block text-xs font-semibold text-slate-300">
+        <label htmlFor={urgencyId} className="block text-xs font-semibold text-[#475569]">
           {MAP_STRINGS.urgencyLabel}
         </label>
         <select id={urgencyId} className={SELECT_CLASS} disabled aria-describedby={urgencyHelpId} value="">
           <option value="">{MAP_STRINGS.urgencyUnavailableOption}</option>
         </select>
-        <p id={urgencyHelpId} className="text-xs text-slate-400">
+        <p id={urgencyHelpId} className="text-[11px] text-[#94a3b8]">
           {MAP_STRINGS.urgencyUnavailableHelp}
         </p>
       </div>
@@ -86,8 +86,8 @@ export function FilterBar({ categories, filters, onChange, onReset, disabled = f
       <Button
         type="button"
         variant="outline"
-        className="min-h-[44px] md:mb-0"
-        icon={<RotateCcw className="h-4 w-4" aria-hidden="true" />}
+        className="min-h-[42px] border-[#e2e8f0] text-[#475569] hover:bg-slate-50 text-xs font-semibold md:mb-0"
+        icon={<RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />}
         onClick={onReset}
         disabled={disabled || !hasActiveFilters(filters)}
       >

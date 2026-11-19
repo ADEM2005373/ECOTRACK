@@ -4,15 +4,15 @@ import { REPORT_STATUSES } from './types';
 
 export function MapLegend() {
   return (
-    <section aria-labelledby="supervision-map-legend" className="rounded-2xl border border-dark-border bg-dark-card p-4">
-      <h2 id="supervision-map-legend" className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-300">
+    <section aria-labelledby="supervision-map-legend" className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-sm">
+      <h2 id="supervision-map-legend" className="mb-3 text-[11px] font-bold uppercase tracking-wider text-[#475569]">
         {MAP_STRINGS.legendTitle}
       </h2>
       <ul className="flex flex-wrap gap-x-5 gap-y-2">
         {REPORT_STATUSES.map((status) => {
           const { fill, text, glyph } = STATUS_STYLES[status];
           return (
-            <li key={status} className="flex items-center gap-2 text-sm text-slate-200">
+            <li key={status} className="flex items-center gap-2 text-xs font-medium text-[#0f172a]">
               <span
                 aria-hidden="true"
                 className="eco-marker eco-marker--legend"

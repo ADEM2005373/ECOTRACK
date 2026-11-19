@@ -65,7 +65,7 @@ function SupervisionMapView({ config }: { config: MapConfig }) {
       <MapLegend />
 
       {state.status === 'ready' && (
-        <p aria-live="polite" className="text-sm text-slate-300">
+        <p aria-live="polite" className="text-xs text-[#475569] font-medium">
           {MAP_STRINGS.shownCount(visibleReports.length, reports.length)}
           {state.data.skipped > 0 && ` · ${MAP_STRINGS.skippedCount(state.data.skipped)}`}
         </p>
@@ -73,7 +73,7 @@ function SupervisionMapView({ config }: { config: MapConfig }) {
 
       <section
         aria-label={MAP_STRINGS.mapRegionLabel}
-        className="relative h-[70vh] min-h-[420px] overflow-hidden rounded-2xl border border-dark-border"
+        className="relative h-[70vh] min-h-[420px] overflow-hidden rounded-xl border border-[#e2e8f0] shadow-sm"
       >
         <MapContainer center={CITY_CENTER} zoom={INITIAL_ZOOM} className="h-full w-full">
           <TileLayer url={config.tileUrl} attribution={OSM_ATTRIBUTION} />
@@ -132,7 +132,7 @@ function SupervisionMapView({ config }: { config: MapConfig }) {
 function MapOverlay({ children }: { children: ReactNode }) {
   return (
     <div className="pointer-events-none absolute inset-x-0 top-4 z-[1000] flex justify-center px-4">
-      <div className="pointer-events-auto max-w-md rounded-xl border border-dark-borderLight bg-dark-card/95 px-5 py-4 text-sm text-slate-100 shadow-xl">
+      <div className="pointer-events-auto max-w-md rounded-xl border border-[#e2e8f0] bg-white/95 px-5 py-4 text-xs text-[#0f172a] shadow-xl">
         {children}
       </div>
     </div>
