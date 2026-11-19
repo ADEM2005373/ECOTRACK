@@ -64,7 +64,7 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
       case 'ADMIN':
         return {
           roleLabel: 'Superviseur SaaS',
-          roleSubtitle: 'Plateforme Métropolitaine',
+          roleSubtitle: 'Supervision Multi-Collectivités',
           sectionTitle: '06 / SUPERVISION GLOBALE'
         };
       case 'ADMIN_MUNICIPALITE':
@@ -173,7 +173,7 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
         {/* Figma: Territoire & Collectivité */}
         <div className="bg-[#1b4449] rounded-[8px] p-[10px] flex flex-col gap-[3px]">
           <p className="font-semibold text-[12px] text-white leading-tight">
-            {user?.municipality || 'Ville de Tunis'}
+            {role === 'ADMIN_SAAS' || role === 'ADMIN' ? 'Plateforme SaaS Centrale' : (user?.municipality || 'Municipalité de Tunis')}
           </p>
           <p className="text-[#aec5cb] text-[10px] leading-tight">
             {roleConfig.roleSubtitle}
@@ -309,6 +309,18 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
                         role: u.role,
                         municipality: u.municipality || 'Collectivité'
                       }, 'jwt_access_token_real');
+                      fetch('/api/v1/auth/audit-event', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          actorId: u.id || u._id || u.email,
+                          actorRole: u.role,
+                          action: 'USER_LOGIN',
+                          entityId: u.id || u._id || u.email,
+                          reason: `Connexion (sélecteur) de ${u.fullName} (${u.role}) - Collectivité: ${u.municipality || 'SaaS'}`,
+                          after: { email: u.email, role: u.role, municipality: u.municipality }
+                        })
+                      }).catch(() => {});
                       setShowRoleModal(false);
                       navigate('/');
                     }}

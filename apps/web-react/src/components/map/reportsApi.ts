@@ -66,7 +66,7 @@ export function parseReport(raw: unknown): ParsedReport {
   } else if (item.createdAt instanceof Date) {
     createdAt = item.createdAt;
   } else {
-    createdAt = new Date();
+    createdAt = null;
   }
 
   if (
@@ -124,7 +124,8 @@ export function parseReportsPayload(body: unknown): ReportsPayload {
 }
 
 export function reportsUrl(apiBaseUrl: string): string {
-  return `${apiBaseUrl.replace(/\/+$/, '')}/reports`;
+  const clean = apiBaseUrl.replace(/\/+$/, '');
+  return clean.endsWith('/reports') ? clean : `${clean}/reports`;
 }
 
 /** Loads every report once; filtering is then done client-side. */

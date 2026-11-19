@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Leaf,
-  Inbox,
-  Map as MapIcon,
-  HelpCircle,
   ChevronRight,
   Bell,
   Hourglass,
@@ -21,6 +17,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { AnomalyCard, AnomalyReportData } from '../../components/moderation/AnomalyCard';
+import { FigmaSidebar } from '../../components/layout/FigmaSidebar';
 
 // Available categories for Agent Override
 const CATEGORY_OPTIONS = [
@@ -68,9 +65,9 @@ const INITIAL_QUEUE: QueueItem[] = [
       photoUrl: '/assets/signalement-trottoir.png',
       photoDate: '02/11/2026, 09:40',
       location: {
-        address: '18 rue de Marseille · Lyon 7e',
-        coordinates: [45.7506, 4.8391],
-        district: 'Guillotière',
+        address: '18 Avenue Habib Bourguiba · Tunis Centre',
+        coordinates: [36.8008, 10.1865],
+        district: 'Centre-Ville',
       },
       source: 'Application citoyenne',
       duplicatesText: 'Aucun doublon détecté',
@@ -97,9 +94,9 @@ const INITIAL_QUEUE: QueueItem[] = [
       photoUrl: '/assets/signalement-trottoir.png',
       photoDate: '02/11/2026, 09:48',
       location: {
-        address: '45 rue Montesquieu · Lyon 7e',
-        coordinates: [45.7521, 4.8415],
-        district: 'Guillotière',
+        address: '45 Avenue de la Liberté · Tunis Belvédère',
+        coordinates: [36.8189, 10.1786],
+        district: 'Belvédère',
       },
       source: 'Application citoyenne',
       duplicatesText: 'Aucun doublon détecté',
@@ -126,9 +123,9 @@ const INITIAL_QUEUE: QueueItem[] = [
       photoUrl: '/assets/signalement-trottoir.png',
       photoDate: '02/11/2026, 10:02',
       location: {
-        address: 'Quai Claude Bernard · Lyon 7e',
-        coordinates: [45.7533, 4.836],
-        district: 'Berges du Rhône',
+        address: 'Route du Lac · Les Berges du Lac',
+        coordinates: [36.8335, 10.2312],
+        district: 'Berges du Lac',
       },
       source: 'Application citoyenne',
       duplicatesText: 'Doublon potentiel (#0839)',
@@ -302,74 +299,7 @@ export const QualificationPage: React.FC = () => {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-50 dark:bg-dark-bg text-slate-800 dark:text-slate-100 font-sans">
       {/* ===================== SIDEBAR (Figma: 05_Flow_Agent_Web) ===================== */}
-      <aside className="w-56 shrink-0 bg-[#102c35] text-white flex flex-col justify-between p-4 hidden md:flex border-r border-[#1b4449]/50">
-        <div className="space-y-6">
-          {/* Logo & Marque */}
-          <Link to="/" className="flex items-center gap-2.5 px-2 py-1">
-            <div className="size-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-md">
-              <Leaf className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <span className="font-heading font-bold text-base tracking-tight text-white block">
-                ECOTRACK
-              </span>
-              <span className="text-[10px] text-emerald-200/70 tracking-widest uppercase block">
-                CONSOLE V2
-              </span>
-            </div>
-          </Link>
-
-          {/* Territoire */}
-          <div className="bg-[#1b4449] p-3 rounded-lg border border-[#23585f] text-xs space-y-1">
-            <p className="font-semibold text-white">Ville de Lyon</p>
-            <p className="text-[11px] text-slate-300">Services de proximité · 9 arr.</p>
-          </div>
-
-          {/* Navigation links */}
-          <div className="space-y-1">
-            <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400 px-2 py-1">
-              05 / OPÉRATIONS AGENT
-            </p>
-            <button
-              type="button"
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg bg-[#1b4449] text-white font-medium text-xs shadow-sm border border-[#23585f]"
-            >
-              <div className="flex items-center gap-2.5">
-                <Inbox className="w-4 h-4 text-emerald-400" />
-                <span>Boîte de réception</span>
-              </div>
-              <span className="text-[11px] font-bold text-emerald-300 bg-emerald-950/60 px-1.5 py-0.5 rounded-full">
-                {queue.filter((q) => q.report.status === 'NOUVEAU').length}
-              </span>
-            </button>
-
-            <Link
-              to="/supervision"
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-[#1b4449]/50 transition-colors text-xs font-medium"
-            >
-              <MapIcon className="w-4 h-4" />
-              <span>Carte opérationnelle</span>
-            </Link>
-          </div>
-        </div>
-
-        {/* Footer Sidebar (Profil & Aide) */}
-        <div className="pt-4 border-t border-[#1b4449] space-y-3">
-          <div className="flex items-center gap-2 text-xs text-slate-300 px-2">
-            <HelpCircle className="w-4 h-4" />
-            <span>Centre d'aide</span>
-          </div>
-          <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg bg-[#1b4449]/60 border border-[#23585f]">
-            <div className="size-8 rounded-full bg-slate-700 text-white flex items-center justify-center font-bold text-xs">
-              CD
-            </div>
-            <div className="text-left overflow-hidden">
-              <p className="text-xs font-semibold text-white truncate">Camille Durand</p>
-              <p className="text-[10px] text-slate-300 truncate">Agent · Mairie</p>
-            </div>
-          </div>
-        </div>
-      </aside>
+      <FigmaSidebar currentTab="qualification" />
 
       {/* ===================== WORKSPACE (MAIN CONTENT) ===================== */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">

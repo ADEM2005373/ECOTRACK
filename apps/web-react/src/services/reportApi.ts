@@ -209,10 +209,18 @@ export async function getReports(
 
     const res = await fetch(url, { headers: authHeaders() });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const raw: unknown[] = await res.json();
-    if (!Array.isArray(raw)) throw new Error('invalid payload');
+    const raw: any = await res.json();
+    const list: unknown[] = Array.isArray(raw)
+      ? raw
+      : Array.isArray(raw?.reports)
+      ? raw.reports
+      : Array.isArray(raw?.data)
+      ? raw.data
+      : Array.isArray(raw?.items)
+      ? raw.items
+      : [];
 
-    const data: ReportItem[] = raw.map((item, idx) =>
+    const data: ReportItem[] = list.map((item, idx) =>
       normalizeReport(item as Record<string, unknown>, idx),
     );
     return { kind: 'live', data };

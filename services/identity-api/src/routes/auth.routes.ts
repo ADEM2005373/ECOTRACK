@@ -1,16 +1,56 @@
 import { Router, Request, Response } from 'express';
+import { connectMongo, AuditLogModel } from '@ecotrack/db';
 import { userService } from '../services/user.service';
 import { tokenService } from '../services/token.service';
 import { loginRateLimiter } from '../services/rate-limiter.service';
 import { loginController, getPublicKeyController } from '../controllers/login.controller';
 import { registerController } from '../controllers/register.controller';
 import { loginRateLimitMiddleware } from '../middlewares/rate-limit.middleware';
-import { UserRole } from '@ecotrack/shared';
+import { UserRole, AuditAction } from '@ecotrack/shared';
 
 const router = Router();
 
 // Validation regex pour format d'email
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function truncateIpAddress(ip?: string): string {
+  if (!ip) return '127.0.0.0/24';
+  const cleanIp = ip.replace(/^.*:/, '').trim();
+  const ipv4Parts = cleanIp.split('.');
+  if (ipv4Parts.length === 4) {
+    return `${ipv4Parts[0]}.${ipv4Parts[1]}.${ipv4Parts[2]}.0/24`;
+  }
+  return '127.0.0.0/24';
+}
+
+async function recordAudit(
+  actorId: string,
+  actorRole: string,
+  action: AuditAction | string,
+  entityId: string,
+  reason: string,
+  clientIp?: string,
+  userAgent?: string,
+  after?: Record<string, any>
+) {
+  try {
+    await AuditLogModel.create({
+      actorId: String(actorId),
+      actorRole: String(actorRole),
+      action: String(action),
+      entityType: 'User',
+      entityId: String(entityId),
+      reason,
+      ipTruncated: truncateIpAddress(clientIp),
+      userAgent: userAgent || 'EcoTrack Web Client',
+      after,
+      timestamp: new Date()
+    });
+    console.log(`[IDENTITY-API] 🛡️ Trace d'audit immuable enregistrée: ${action} pour ${actorId} (${actorRole})`);
+  } catch (err) {
+    console.warn('[IDENTITY-API] ⚠️ Impossible d\'enregistrer la trace d\'audit:', err);
+  }
+}
 
 /**
  * GET /auth/public-key
@@ -64,6 +104,15 @@ router.post('/login', async (req: Request, res: Response) => {
     const user = await userService.validateCredentials(email, password);
     if (!user) {
       loginRateLimiter.recordFailure(rateLimitKey);
+      await recordAudit(
+        email ? email.trim().toLowerCase() : 'anonyme',
+        'UNKNOWN',
+        'USER_LOGIN_FAILED',
+        email ? email.trim().toLowerCase() : 'anonymous',
+        `Tentative de connexion échouée (identifiants invalides) pour: ${email}`,
+        clientIp,
+        req.headers['user-agent'] as string
+      );
       return res.status(401).json({
         error: 'UNAUTHORIZED',
         message: 'Identifiants invalides (adresse e-mail ou mot de passe incorrect).'
@@ -75,6 +124,18 @@ router.post('/login', async (req: Request, res: Response) => {
 
     // 5. Génération des tokens JWT RS256
     const authTokens = tokenService.generateAuthTokens(user);
+
+    // 6. Trace d'audit officielle immuable dans MongoDB
+    await recordAudit(
+      user.id || user.email,
+      user.role,
+      AuditAction.USER_LOGIN,
+      user.id || user.email,
+      `Connexion réussie de ${user.fullName} (${user.role}) - Collectivité: ${user.municipality || 'Centrale / SaaS'}`,
+      clientIp,
+      req.headers['user-agent'] as string,
+      { email: user.email, role: user.role, municipality: user.municipality }
+    );
 
     return res.status(200).json(authTokens);
 
@@ -166,6 +227,19 @@ const createUserHandler = async (req: Request, res: Response) => {
       municipality: municipality ? String(municipality).trim() : undefined
     });
 
+    // Trace d'audit pour création d'utilisateur / collectivité
+    const clientIp = req.ip || req.socket.remoteAddress || '127.0.0.1';
+    await recordAudit(
+      (req.headers['x-user-id'] as string) || (req.headers['x-actor-id'] as string) || 'admin@ecotrack.tn',
+      (req.headers['x-user-role'] as string) || 'ADMIN_SAAS',
+      AuditAction.USER_REGISTER,
+      user.id || user.email,
+      `Création du compte ${user.fullName} (${user.role}) - Collectivité: ${user.municipality || 'SaaS'}`,
+      clientIp,
+      req.headers['user-agent'] as string,
+      { email: user.email, role: user.role, municipality: user.municipality }
+    );
+
     return res.status(201).json({
       message: 'Utilisateur créé avec succès',
       user
@@ -197,9 +271,43 @@ router.delete('/users/:id', async (req: Request, res: Response) => {
     if (!success) {
       return res.status(404).json({ error: 'NOT_FOUND', message: 'Utilisateur introuvable.' });
     }
+    const clientIp = req.ip || req.socket.remoteAddress || '127.0.0.1';
+    await recordAudit(
+      (req.headers['x-user-id'] as string) || (req.headers['x-actor-id'] as string) || 'admin@ecotrack.tn',
+      (req.headers['x-user-role'] as string) || 'ADMIN_SAAS',
+      AuditAction.ADMIN_USER_DEACTIVATED,
+      req.params.id,
+      `Suppression du compte utilisateur ID: ${req.params.id}`,
+      clientIp,
+      req.headers['user-agent'] as string
+    );
     return res.status(200).json({ message: 'Utilisateur supprimé avec succès.' });
   } catch (err: any) {
     return res.status(400).json({ error: 'BAD_REQUEST', message: err.message });
+  }
+});
+
+/**
+ * POST /auth/audit-event
+ * Permet d'enregistrer des événements de session (changement de rôle, etc.)
+ */
+router.post('/audit-event', async (req: Request, res: Response) => {
+  try {
+    const { actorId, actorRole, action, entityId, reason, after } = req.body;
+    const clientIp = req.ip || req.socket.remoteAddress || '127.0.0.1';
+    await recordAudit(
+      actorId || 'anonyme',
+      actorRole || 'UNKNOWN',
+      action || AuditAction.USER_LOGIN,
+      entityId || actorId || 'session',
+      reason || 'Événement de session utilisateur',
+      clientIp,
+      req.headers['user-agent'] as string,
+      after
+    );
+    return res.status(201).json({ status: 'ok' });
+  } catch (err: any) {
+    return res.status(500).json({ error: 'INTERNAL_SERVER_ERROR', message: err.message });
   }
 });
 
