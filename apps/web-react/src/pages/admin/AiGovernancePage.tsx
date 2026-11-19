@@ -118,17 +118,19 @@ export const AiGovernancePage: React.FC = () => {
       };
 
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `active_learning_export_${new Date().toISOString().slice(0, 10)}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      if (typeof URL.createObjectURL === 'function') {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `active_learning_export_${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
 
       setExportSuccessMessage(
-        `Jeu d'Active Learning exporté avec succès (${payload.samples.length} échantillons labellisés prioritaires pour réentraînement).`
+        `Dataset exporté avec succès : ${payload.samples.length} échantillons labellisés pour réentraînement Active Learning.`
       );
       setTimeout(() => setExportSuccessMessage(null), 6000);
     } finally {
@@ -163,7 +165,8 @@ export const AiGovernancePage: React.FC = () => {
               </span>
             </div>
             <p className="text-[13px] text-[#475569] mt-0.5">
-              Observabilité MLOps &amp; Apprentissage Continu — Suivi de la concordance agent/modèle, détection du drift et cycle d'Active Learning MobileNetV3.
+              <span>Observabilité MLOps &amp; Apprentissage Continu</span>
+              <span className="text-[#94a3b8]"> — Suivi de la concordance agent/modèle, détection du drift et cycle d'Active Learning MobileNetV3.</span>
             </p>
           </div>
 

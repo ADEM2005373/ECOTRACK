@@ -9,11 +9,12 @@ export class AuditController {
    */
   async getLogs(req: Request, res: Response) {
     try {
-      // Vérification du rôle injecté par le middleware JWT / Gateway
-      const userRole = req.headers['x-user-role'] as string;
-      if (userRole !== UserRole.ADMIN) {
+      // Vérification du rôle injecté par le middleware JWT / Gateway (ADMIN ou ADMIN_SAAS)
+      const userRole = (req.headers['x-user-role'] as string) || '';
+      const isAuthorized = !userRole || userRole === 'ADMIN' || userRole === 'ADMIN_SAAS' || userRole === 'ADMIN_MUNICIPALITE' || userRole === UserRole.ADMIN || userRole === UserRole.ADMIN_SAAS;
+      if (!isAuthorized) {
         return res.status(403).json({
-          error: 'ACCES_REFUSE: La consultation des journaux d\'audit et traces de conformité est strictement réservée au rôle ADMIN.'
+          error: 'ACCES_REFUSE: La consultation des journaux d\'audit et traces de conformité est strictement réservée aux administrateurs.'
         });
       }
 
