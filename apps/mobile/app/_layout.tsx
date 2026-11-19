@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
@@ -8,6 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { colors, textStyles } from '../src/theme';
 import { loginStrings, registerStrings } from '../src/constants/strings';
 import { fontAssets } from '../src/theme/fonts';
+import { useAuthStore } from '../src/store/authStore';
 
 // Garde le splash visible tant que les polices CDCF ne sont pas chargées.
 SplashScreen.preventAutoHideAsync();
@@ -16,6 +17,23 @@ const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts(fontAssets);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const loadSession = useAuthStore((state) => state.loadSession);
+  const router = useRouter();
+  const segments = useSegments();
+
+  useEffect(() => {
+    loadSession();
+  }, []);
+
+  useEffect(() => {
+    const inAuthRoute = ['login', 'register'].includes(segments[0] ?? '');
+    if (!isAuthenticated && !inAuthRoute) {
+      router.replace('/login');
+    } else if (isAuthenticated && inAuthRoute) {
+      router.replace('/(tabs)');
+    }
+  }, [isAuthenticated, segments]);
 
   useEffect(() => {
     if (fontError) {

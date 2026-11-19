@@ -1,7 +1,17 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './components/ui/Button';
 import { RegisterModal } from './components/RegisterModal';
+import { useAuth } from './store/authStore';
+import {
+  getStats,
+  getReports,
+  assignReport,
+  type ReportStats,
+  type ReportItem,
+  MOCK_STATS,
+  MOCK_REPORTS,
+} from './services/reportApi';
 import { 
   ShieldCheck, 
   Trash2, 
@@ -19,101 +29,56 @@ import {
   Search,
   CheckCircle,
   Eye,
-  Server
+  Server,
+  LogOut
 } from 'lucide-react';
 
-interface IncidentItem {
-  id: string;
-  reference: string;
-  title: string;
-  category: 'DECHARGE_SAUVAGE' | 'ENCOMBRANTS' | 'GRAFFITI' | 'DEPOT_SAUVAGE' | 'AUTRE';
-  district: string;
-  status: 'NOUVEAU' | 'A_QUALIFIER' | 'EN_TRAITEMENT' | 'RESOLU' | 'REJETE';
-  confidence: number;
-  timeAgo: string;
-  worker?: string;
-  imageUrl: string;
-}
-
-const RECENT_INCIDENTS: IncidentItem[] = [
-  {
-    id: 'inc_001',
-    reference: 'REP-2026-0498',
-    title: 'Décharge sauvage d’encombrants et cartons',
-    category: 'DECHARGE_SAUVAGE',
-    district: 'Centre-Ville',
-    status: 'A_QUALIFIER',
-    confidence: 0.94,
-    timeAgo: 'Il y a 12 min',
-    imageUrl: 'https://images.unsplash.com/photo-1605600659873-d808a13e4d2a?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 'inc_002',
-    reference: 'REP-2026-0495',
-    title: 'Gravats de chantier bloquant la chaussée',
-    category: 'DEPOT_SAUVAGE',
-    district: 'El Menzah',
-    status: 'EN_TRAITEMENT',
-    confidence: 0.89,
-    timeAgo: 'Il y a 42 min',
-    worker: 'Tarek Jouini',
-    imageUrl: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 'inc_003',
-    reference: 'REP-2026-0492',
-    title: 'Détritus ménagers autour des conteneurs',
-    category: 'DECHARGE_SAUVAGE',
-    district: 'Ariana',
-    status: 'RESOLU',
-    confidence: 0.96,
-    timeAgo: 'Il y a 2 h',
-    worker: 'Youssef Trabelsi',
-    imageUrl: 'https://images.unsplash.com/photo-1528323273322-d81458248d40?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 'inc_004',
-    reference: 'REP-2026-0488',
-    title: 'Tag et dégradation sur mur municipal',
-    category: 'GRAFFITI',
-    district: 'La Marsa',
-    status: 'NOUVEAU',
-    confidence: 0.92,
-    timeAgo: 'Il y a 3 h',
-    imageUrl: 'https://images.unsplash.com/photo-1572945281869-826b8e485e07?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 'inc_005',
-    reference: 'REP-2026-0481',
-    title: 'Mobilier usagé abandonné sur trottoir',
-    category: 'ENCOMBRANTS',
-    district: 'Les Berges du Lac',
-    status: 'EN_TRAITEMENT',
-    confidence: 0.91,
-    timeAgo: 'Il y a 4 h',
-    worker: 'Hamza Dridi',
-    imageUrl: 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=400&q=80',
-  },
-];
-
 export default function App() {
+  const navigate = useNavigate();
+  const { state: authState, logout } = useAuth();
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [filterDistrict, setFilterDistrict] = useState<string>('TOUS');
   const [filterStatus, setFilterStatus] = useState<string>('TOUS');
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
-  const filteredIncidents = RECENT_INCIDENTS.filter((item) => {
-    if (filterDistrict !== 'TOUS' && item.district !== filterDistrict) return false;
-    if (filterStatus !== 'TOUS' && item.status !== filterStatus) return false;
-    return true;
-  });
+  const [stats, setStats] = useState<ReportStats>(MOCK_STATS);
+  const [reports, setReports] = useState<ReportItem[]>(MOCK_REPORTS);
+  const [isLive, setIsLive] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleQuickAction = (msg: string) => {
-    setActionSuccess(msg);
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [statsResult, reportsResult] = await Promise.all([
+        getStats(),
+        getReports({ district: filterDistrict, status: filterStatus }),
+      ]);
+      setStats(statsResult.data);
+      setReports(reportsResult.data);
+      setIsLive(statsResult.kind === 'live' || reportsResult.kind === 'live');
+    } catch {
+      setIsLive(false);
+    } finally {
+      setLoading(false);
+    }
+  }, [filterDistrict, filterStatus]);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
+
+  const handleQuickAction = async (reportId: string, ref: string) => {
+    const res = await assignReport(reportId, 'ouvrier-default');
+    if (res.kind === 'success') {
+      setActionSuccess(`Intervention assignée pour ${ref}`);
+      void loadData();
+    } else {
+      setActionSuccess(`Intervention assignée pour ${ref} (mode local)`);
+    }
     setTimeout(() => setActionSuccess(null), 3000);
   };
 
-  const getStatusBadge = (status: IncidentItem['status']) => {
+  const getStatusBadge = (status: ReportItem['status']) => {
     switch (status) {
       case 'RESOLU':
         return (
@@ -197,14 +162,30 @@ export default function App() {
             <span>Power BI (ECO-42)</span>
           </Link>
           <div className="h-6 w-px bg-slate-800 mx-1"></div>
-          <Button
-            variant="primary"
-            size="sm"
-            icon={<UserPlus className="w-3.5 h-3.5" />}
-            onClick={() => setIsRegisterOpen(true)}
-          >
-            S'inscrire (ECO-12)
-          </Button>
+          {authState.isAuthenticated ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400 hidden sm:block">
+                {authState.user?.fullName}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                icon={<LogOut className="w-3.5 h-3.5" />}
+                onClick={() => { logout(); navigate('/login'); }}
+              >
+                Déconnexion
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<UserPlus className="w-3.5 h-3.5" />}
+              onClick={() => setIsRegisterOpen(true)}
+            >
+              S'inscrire (ECO-12)
+            </Button>
+          )}
         </nav>
       </header>
 
@@ -228,10 +209,10 @@ export default function App() {
               <span className="font-semibold uppercase tracking-wider">Volume Consolidé</span>
               <Layers className="w-4 h-4 text-emerald-400" />
             </div>
-            <div className="text-3xl font-extrabold text-white mt-2 font-heading">500</div>
+            <div className="text-3xl font-extrabold text-white mt-2 font-heading">{stats.total}</div>
             <div className="flex items-center gap-1.5 text-xs text-emerald-400 mt-1">
-              <span className="font-bold">300 résolus (60%)</span>
-              <span className="text-slate-500">• 100 en cours</span>
+              <span className="font-bold">{stats.resolved} résolus ({stats.total > 0 ? Math.round((stats.resolved / stats.total) * 100) : 0}%)</span>
+              <span className="text-slate-500">• {stats.inProgress} en cours</span>
             </div>
           </div>
 
@@ -240,7 +221,7 @@ export default function App() {
               <span className="font-semibold uppercase tracking-wider">Latence API (P95)</span>
               <Clock className="w-4 h-4 text-blue-400" />
             </div>
-            <div className="text-3xl font-extrabold text-white mt-2 font-heading">145 ms</div>
+            <div className="text-3xl font-extrabold text-white mt-2 font-heading">{stats.averageLatencyMs} ms</div>
             <div className="flex items-center gap-1.5 text-xs text-emerald-400 mt-1">
               <span className="font-bold">NFR-01 Validé</span>
               <span className="text-slate-500">(SLA &lt; 300 ms à 100 req/s)</span>
@@ -252,7 +233,7 @@ export default function App() {
               <span className="font-semibold uppercase tracking-wider">F1-Score IA Vision</span>
               <Brain className="w-4 h-4 text-purple-400" />
             </div>
-            <div className="text-3xl font-extrabold text-white mt-2 font-heading">90.2%</div>
+            <div className="text-3xl font-extrabold text-white mt-2 font-heading">{(stats.aiF1Score * 100).toFixed(1)}%</div>
             <div className="flex items-center gap-1.5 text-xs text-purple-400 mt-1">
               <span className="font-bold">Inférence 38 ms</span>
               <span className="text-slate-500">(MobileNetV3 PyTorch)</span>
@@ -264,7 +245,7 @@ export default function App() {
               <span className="font-semibold uppercase tracking-wider">Garde T4 & Résolution</span>
               <ShieldCheck className="w-4 h-4 text-amber-400" />
             </div>
-            <div className="text-3xl font-extrabold text-white mt-2 font-heading">94.2%</div>
+            <div className="text-3xl font-extrabold text-white mt-2 font-heading">{(stats.resolutionRate * 100).toFixed(1)}%</div>
             <div className="flex items-center gap-1.5 text-xs text-emerald-400 mt-1">
               <span className="font-bold">Photo après travaux</span>
               <span className="text-slate-500">(Anti-fraude 100%)</span>
@@ -363,10 +344,14 @@ export default function App() {
         <section className="bg-dark-card border border-dark-border rounded-2xl overflow-hidden shadow-xl">
           <div className="p-5 border-b border-dark-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <span>Flux Opérationnel des Signalements en Temps Réel</span>
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              </h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-bold text-white">Flux Opérationnel des Signalements en Temps Réel</h2>
+                <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${isLive ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'}`}>
+                  {isLive ? 'En direct' : 'Mode secours / local'}
+                </span>
+                {loading && <span className="text-[10px] text-slate-400 animate-pulse">Chargement...</span>}
+              </div>
               <p className="text-xs text-slate-400 mt-0.5">
                 Surveillance continue du cycle de vie des anomalies urbaines (Machine à États Finis T1 à T5).
               </p>
@@ -407,13 +392,14 @@ export default function App() {
               <Button
                 variant="outline"
                 size="sm"
-                icon={<RefreshCw className="w-3.5 h-3.5" />}
+                icon={<RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />}
                 onClick={() => {
                   setFilterDistrict('TOUS');
                   setFilterStatus('TOUS');
+                  void loadData();
                 }}
               >
-                Réinitialiser
+                Actualiser
               </Button>
             </div>
           </div>
@@ -432,7 +418,7 @@ export default function App() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 font-sans">
-                {filteredIncidents.map((incident) => (
+                {reports.map((incident) => (
                   <tr key={incident.id} className="hover:bg-slate-900/40 transition">
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
@@ -483,7 +469,7 @@ export default function App() {
                         <Button
                           variant="secondary"
                           size="sm"
-                          onClick={() => handleQuickAction(`Intervention assignée pour ${incident.reference}`)}
+                          onClick={() => void handleQuickAction(incident.id, incident.reference)}
                         >
                           Assigner
                         </Button>

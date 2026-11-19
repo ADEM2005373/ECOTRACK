@@ -1,145 +1,334 @@
+/**
+ * RoadmapScreen — Worker/Agent intervention list.
+ * Fetches from GET /api/v1/interventions/assigned with auth token.
+ * Falls back to 3 mock items if the API is unavailable.
+ */
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, FlatList, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
-import * as Location from 'expo-location';
-import { useFocusEffect, useRouter } from 'expo-router';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, textStyles } from '../../theme';
-import { fetchWorkerRoadmap, type WorkerReport } from '../../services/interventionApi';
+import { getMyInterventions, type Intervention, type InterventionStatus } from '../../services/interventionApi';
+import { useAuthStore } from '../../store/authStore';
 
-function distanceMeters(
-  from: Location.LocationObjectCoords,
-  report: WorkerReport,
-): number {
-  const [longitude, latitude] = report.location.coordinates;
-  const earthRadius = 6371000;
-  const lat1 = (from.latitude * Math.PI) / 180;
-  const lat2 = (latitude * Math.PI) / 180;
-  const deltaLat = ((latitude - from.latitude) * Math.PI) / 180;
-  const deltaLon = ((longitude - from.longitude) * Math.PI) / 180;
-  const a =
-    Math.sin(deltaLat / 2) ** 2 +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLon / 2) ** 2;
-  return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+// ─── Category helpers ─────────────────────────────────────────────────────────
+
+type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
+
+const CATEGORY_META: Record<string, { label: string; icon: IoniconName }> = {
+  DEPOT_SAUVAGE:      { label: 'Dépôt sauvage',       icon: 'trash-outline' },
+  ENCOMBRANTS:        { label: 'Encombrants',          icon: 'cube-outline' },
+  DECHETS_DANGEREUX:  { label: 'Déchets dangereux',   icon: 'warning-outline' },
+  GRAFFITI:           { label: 'Graffiti',             icon: 'brush-outline' },
+  VEGETAUX:           { label: 'Végétaux',             icon: 'leaf-outline' },
+  AUTRE:              { label: 'Autre',                icon: 'help-circle-outline' },
+};
+
+function getCategoryMeta(category: string) {
+  return CATEGORY_META[category] ?? { label: category, icon: 'help-circle-outline' as IoniconName };
 }
 
-function formatDistance(meters: number): string {
-  return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`;
-}
+// ─── Status badge ─────────────────────────────────────────────────────────────
 
-export default function RoadmapScreen() {
-  const router = useRouter();
-  const [reports, setReports] = useState<WorkerReport[]>([]);
-  const [position, setPosition] = useState<Location.LocationObjectCoords | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+type BadgeStyle = { bg: string; text: string; label: string };
 
-  const loadRoadmap = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const permission = await Location.requestForegroundPermissionsAsync();
-      if (permission.status !== Location.PermissionStatus.GRANTED) {
-        throw new Error('La permission de localisation est nécessaire pour trier les interventions.');
-      }
-      const current = await Location.getCurrentPositionAsync({});
-      setPosition(current.coords);
-      setReports(await fetchWorkerRoadmap(current.coords.longitude, current.coords.latitude));
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Impossible de charger la feuille de route.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+const STATUS_BADGE: Record<InterventionStatus, BadgeStyle> = {
+  EN_ATTENTE: { bg: '#E2E8F0', text: '#475569', label: 'En attente' },
+  EN_COURS:   { bg: '#DBEAFE', text: '#1D4ED8', label: 'En cours' },
+  TERMINEE:   { bg: '#D1FAE5', text: '#047857', label: 'Terminée' },
+};
 
-  useFocusEffect(
-    useCallback(() => {
-      void loadRoadmap();
-    }, [loadRoadmap]),
-  );
-
-  const openDirections = (report: WorkerReport) => {
-    const [longitude, latitude] = report.location.coordinates;
-    void Linking.openURL(
-      `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`,
-    );
-  };
-
+function StatusBadge({ status }: { status: InterventionStatus }) {
+  const badge = STATUS_BADGE[status] ?? STATUS_BADGE.EN_ATTENTE;
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title} accessibilityRole="header">Feuille de route</Text>
-        <Text style={styles.subtitle}>Interventions ASSIGNÉES les plus proches</Text>
-      </View>
-      {loading ? <ActivityIndicator color={colors.secondary} accessibilityLabel="Chargement" /> : null}
-      {error ? (
-        <View style={styles.message}>
-          <Text style={styles.error}>{error}</Text>
-          <Pressable onPress={() => void loadRoadmap()} style={styles.retry}>
-            <Text style={styles.retryText}>Réessayer</Text>
-          </Pressable>
-        </View>
-      ) : null}
-      {!loading && !error && reports.length === 0 ? (
-        <Text style={styles.empty}>Aucune intervention assignée à proximité.</Text>
-      ) : null}
-      <FlatList
-        data={reports}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        renderItem={({ item }) => {
-          const distance = position ? distanceMeters(position, item) : 0;
-          return (
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <Text style={styles.category}>{item.category}</Text>
-                {item.priority ? <Text style={styles.priority}>{item.priority}</Text> : null}
-              </View>
-              <Text style={styles.distance}>{formatDistance(distance)}</Text>
-              {item.description ? <Text style={styles.description}>{item.description}</Text> : null}
-              <View style={styles.actions}>
-                <Pressable onPress={() => openDirections(item)} style={styles.secondaryButton}>
-                  <Text style={styles.secondaryText}>Itinéraire GPS</Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => router.push({ pathname: '/interventions/[id]', params: { id: item.id } })}
-                  style={styles.primaryButton}
-                >
-                  <Text style={styles.primaryText}>Voir l’intervention</Text>
-                </Pressable>
-              </View>
-            </View>
-          );
-        }}
-      />
+    <View style={[styles.badge, { backgroundColor: badge.bg }]}>
+      <Text style={[styles.badgeText, { color: badge.text }]}>{badge.label}</Text>
     </View>
   );
 }
 
+// ─── Intervention card ────────────────────────────────────────────────────────
+
+function InterventionCard({ item, onPress }: { item: Intervention; onPress: () => void }) {
+  const { label, icon } = getCategoryMeta(item.category);
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+      accessibilityRole="button"
+      accessibilityLabel={`Intervention ${item.reference}`}
+    >
+      <View style={styles.cardTop}>
+        <View style={styles.refRow}>
+          <Text style={styles.reference}>{item.reference}</Text>
+          <StatusBadge status={item.status} />
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      </View>
+      <View style={styles.categoryRow}>
+        <Ionicons name={icon} size={16} color={colors.primary} />
+        <Text style={styles.categoryLabel}>{label}</Text>
+      </View>
+      <Text style={styles.address} numberOfLines={1}>
+        📍 {item.address}
+      </Text>
+    </Pressable>
+  );
+}
+
+// ─── Main screen ──────────────────────────────────────────────────────────────
+
+export default function RoadmapScreen() {
+  const router = useRouter();
+  const token = useAuthStore((s) => (s as unknown as { token?: string }).token ?? '');
+
+  const [interventions, setInterventions] = useState<Intervention[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setError(null);
+    const result = await getMyInterventions(token);
+    if (result.kind === 'success') {
+      setInterventions(result.data);
+    } else {
+      setError(result.message);
+    }
+  }, [token]);
+
+  // Initial load
+  React.useEffect(() => {
+    setLoading(true);
+    void load().finally(() => setLoading(false));
+  }, [load]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await load();
+    setRefreshing(false);
+  }, [load]);
+
+  // ── Stats ──────────────────────────────────────────────────────────────────
+  const total = interventions.length;
+  const done = interventions.filter((i) => i.status === 'TERMINEE').length;
+
+  const today = new Date().toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
+
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title} accessibilityRole="header">Mes interventions</Text>
+        <Text style={styles.dateText}>{today.charAt(0).toUpperCase() + today.slice(1)}</Text>
+      </View>
+
+      {loading ? (
+        <ActivityIndicator color={colors.primary} size="large" style={{ marginTop: spacing.xl }} />
+      ) : (
+        <>
+          {/* Summary cards */}
+          <View style={styles.summaryRow}>
+            <View style={[styles.summaryCard, styles.summaryGreen]}>
+              <Text style={styles.summaryNumber}>{total}</Text>
+              <Text style={styles.summaryLabel}>intervention{total !== 1 ? 's' : ''} aujourd'hui</Text>
+            </View>
+            <View style={[styles.summaryCard, styles.summaryBlue]}>
+              <Text style={[styles.summaryNumber, { color: '#1D4ED8' }]}>{done}</Text>
+              <Text style={[styles.summaryLabel, { color: '#1D4ED8' }]}>terminée{done !== 1 ? 's' : ''}</Text>
+            </View>
+          </View>
+
+          {error ? (
+            <View style={styles.errorBox}>
+              <Text style={styles.errorText}>{error}</Text>
+              <Pressable onPress={() => { setLoading(true); void load().finally(() => setLoading(false)); }} style={styles.retryBtn}>
+                <Text style={styles.retryText}>Réessayer</Text>
+              </Pressable>
+            </View>
+          ) : null}
+
+          {!error && interventions.length === 0 ? (
+            <Text style={styles.emptyText}>Aucune intervention assignée pour aujourd'hui.</Text>
+          ) : null}
+
+          <FlatList
+            data={interventions}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.list}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => void onRefresh()}
+                tintColor={colors.primary}
+                colors={[colors.primary]}
+              />
+            }
+            renderItem={({ item }) => (
+              <InterventionCard
+                item={item}
+                onPress={() =>
+                  router.push({ pathname: '/interventions/[id]', params: { id: item.id } })
+                }
+              />
+            )}
+          />
+        </>
+      )}
+    </View>
+  );
+}
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.lg },
-  header: { marginBottom: spacing.lg },
-  title: { ...textStyles.heading, color: colors.secondary },
-  subtitle: { ...textStyles.body, color: colors.textMuted, marginTop: spacing.xs },
-  list: { gap: spacing.md, paddingBottom: spacing.xl },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    paddingTop: spacing.lg,
+  },
+  header: {
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  title: {
+    ...textStyles.heading,
+    color: colors.text,
+  },
+  dateText: {
+    ...textStyles.caption,
+    color: colors.textMuted,
+    marginTop: spacing.xs,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+  },
+  summaryCard: {
+    flex: 1,
+    borderRadius: 14,
+    padding: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 72,
+  },
+  summaryGreen: {
+    backgroundColor: '#D1FAE5',
+  },
+  summaryBlue: {
+    backgroundColor: '#DBEAFE',
+  },
+  summaryNumber: {
+    fontFamily: 'PlusJakartaSans-Bold',
+    fontSize: 28,
+    color: '#047857',
+    lineHeight: 34,
+  },
+  summaryLabel: {
+    ...textStyles.caption,
+    color: '#047857',
+    textAlign: 'center',
+  },
+  list: {
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xl,
+  },
   card: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
-    borderRadius: 16,
     borderWidth: 1,
+    borderRadius: 16,
     padding: spacing.lg,
+    gap: spacing.sm,
   },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.sm },
-  category: { ...textStyles.subtitle, color: colors.text, flex: 1 },
-  priority: { ...textStyles.label, color: colors.feedbackText.warning, textTransform: 'uppercase' },
-  distance: { ...textStyles.label, color: colors.secondary, marginTop: spacing.sm },
-  description: { ...textStyles.body, color: colors.textMuted, marginTop: spacing.sm },
-  actions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg },
-  primaryButton: { backgroundColor: colors.action.primary, borderRadius: 10, padding: spacing.sm, minHeight: 44, justifyContent: 'center' },
-  primaryText: { ...textStyles.label, color: colors.action.onPrimary },
-  secondaryButton: { borderColor: colors.secondary, borderRadius: 10, borderWidth: 1, padding: spacing.sm, minHeight: 44, justifyContent: 'center' },
-  secondaryText: { ...textStyles.label, color: colors.secondary },
-  message: { alignItems: 'center', gap: spacing.md, paddingVertical: spacing.xl },
-  error: { ...textStyles.body, color: colors.feedbackText.error, textAlign: 'center' },
-  retry: { backgroundColor: colors.action.primary, borderRadius: 10, paddingHorizontal: spacing.lg, paddingVertical: spacing.sm },
-  retryText: { ...textStyles.label, color: colors.action.onPrimary },
-  empty: { ...textStyles.body, color: colors.textMuted, textAlign: 'center', paddingVertical: spacing.xl },
+  cardPressed: {
+    opacity: 0.75,
+  },
+  cardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  refRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    flex: 1,
+  },
+  reference: {
+    ...textStyles.subtitle,
+    color: colors.text,
+    flexShrink: 1,
+  },
+  badge: {
+    borderRadius: 999,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+  },
+  badgeText: {
+    ...textStyles.label,
+    fontSize: 11,
+  },
+  categoryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  categoryLabel: {
+    ...textStyles.label,
+    color: colors.textMuted,
+  },
+  address: {
+    ...textStyles.body,
+    color: colors.textMuted,
+    fontSize: 13,
+  },
+  errorBox: {
+    marginHorizontal: spacing.lg,
+    padding: spacing.lg,
+    backgroundColor: '#FEE2E2',
+    borderRadius: 12,
+    marginBottom: spacing.lg,
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  errorText: {
+    ...textStyles.body,
+    color: colors.feedbackText.error,
+    textAlign: 'center',
+  },
+  retryBtn: {
+    backgroundColor: colors.action.primary,
+    borderRadius: 10,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  retryText: {
+    ...textStyles.label,
+    color: colors.action.onPrimary,
+  },
+  emptyText: {
+    ...textStyles.body,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginTop: spacing.xl,
+    paddingHorizontal: spacing.xl,
+  },
 });

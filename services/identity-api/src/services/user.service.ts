@@ -28,7 +28,7 @@ export class UserService {
   /**
    * Recherche un utilisateur par email en incluant son hash de mot de passe (pour l'authentification)
    */
-  async findByEmailWithPassword(email: string): Promise<IUserDocument | null> {
+  async findByEmailWithPassword(email: string): Promise<any> {
     return UserModel.findOne({ email: email.toLowerCase().trim() }).select('+password +refreshTokenHash');
   }
 
@@ -41,10 +41,42 @@ export class UserService {
   }
 
   /**
+   * Initialise automatiquement un compte administrateur par défaut en base s'il n'existe pas.
+   */
+  async seedDefaultAdmin(): Promise<void> {
+    try {
+      const email = 'admin@ecotrack.tn';
+      const existing = await UserModel.findOne({ email });
+      if (!existing) {
+        const admin = new UserModel({
+          email,
+          password: 'Admin2026!',
+          fullName: 'Administrateur Principal',
+          phoneNumber: '+216 71 000 000',
+          role: UserRole.ADMIN,
+          isActive: true
+        });
+        await admin.save();
+        console.log('[IDENTITY-API] ✅ Compte administrateur par défaut initialisé en base: admin@ecotrack.tn / Admin2026!');
+      }
+    } catch (err) {
+      console.warn('[IDENTITY-API] ⚠️ Initialisation de l\'admin ignorée:', err);
+    }
+  }
+
+  /**
    * Valide les identifiants email / password
    */
   async validateCredentials(email: string, plainTextPassword: string): Promise<IUser | null> {
-    const user = await this.findByEmailWithPassword(email);
+    const normalizedEmail = email.toLowerCase().trim();
+    let user = await this.findByEmailWithPassword(normalizedEmail);
+
+    // Auto-création si l'admin tente de se connecter et n'existe pas encore en base
+    if (!user && normalizedEmail === 'admin@ecotrack.tn' && plainTextPassword === 'Admin2026!') {
+      await this.seedDefaultAdmin();
+      user = await this.findByEmailWithPassword(normalizedEmail);
+    }
+
     if (!user || !user.isActive) {
       return null;
     }

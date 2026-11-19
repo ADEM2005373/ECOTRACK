@@ -35,8 +35,17 @@ app.post('/api/v1/auth/register-dev', async (req: Request, res: Response) => {
   }
 });
 
+// Redirection conviviale si l'utilisateur accède à l'API via son navigateur web (ex: http://localhost:3001/login)
+app.get('*', (req: Request, res: Response, next: any) => {
+  if (req.accepts('html') && !req.path.startsWith('/api') && !req.path.startsWith('/health')) {
+    return res.redirect(`http://localhost:3000${req.originalUrl}`);
+  }
+  next();
+});
+
 export async function startServer() {
   await connectMongo();
+  await userService.seedDefaultAdmin();
   return app.listen(PORT, () => {
     console.log(`[IDENTITY-API] Running on port ${PORT}`);
   });

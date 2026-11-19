@@ -75,14 +75,14 @@ UserSchema.index({ email: 1 }, { unique: true });
 UserSchema.index({ role: 1, isActive: 1 });
 
 // Hook Mongoose Pre-Save : Hachage automatique avec Argon2id lors de la création ou modification
-UserSchema.pre<IUserDocument>('save', async function (next) {
-  if (!this.isModified('password')) {
+UserSchema.pre('save', async function (next) {
+  if (!(this as any).isModified('password')) {
     return next();
   }
 
   try {
-    const hash = await argon2.hash(this.password, ARGON2_CONFIG);
-    this.password = hash;
+    const hash = await argon2.hash((this as any).password, ARGON2_CONFIG);
+    (this as any).password = hash;
     return next();
   } catch (err: any) {
     return next(err);
@@ -97,4 +97,4 @@ UserSchema.methods.comparePassword = async function (candidatePassword: string):
   return argon2.verify(this.password, candidatePassword);
 };
 
-export const UserModel: Model<IUserDocument> = model<IUserDocument>('User', UserSchema);
+export const UserModel = model<any>('User', UserSchema);
