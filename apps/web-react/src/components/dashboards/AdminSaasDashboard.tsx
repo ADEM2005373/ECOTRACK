@@ -57,7 +57,7 @@ const INITIAL_ALERTS: TechnicalAlert[] = [
     id: 'alt_02',
     severity: 'INFO',
     service: 'PostgreSQL DW',
-    message: 'Synchronisation horaire ETL achevée avec succès (500 faits et dimensions synchronisés).',
+    message: 'Synchronisation horaire ETL achevée avec succès (faits et dimensions synchronisés avec PostgreSQL DW).',
     timestamp: 'Il y a 18 min',
     resolved: true,
   },
@@ -689,7 +689,7 @@ export const AdminSaasDashboard: React.FC = () => {
               <div className="text-xs space-y-1.5 text-[#475569]">
                 <div className="flex justify-between"><span>Port d'écoute :</span><strong className="font-mono text-[#0f172a]">3002</strong></div>
                 <div className="flex justify-between"><span>Index Spatial :</span><strong className="font-mono text-[#0f172a]">GeoJSON 2dsphere</strong></div>
-                <div className="flex justify-between"><span>Volume signalements :</span><strong className="font-mono text-[#0f172a]">500 enregistrés</strong></div>
+                <div className="flex justify-between"><span>Volume signalements :</span><strong className="font-mono text-[#0f172a]">{reportsCount} enregistrés</strong></div>
                 <div className="flex justify-between"><span>Event bus :</span><strong className="text-[#059669]">report.created (Actif)</strong></div>
               </div>
             </div>
