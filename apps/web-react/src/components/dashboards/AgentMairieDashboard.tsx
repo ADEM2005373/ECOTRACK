@@ -80,10 +80,10 @@ export const AgentMairieDashboard: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-[26px] font-bold text-[#0f172a] font-heading tracking-tight">
-            Boîte de réception
+            Boîte de réception &amp; Dispatching Bureautique
           </h1>
           <p className="text-[13px] text-[#475569] mt-0.5">
-            Qualifiez les signalements et coordonnez les interventions sur votre territoire.
+            Traitement bureautique : analysez les réclamations citoyennes et affectez chaque dossier à la brigade technique compétente selon son type et sa gravité.
           </p>
         </div>
 
@@ -282,27 +282,32 @@ export const AgentMairieDashboard: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white border border-[#e2e8f0] rounded-[12px] p-6 max-w-md w-full shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-3">
-              <h3 className="text-base font-bold text-[#0f172a]">Assignation de Brigade Terrain</h3>
+              <h3 className="text-base font-bold text-[#0f172a]">Affectation à une Brigade Technique</h3>
               <button onClick={() => setAssignTarget(null)} className="text-[#94a3b8] hover:text-[#0f172a]">✕</button>
             </div>
 
             <div className="p-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-[8px] text-xs space-y-1">
-              <p><strong>Référence :</strong> {assignTarget.reference}</p>
-              <p><strong>Type d'anomalie :</strong> {assignTarget.category}</p>
+              <p><strong>Référence dossier :</strong> {assignTarget.reference}</p>
+              <p><strong>Type analysé :</strong> {assignTarget.category}</p>
               <p><strong>Localisation :</strong> {assignTarget.district}</p>
+              <p className="text-[11px] text-blue-700 font-medium pt-1">
+                Traitement bureautique : sélectionnez la brigade spécialisée selon la nature des déchets.
+              </p>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#0f172a] mb-1">Brigade Municipale Dédiée</label>
+              <label className="block text-xs font-semibold text-[#0f172a] mb-1">Brigade Technique Cible</label>
               <select
                 value={selectedBrigade}
                 onChange={e => setSelectedBrigade(e.target.value)}
                 className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
               >
-                <option value="Brigade Voirie Centre-Ville">Brigade Voirie Centre-Ville</option>
-                <option value="Brigade Salubrité & Déchets">Brigade Salubrité & Déchets</option>
-                <option value="Brigade Éclairage & Réseaux">Brigade Éclairage & Réseaux</option>
-                <option value="Équipe Intervention Rapide">Équipe Intervention Rapide</option>
+                <option value="Brigade Voirie & Salubrité">Brigade Voirie &amp; Salubrité (Dépôts sauvages, gravats)</option>
+                <option value="Brigade Ramassage Poids Lourd">Brigade Ramassage Poids Lourd (Encombrants, mobilier)</option>
+                <option value="Brigade Espaces Verts">Brigade Espaces Verts (Végétaux, élagage)</option>
+                <option value="Brigade Peinture & Nettoyage">Brigade Peinture &amp; Nettoyage (Graffitis)</option>
+                <option value="Brigade Intervention Spéciale">Brigade Intervention Spéciale (Dangereux, toxique)</option>
+                <option value="Brigade Collecte Express">Brigade Collecte Express (Bacs débordants)</option>
               </select>
             </div>
 

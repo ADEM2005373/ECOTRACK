@@ -14,7 +14,9 @@ import {
   PlusCircle,
   Search,
   Trash2,
-  Camera
+  Camera,
+  Building2,
+  Info
 } from 'lucide-react';
 
 interface StaffUser {
@@ -104,7 +106,7 @@ export const AdminMairieDashboard: React.FC = () => {
               role: u.role,
               active: u.isActive !== false,
               municipality: u.municipality,
-              brigade: u.role === 'CHEF_OUVRIER' ? 'Voirie & Salubrité' : u.role === 'OUVRIER' ? 'Équipe Technique' : 'Pôle Modération',
+              brigade: u.role === 'CHEF_OUVRIER' ? 'Voirie & Salubrité' : u.role === 'OUVRIER' ? 'Équipe Technique' : 'Pôle Bureautique & Dispatching',
               assignedCount: u.role === 'CHEF_OUVRIER' ? 3 : 1
             }));
           setAgents(list);
@@ -442,7 +444,7 @@ export const AdminMairieDashboard: React.FC = () => {
               </div>
               <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">{agents.length}</div>
               <p className="text-[11px] text-[#475569] mt-1">
-                {agents.length === 0 ? 'Aucun collaborateur enregistré' : `${agents.filter(a => a.role === 'CHEF_OUVRIER').length} chefs ouvriers · ${agents.filter(a => a.role === 'AGENT_MAIRIE').length} agents`}
+                {agents.length === 0 ? 'Aucun collaborateur enregistré' : `${agents.filter(a => a.role === 'CHEF_OUVRIER').length} chefs de brigade terrain · ${agents.filter(a => a.role === 'AGENT_MAIRIE').length} agents de bureau`}
               </p>
             </div>
 
@@ -698,12 +700,38 @@ export const AdminMairieDashboard: React.FC = () => {
                         <div className="text-[#64748b] text-[11px]">{a.email}</div>
                       </td>
                       <td className="py-2.5 px-4">
-                        <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-100 text-[#0f172a] border border-[#e2e8f0]">
-                          {a.role}
+                        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${
+                          a.role === 'AGENT_MAIRIE'
+                            ? 'bg-blue-50 text-blue-700 border-blue-200'
+                            : a.role === 'CHEF_OUVRIER'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-slate-100 text-slate-700 border-slate-200'
+                        }`}>
+                          {a.role === 'AGENT_MAIRIE'
+                            ? 'Agent Traitement Bureautique'
+                            : a.role === 'CHEF_OUVRIER'
+                            ? 'Chef Ouvrier (Terrain)'
+                            : 'Ouvrier Technique (Terrain)'}
                         </span>
                       </td>
                       <td className="py-2.5 px-4 text-[#475569]">
-                        {a.brigade}
+                        {a.role === 'AGENT_MAIRIE' ? (
+                          <div className="flex flex-col">
+                            <span className="inline-flex items-center gap-1.5 text-blue-800 font-semibold text-xs">
+                              <Building2 className="w-3.5 h-3.5 text-blue-600" />
+                              Pôle Bureautique &amp; Dispatching
+                            </span>
+                            <span className="text-[10px] text-[#64748b]">Affecte les réclamations aux brigades</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col">
+                            <span className="inline-flex items-center gap-1.5 text-[#0f172a] font-semibold text-xs">
+                              <Users className="w-3.5 h-3.5 text-[#059669]" />
+                              {a.brigade || 'Brigade Voirie & Salubrité'}
+                            </span>
+                            <span className="text-[10px] text-[#64748b]">Équipe terrain opérationnelle</span>
+                          </div>
+                        )}
                       </td>
                       <td className="py-2.5 px-4">
                         <span className="inline-flex items-center gap-1 text-[#059669] font-semibold text-[11px]">
@@ -835,29 +863,69 @@ export const AdminMairieDashboard: React.FC = () => {
                   <label className="block text-xs font-semibold text-[#0f172a] mb-1">Rôle opérationnel</label>
                   <select
                     value={newUserRole}
-                    onChange={e => setNewUserRole(e.target.value)}
+                    onChange={e => {
+                      const role = e.target.value;
+                      setNewUserRole(role);
+                      if (role === 'AGENT_MAIRIE') {
+                        setNewUserBrigade('Pôle Bureautique & Dispatching');
+                      } else if (newUserBrigade.includes('Bureautique')) {
+                        setNewUserBrigade('Voirie & Salubrité');
+                      }
+                    }}
                     className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
                   >
-                    <option value="CHEF_OUVRIER">Chef Ouvrier (Missions)</option>
-                    <option value="AGENT_MAIRIE">Agent Mairie (Modération)</option>
-                    <option value="OUVRIER">Ouvrier Technique</option>
+                    <option value="AGENT_MAIRIE">Agent Mairie (Traitement Bureautique &amp; Dispatching)</option>
+                    <option value="CHEF_OUVRIER">Chef Ouvrier (Terrain / Responsable Brigade)</option>
+                    <option value="OUVRIER">Ouvrier Technique (Équipe de Terrain)</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#0f172a] mb-1">Brigade affectée</label>
-                  <select
-                    value={newUserBrigade}
-                    onChange={e => setNewUserBrigade(e.target.value)}
-                    className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
-                  >
-                    <option value="Voirie & Salubrité">Voirie & Salubrité</option>
-                    <option value="Ramassage Poids Lourd">Ramassage Poids Lourd</option>
-                    <option value="Intervention Spéciale">Intervention Spéciale</option>
-                    <option value="Espaces Verts">Espaces Verts</option>
-                  </select>
+                  <label className="block text-xs font-semibold text-[#0f172a] mb-1">
+                    {newUserRole === 'AGENT_MAIRIE' ? 'Affectation / Pôle' : 'Brigade affectée (Terrain)'}
+                  </label>
+                  {newUserRole === 'AGENT_MAIRIE' ? (
+                    <div className="w-full bg-blue-50/50 border border-blue-200 rounded-[8px] p-2 text-xs flex flex-col justify-center min-h-[42px]">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-blue-700 flex items-center gap-1.5">
+                          <Building2 className="w-3.5 h-3.5 text-blue-600" />
+                          Pôle Bureautique &amp; Dispatching
+                        </span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 font-medium">Poste Bureau</span>
+                      </div>
+                      <span className="text-[10px] text-[#64748b] mt-0.5">Non rattaché à une brigade de terrain</span>
+                    </div>
+                  ) : (
+                    <select
+                      value={newUserBrigade}
+                      onChange={e => setNewUserBrigade(e.target.value)}
+                      className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
+                    >
+                      <option value="Voirie & Salubrité">Brigade Voirie &amp; Salubrité</option>
+                      <option value="Ramassage Poids Lourd">Brigade Ramassage Poids Lourd</option>
+                      <option value="Intervention Spéciale">Brigade Intervention Spéciale</option>
+                      <option value="Espaces Verts">Brigade Espaces Verts</option>
+                      <option value="Peinture & Nettoyage">Brigade Peinture &amp; Nettoyage</option>
+                    </select>
+                  )}
                 </div>
               </div>
+
+              {newUserRole === 'AGENT_MAIRIE' ? (
+                <div className="bg-blue-50/70 border border-blue-200 rounded-[8px] p-3 text-xs text-blue-900 flex items-start gap-2.5">
+                  <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                  <p className="leading-relaxed">
+                    <strong>Rôle Bureautique &amp; Dispatching :</strong> Cet agent n'a pas de brigade spéciale. C'est un <strong>agent de traitement bureautique</strong> qui analyse les réclamations citoyennes, qualifie les anomalies et <strong>les affecte selon leur analyse et leur type à la brigade technique appropriée</strong> (Voirie, Ramassage Poids Lourd, Espaces Verts, etc.).
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-emerald-50/70 border border-emerald-200 rounded-[8px] p-3 text-xs text-emerald-900 flex items-start gap-2.5">
+                  <Info className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
+                  <p className="leading-relaxed">
+                    <strong>Équipe Opérationnelle Terrain :</strong> Cet intervenant est rattaché à la brigade technique sélectionnée pour recevoir les ordres de mission et intervenir physiquement sur le terrain avec preuve photo avant/après travaux.
+                  </p>
+                </div>
+              )}
 
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#e2e8f0]">
                 <button
