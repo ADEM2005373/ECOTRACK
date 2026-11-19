@@ -223,6 +223,34 @@ export const AdminMairieDashboard: React.FC = () => {
   const [newReportCategory, setNewReportCategory] = useState('DEPOT_SAUVAGE');
   const [newReportDistrict, setNewReportDistrict] = useState('Centre-Ville');
 
+  // En-têtes d'authentification pour attribution précise dans le journal d'audit
+  const getAuthHeaders = () => {
+    const token = authState.accessToken || localStorage.getItem('ecotrack_access_token') || '';
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    if (authState.user?.id) {
+      headers['x-user-id'] = authState.user.id;
+      headers['x-actor-id'] = authState.user.email || authState.user.id;
+    }
+    if (authState.user?.email) {
+      headers['x-user-email'] = authState.user.email;
+    }
+    if (authState.user?.fullName) {
+      headers['x-user-name'] = authState.user.fullName;
+    }
+    if (authState.user?.role) {
+      headers['x-user-role'] = authState.user.role;
+    }
+    if (municipality) {
+      headers['x-user-municipality'] = municipality;
+    }
+    return headers;
+  };
+
   // Gestionnaire d'ajout de collaborateur
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -236,7 +264,7 @@ export const AdminMairieDashboard: React.FC = () => {
     try {
       const res = await fetch('/api/v1/auth/users', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           email: newUserEmail.trim(),
           password: newUserPassword.trim() || 'Agent2026!',
@@ -266,7 +294,10 @@ export const AdminMairieDashboard: React.FC = () => {
   const handleDeleteUser = async (id: string, name: string) => {
     if (!confirm(`Confirmez-vous la désactivation du compte de ${name} ?`)) return;
     try {
-      const res = await fetch(`/api/v1/auth/users/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/v1/auth/users/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
       if (res.ok) {
         showToast(`Compte de ${name} supprimé avec succès`);
         fetchAgents();
@@ -307,7 +338,7 @@ export const AdminMairieDashboard: React.FC = () => {
     try {
       const res = await fetch('/api/v1/reports', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           description: `${newReportTitle}${newReportDesc ? ` — ${newReportDesc}` : ''}`,
           category: newReportCategory,

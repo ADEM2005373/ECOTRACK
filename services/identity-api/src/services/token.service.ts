@@ -37,6 +37,7 @@ export interface JwtPayload {
   email: string;
   role: UserRole;
   fullName: string;
+  municipality?: string;
   iat: number;
   exp: number;
   iss: string;
@@ -126,7 +127,8 @@ export class TokenService {
         sub: user.id,
         email: user.email,
         role: user.role,
-        fullName: user.fullName
+        fullName: user.fullName,
+        municipality: user.municipality
       },
       this.accessTtlSeconds
     );

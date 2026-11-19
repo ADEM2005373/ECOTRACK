@@ -196,9 +196,17 @@ export const AdminSaasDashboard: React.FC = () => {
 
     setIsSubmittingMun(true);
     try {
+      const token = localStorage.getItem('ecotrack_access_token') || '';
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      headers['x-actor-id'] = 'admin@ecotrack.tn';
+      headers['x-user-id'] = '6aff029448be8ba9c6c9f264';
+      headers['x-user-role'] = 'ADMIN_SAAS';
+      headers['x-user-name'] = 'Administrateur SaaS Principal';
+
       const res = await fetch('/api/v1/auth/users', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           email: newMunAdminEmail.trim(),
           password: newMunPassword.trim() || 'Mairie2026!',

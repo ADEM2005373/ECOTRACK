@@ -189,6 +189,44 @@ router.get('/users', async (_req: Request, res: Response) => {
   }
 });
 
+function extractActorInfo(req: Request): {
+  actorId: string;
+  actorRole: string;
+  actorEmail?: string;
+  actorName?: string;
+  municipality?: string;
+} {
+  let actorId = (req.headers['x-actor-id'] as string) || (req.headers['x-user-id'] as string);
+  let actorRole = (req.headers['x-user-role'] as string);
+  let actorEmail = (req.headers['x-user-email'] as string);
+  let actorName = (req.headers['x-user-name'] as string);
+  let municipality = (req.headers['x-user-municipality'] as string);
+
+  // Vérification de l'en-tête Authorization Bearer JWT
+  const authHeader = req.headers['authorization'];
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    const decoded = tokenService.verifyToken(token) as any;
+    if (decoded) {
+      if (!actorId) actorId = decoded.email || decoded.sub;
+      if (!actorRole) actorRole = decoded.role;
+      if (!actorEmail) actorEmail = decoded.email;
+      if (!actorName) actorName = decoded.fullName;
+      if (!municipality && decoded.municipality) municipality = decoded.municipality;
+    }
+  }
+
+  // Fallbacks intelligents si non spécifié
+  if (!actorId) {
+    actorId = 'admin@ecotrack.tn';
+  }
+  if (!actorRole) {
+    actorRole = 'ADMIN_SAAS';
+  }
+
+  return { actorId, actorRole, actorEmail, actorName, municipality };
+}
+
 /**
  * POST /auth/users & POST /auth/admin/create-user
  * Création d'utilisateurs par l'administrateur (tous rôles autorisés)
@@ -229,12 +267,15 @@ const createUserHandler = async (req: Request, res: Response) => {
 
     // Trace d'audit pour création d'utilisateur / collectivité
     const clientIp = req.ip || req.socket.remoteAddress || '127.0.0.1';
+    const actor = extractActorInfo(req);
+    const actorDisplay = actor.actorName ? `${actor.actorName} (${actor.actorRole})` : actor.actorId;
+
     await recordAudit(
-      (req.headers['x-user-id'] as string) || (req.headers['x-actor-id'] as string) || 'admin@ecotrack.tn',
-      (req.headers['x-user-role'] as string) || 'ADMIN_SAAS',
+      actor.actorId,
+      actor.actorRole,
       AuditAction.USER_REGISTER,
       user.id || user.email,
-      `Création du compte ${user.fullName} (${user.role}) - Collectivité: ${user.municipality || 'SaaS'}`,
+      `Création du compte ${user.fullName} (${user.role}) par ${actorDisplay} - Collectivité: ${user.municipality || 'SaaS'}`,
       clientIp,
       req.headers['user-agent'] as string,
       { email: user.email, role: user.role, municipality: user.municipality }
@@ -272,12 +313,13 @@ router.delete('/users/:id', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'NOT_FOUND', message: 'Utilisateur introuvable.' });
     }
     const clientIp = req.ip || req.socket.remoteAddress || '127.0.0.1';
+    const actor = extractActorInfo(req);
     await recordAudit(
-      (req.headers['x-user-id'] as string) || (req.headers['x-actor-id'] as string) || 'admin@ecotrack.tn',
-      (req.headers['x-user-role'] as string) || 'ADMIN_SAAS',
+      actor.actorId,
+      actor.actorRole,
       AuditAction.ADMIN_USER_DEACTIVATED,
       req.params.id,
-      `Suppression du compte utilisateur ID: ${req.params.id}`,
+      `Suppression du compte utilisateur ID: ${req.params.id} par ${actor.actorName || actor.actorId} (${actor.actorRole})`,
       clientIp,
       req.headers['user-agent'] as string
     );
