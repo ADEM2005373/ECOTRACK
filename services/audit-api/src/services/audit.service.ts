@@ -38,6 +38,15 @@ export class AuditService {
     if (filters.entityType) query.entityType = filters.entityType;
     if (filters.entityId) query.entityId = filters.entityId;
 
+    if (filters.municipality && filters.municipality.trim()) {
+      const munRegex = new RegExp(filters.municipality.trim(), 'i');
+      query.$or = [
+        { 'after.municipality': munRegex },
+        { 'before.municipality': munRegex },
+        { reason: munRegex },
+      ];
+    }
+
     if (filters.startDate || filters.endDate) {
       query.timestamp = {};
       if (filters.startDate) query.timestamp.$gte = new Date(filters.startDate);

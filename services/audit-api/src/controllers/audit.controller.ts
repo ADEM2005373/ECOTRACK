@@ -9,7 +9,7 @@ export class AuditController {
    */
   async getLogs(req: Request, res: Response) {
     try {
-      // Vérification du rôle injecté par le middleware JWT / Gateway (ADMIN ou ADMIN_SAAS)
+      // Vérification du rôle injecté par le middleware JWT / Gateway (ADMIN ou ADMIN_SAAS ou ADMIN_MUNICIPALITE)
       const userRole = (req.headers['x-user-role'] as string) || '';
       const isAuthorized = !userRole || userRole === 'ADMIN' || userRole === 'ADMIN_SAAS' || userRole === 'ADMIN_MUNICIPALITE' || userRole === UserRole.ADMIN || userRole === UserRole.ADMIN_SAAS;
       if (!isAuthorized) {
@@ -18,6 +18,14 @@ export class AuditController {
         });
       }
 
+      const callerMunicipality = (req.headers['x-user-municipality'] as string) || '';
+      const requestedMunicipality = (req.query.municipality as string) || '';
+
+      // Isolation territoriale stricte : un administrateur municipal ne peut voir que les traces de sa collectivité
+      const effectiveMunicipality = userRole === 'ADMIN_MUNICIPALITE'
+        ? (callerMunicipality || requestedMunicipality)
+        : (requestedMunicipality || callerMunicipality);
+
       const filters: AuditQueryFilters = {
         actorId: req.query.actorId as string,
         action: req.query.action as string,
@@ -25,6 +33,7 @@ export class AuditController {
         entityId: req.query.entityId as string,
         startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
         endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined,
+        municipality: effectiveMunicipality ? effectiveMunicipality.trim() : undefined,
         page: req.query.page ? parseInt(req.query.page as string, 10) : 1,
         limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 20
       };

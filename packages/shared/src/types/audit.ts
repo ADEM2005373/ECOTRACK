@@ -66,6 +66,7 @@ export interface AuditQueryFilters {
   entityId?: string;
   startDate?: Date;
   endDate?: Date;
+  municipality?: string;
   page?: number;
   limit?: number;
 }

@@ -132,6 +132,7 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
         { id: 'categories', label: 'Catégories & Seuils SLA', icon: <Tags className="w-4 h-4 text-purple-400" />, path: '/?tab=categories' },
         { id: 'powerbi', label: 'Pilotage & Analyses', icon: <BarChart3 className="w-4 h-4 text-indigo-400" />, path: '/admin/analytics' },
         { id: 'map', label: 'Carte Territoriale', icon: <MapPin className="w-4 h-4 text-teal-400" />, path: '/supervision' },
+        { id: 'audit', label: 'Journal d’Audit Territorial', icon: <ShieldCheck className="w-4 h-4 text-teal-400" />, path: '/admin/audit' },
       ];
     }
 

@@ -16,7 +16,9 @@ import {
   Trash2,
   Camera,
   Building2,
-  Info
+  Info,
+  ShieldCheck,
+  Lock
 } from 'lucide-react';
 
 interface StaffUser {
@@ -58,23 +60,23 @@ export const AdminMairieDashboard: React.FC = () => {
   const municipality = authState.user?.municipality || 'Municipalité de Zarzouna';
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const currentTabParam = searchParams.get('tab') as 'overview' | 'reports' | 'users' | 'categories' | null;
+  const currentTabParam = searchParams.get('tab') as 'overview' | 'reports' | 'users' | 'categories' | 'audit' | null;
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'reports' | 'users' | 'categories'>(
-    currentTabParam && ['overview', 'reports', 'users', 'categories'].includes(currentTabParam)
+  const [activeTab, setActiveTab] = useState<'overview' | 'reports' | 'users' | 'categories' | 'audit'>(
+    currentTabParam && ['overview', 'reports', 'users', 'categories', 'audit'].includes(currentTabParam)
       ? currentTabParam
       : 'overview'
   );
 
   useEffect(() => {
-    if (currentTabParam && ['overview', 'reports', 'users', 'categories'].includes(currentTabParam)) {
+    if (currentTabParam && ['overview', 'reports', 'users', 'categories', 'audit'].includes(currentTabParam)) {
       setActiveTab(currentTabParam);
     } else if (!currentTabParam) {
       setActiveTab('overview');
     }
   }, [currentTabParam]);
 
-  const switchTab = (tab: 'overview' | 'reports' | 'users' | 'categories') => {
+  const switchTab = (tab: 'overview' | 'reports' | 'users' | 'categories' | 'audit') => {
     setActiveTab(tab);
     setSearchParams(tab === 'overview' ? {} : { tab });
   };
@@ -158,9 +160,32 @@ export const AdminMairieDashboard: React.FC = () => {
       .catch(() => {});
   };
 
+  // 4. Traces d'audit immuables spécialisées pour la commune (Row-Level Security)
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [loadingAudit, setLoadingAudit] = useState(false);
+
+  const fetchAuditLogs = () => {
+    setLoadingAudit(true);
+    fetch(`/api/v1/audit/logs?municipality=${encodeURIComponent(municipality)}&limit=30`, {
+      headers: {
+        'x-user-role': 'ADMIN_MUNICIPALITE',
+        'x-user-municipality': municipality,
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data.logs)) {
+          setAuditLogs(data.logs);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingAudit(false));
+  };
+
   useEffect(() => {
     fetchAgents();
     fetchMunicipalReports();
+    fetchAuditLogs();
   }, [municipality]);
 
   const [reportSearch, setReportSearch] = useState('');
@@ -346,7 +371,7 @@ export const AdminMairieDashboard: React.FC = () => {
             className="inline-flex items-center gap-2 bg-[#059669] hover:bg-[#047857] text-white font-semibold px-4 h-[44px] rounded-[8px] text-[13px] transition shadow-sm"
           >
             <BarChart3 className="w-4 h-4" />
-            <span>Pilotage & Analyses</span>
+            <span>Pilotage &amp; Analyses</span>
           </Link>
           <Link
             to="/supervision"
@@ -355,10 +380,17 @@ export const AdminMairieDashboard: React.FC = () => {
             <MapPin className="w-4 h-4" />
             <span>Carte Territoriale</span>
           </Link>
+          <Link
+            to="/admin/audit"
+            className="inline-flex items-center gap-2 bg-white border border-[#e2e8f0] text-[#0f172a] hover:bg-slate-50 font-semibold px-4 h-[44px] rounded-[8px] text-[13px] transition shadow-sm"
+          >
+            <ShieldCheck className="w-4 h-4 text-[#059669]" />
+            <span>Journal d'Audit</span>
+          </Link>
         </div>
       </div>
 
-      {/* Onglets de navigation interne (Figma: Overview / Reports / Users / Categories) */}
+      {/* Onglets de navigation interne (Figma: Overview / Reports / Users / Categories / Audit) */}
       <div className="flex items-center gap-2 border-b border-[#e2e8f0] pb-2 overflow-x-auto">
         <button
           onClick={() => switchTab('overview')}
@@ -368,7 +400,7 @@ export const AdminMairieDashboard: React.FC = () => {
               : 'text-[#475569] hover:bg-slate-100 hover:text-[#0f172a]'
           }`}
         >
-          Vue d'ensemble & KPIs
+          Vue d'ensemble &amp; KPIs
         </button>
         <button
           onClick={() => switchTab('reports')}
@@ -378,7 +410,7 @@ export const AdminMairieDashboard: React.FC = () => {
               : 'text-[#475569] hover:bg-slate-100 hover:text-[#0f172a]'
           }`}
         >
-          <span>Signalements & Suivi</span>
+          <span>Signalements &amp; Suivi</span>
           <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#059669] text-white font-bold">{reports.length}</span>
         </button>
         <button
@@ -389,7 +421,7 @@ export const AdminMairieDashboard: React.FC = () => {
               : 'text-[#475569] hover:bg-slate-100 hover:text-[#0f172a]'
           }`}
         >
-          <span>Utilisateurs & Brigades</span>
+          <span>Utilisateurs &amp; Brigades</span>
           <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-800 font-bold">{agents.length}</span>
         </button>
         <button
@@ -400,8 +432,20 @@ export const AdminMairieDashboard: React.FC = () => {
               : 'text-[#475569] hover:bg-slate-100 hover:text-[#0f172a]'
           }`}
         >
-          <span>Catégories & Seuils SLA</span>
+          <span>Catégories &amp; Seuils SLA</span>
           <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-800 font-bold">{categories.length}</span>
+        </button>
+        <button
+          onClick={() => { switchTab('audit'); fetchAuditLogs(); }}
+          className={`px-4 py-2 rounded-[8px] text-[13px] font-semibold transition whitespace-nowrap flex items-center gap-2 ${
+            activeTab === 'audit'
+              ? 'bg-[#102c35] text-white'
+              : 'text-[#475569] hover:bg-slate-100 hover:text-[#0f172a]'
+          }`}
+        >
+          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <span>Journal d'Audit Territorial</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-800 font-bold">{auditLogs.length}</span>
         </button>
       </div>
 
@@ -802,6 +846,111 @@ export const AdminMairieDashboard: React.FC = () => {
                     </td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ================= ONGLET 5 : JOURNAL D'AUDIT TERRITORIAL ================= */}
+      {activeTab === 'audit' && (
+        <div className="bg-white border border-[#e2e8f0] rounded-[12px] shadow-sm overflow-hidden p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-[#0f172a]">
+                  Journal d'Audit &amp; Traçabilité ({municipality})
+                </h3>
+                <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-[#059669] border border-emerald-200 flex items-center gap-1">
+                  <Lock className="w-3 h-3 text-[#059669]" />
+                  Isolation Territoriale RLS
+                </span>
+              </div>
+              <p className="text-xs text-[#475569] mt-0.5">
+                Historique immuable en écriture seule (Append-Only) restreint aux connexions, qualifications et opérations de {municipality}.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={fetchAuditLogs}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#e2e8f0] hover:bg-slate-50 text-[#0f172a] text-xs font-semibold rounded-[8px] shadow-sm"
+              >
+                <Clock className="w-3.5 h-3.5 text-[#059669]" />
+                <span>Actualiser</span>
+              </button>
+              <Link
+                to="/admin/audit"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-semibold rounded-[8px] shadow-sm"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Console d'Audit Complète</span>
+              </Link>
+            </div>
+          </div>
+
+          <div className="border border-[#e2e8f0] rounded-[8px] overflow-hidden">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-[#f8fafc] text-[#475569] font-semibold border-b border-[#e2e8f0] h-[40px]">
+                  <th className="py-2.5 px-4">Date &amp; Heure</th>
+                  <th className="py-2.5 px-4">Acteur</th>
+                  <th className="py-2.5 px-4">Rôle</th>
+                  <th className="py-2.5 px-4">Action</th>
+                  <th className="py-2.5 px-4">IP (RGPD)</th>
+                  <th className="py-2.5 px-4">Motif / Justification</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#e2e8f0]">
+                {loadingAudit ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-10 text-[#64748b]">
+                      Chargement des traces d'audit de la commune...
+                    </td>
+                  </tr>
+                ) : auditLogs.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-10 text-[#64748b]">
+                      <ShieldCheck className="w-8 h-8 mx-auto text-[#94a3b8] mb-2" />
+                      <p className="font-semibold text-sm text-[#0f172a]">Aucune trace enregistrée pour {municipality}</p>
+                      <p className="text-xs text-[#64748b] mt-1">
+                        Les futures connexions d'agents, qualifications et créations d'équipes apparaîtront ici.
+                      </p>
+                    </td>
+                  </tr>
+                ) : (
+                  auditLogs.map((log: any) => (
+                    <tr key={log.id} className="hover:bg-[#f8fafc] h-[52px]">
+                      <td className="py-2.5 px-4 font-mono text-[11px] text-[#64748b]">
+                        {new Date(log.timestamp).toLocaleString('fr-FR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </td>
+                      <td className="py-2.5 px-4 font-semibold text-[#0f172a]">
+                        {log.actorId}
+                      </td>
+                      <td className="py-2.5 px-4">
+                        <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-100 text-[#0f172a] border border-[#e2e8f0]">
+                          {log.actorRole}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-4">
+                        <span className="font-semibold text-[#059669] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 text-[11px]">
+                          {log.action}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-4 font-mono text-[11px] text-[#64748b]">
+                        {log.ipTruncated}
+                      </td>
+                      <td className="py-2.5 px-4 text-[#0f172a] text-[12px] truncate max-w-[280px]" title={log.reason}>
+                        {log.reason || '—'}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
