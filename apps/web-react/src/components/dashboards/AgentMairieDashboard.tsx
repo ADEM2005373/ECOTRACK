@@ -177,8 +177,19 @@ export const AgentMairieDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e2e8f0] text-[12px]">
-              {filteredReports.map((incident) => (
-                <tr key={incident.id} className="hover:bg-[#f8fafc] transition-colors h-[64px]">
+              {filteredReports.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-12 text-[#64748b]">
+                    <ShieldCheck className="w-8 h-8 mx-auto text-[#94a3b8] mb-2" />
+                    <p className="font-semibold text-sm text-[#0f172a]">Boîte de réception municipale vide</p>
+                    <p className="text-xs text-[#64748b] mt-1 max-w-sm mx-auto">
+                      Toutes les données de test ont été purgées. Les nouvelles réclamations déposées par les citoyens apparaîtront ici pour qualification.
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                filteredReports.map((incident) => (
+                  <tr key={incident.id} className="hover:bg-[#f8fafc] transition-colors h-[64px]">
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
                       <img
@@ -260,7 +271,7 @@ export const AgentMairieDashboard: React.FC = () => {
                     </div>
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>

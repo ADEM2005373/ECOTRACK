@@ -15,32 +15,8 @@ const DEMO_FALLBACK_ACCOUNTS: Record<string, { role: string; fullName: string; p
   'admin@ecotrack.tn': {
     pass: 'Admin2026!',
     role: 'ADMIN_SAAS',
-    fullName: 'Administrateur SaaS Global',
+    fullName: 'Administrateur SaaS Principal',
     municipality: 'Supervision Centrale'
-  },
-  'mairie.tunis@ecotrack.tn': {
-    pass: 'Mairie2026!',
-    role: 'ADMIN_MUNICIPALITE',
-    fullName: 'Directeur Services Mairie Tunis',
-    municipality: 'Municipalité de Tunis'
-  },
-  'agent.tunis@ecotrack.tn': {
-    pass: 'Agent2026!',
-    role: 'AGENT_MAIRIE',
-    fullName: 'Agent Modérateur Mairie Tunis',
-    municipality: 'Municipalité de Tunis'
-  },
-  'chef.ouvrier@ecotrack.tn': {
-    pass: 'Ouvrier2026!',
-    role: 'CHEF_OUVRIER',
-    fullName: 'Karim Ben Salem (Chef Voirie)',
-    municipality: 'Municipalité de Tunis'
-  },
-  'citoyen@ecotrack.tn': {
-    pass: 'Citoyen2026!',
-    role: 'CITOYEN',
-    fullName: 'Anis Mahjoub (Citoyen)',
-    municipality: 'Municipalité de Tunis'
   }
 };
 

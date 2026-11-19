@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth, type AuthUser } from '../../store/authStore';
 import {
@@ -26,69 +26,6 @@ interface FigmaSidebarProps {
   onSelectTab?: (tab: string) => void;
 }
 
-const DEMO_PRESETS: { label: string; role: string; desc: string; user: AuthUser }[] = [
-  {
-    label: '👑 Admin SaaS',
-    role: 'ADMIN_SAAS',
-    desc: 'Superviseur Global Multi-Mairies',
-    user: {
-      id: 'usr_admin_saas',
-      email: 'admin@ecotrack.tn',
-      fullName: 'Administrateur Principal',
-      role: 'ADMIN_SAAS',
-      municipality: 'Plateforme Métropolitaine',
-    },
-  },
-  {
-    label: '🏛️ Admin Mairie',
-    role: 'ADMIN_MUNICIPALITE',
-    desc: 'Directeur Services Urbains',
-    user: {
-      id: 'usr_admin_mairie',
-      email: 'mairie.tunis@ecotrack.tn',
-      fullName: 'Mondher Ben Amor',
-      role: 'ADMIN_MUNICIPALITE',
-      municipality: 'Ville de Tunis',
-    },
-  },
-  {
-    label: '📋 Agent Mairie',
-    role: 'AGENT_MAIRIE',
-    desc: 'Modération & Tri IA',
-    user: {
-      id: 'usr_agent_mairie',
-      email: 'agent.tunis@ecotrack.tn',
-      fullName: 'Camille Durand',
-      role: 'AGENT_MAIRIE',
-      municipality: 'Ville de Tunis',
-    },
-  },
-  {
-    label: '👷 Chef Ouvrier',
-    role: 'CHEF_OUVRIER',
-    desc: 'Interventions & Preuve Photo',
-    user: {
-      id: 'usr_chef_ouvrier',
-      email: 'chef.ouvrier@ecotrack.tn',
-      fullName: 'Karim Ben Salem',
-      role: 'CHEF_OUVRIER',
-      municipality: 'Ville de Tunis',
-    },
-  },
-  {
-    label: '📱 Citoyen',
-    role: 'CITOYEN',
-    desc: 'Déclaration & Suivi',
-    user: {
-      id: 'usr_citoyen',
-      email: 'citoyen@ecotrack.tn',
-      fullName: 'Anis Mahjoub',
-      role: 'CITOYEN',
-      municipality: 'Ville de Tunis',
-    },
-  },
-];
-
 export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
   let user: any = null;
   let role = 'ADMIN_SAAS';
@@ -108,6 +45,18 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showRoleModal, setShowRoleModal] = useState(false);
+  const [dbUsers, setDbUsers] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (showRoleModal) {
+      fetch('/api/v1/auth/users')
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data.users)) setDbUsers(data.users);
+        })
+        .catch(() => {});
+    }
+  }, [showRoleModal]);
 
   const getRoleConfig = () => {
     switch (role) {
@@ -162,14 +111,14 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
 
     if (role === 'CHEF_OUVRIER' || role === 'OUVRIER') {
       return [
-        { id: 'missions', label: 'Feuille de Route (Missions)', icon: <Wrench className="w-4 h-4 text-amber-400" />, path: '/', count: '3' },
+        { id: 'missions', label: 'Feuille de Route (Missions)', icon: <Wrench className="w-4 h-4 text-amber-400" />, path: '/' },
         { id: 'map', label: 'Carte des Chantiers', icon: <MapPin className="w-4 h-4 text-blue-400" />, path: '/supervision' },
       ];
     }
 
     if (role === 'AGENT_MAIRIE' || role === 'AGENT') {
       return [
-        { id: 'inbox', label: 'Boîte de réception', icon: <Inbox className="w-4 h-4 text-emerald-400" />, path: '/', count: '24' },
+        { id: 'inbox', label: 'Boîte de réception', icon: <Inbox className="w-4 h-4 text-emerald-400" />, path: '/' },
         { id: 'qualification', label: 'Atelier de Qualification', icon: <ShieldCheck className="w-4 h-4 text-purple-400" />, path: '/agent/qualification' },
         { id: 'map', label: 'Carte opérationnelle', icon: <MapPin className="w-4 h-4 text-blue-400" />, path: '/supervision' },
       ];
@@ -177,8 +126,8 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
 
     if (role === 'ADMIN_MUNICIPALITE') {
       return [
-        { id: 'overview', label: 'Direction Municipale', icon: <Inbox className="w-4 h-4 text-blue-400" />, path: '/', count: '14' },
-        { id: 'users', label: 'Utilisateurs & Brigades', icon: <Users className="w-4 h-4 text-emerald-400" />, path: '/?tab=users', count: '4' },
+        { id: 'overview', label: 'Direction Municipale', icon: <Inbox className="w-4 h-4 text-blue-400" />, path: '/' },
+        { id: 'users', label: 'Utilisateurs & Brigades', icon: <Users className="w-4 h-4 text-emerald-400" />, path: '/?tab=users' },
         { id: 'categories', label: 'Catégories & Seuils SLA', icon: <Tags className="w-4 h-4 text-purple-400" />, path: '/?tab=categories' },
         { id: 'powerbi', label: 'Pilotage & Analyses', icon: <BarChart3 className="w-4 h-4 text-indigo-400" />, path: '/admin/analytics' },
         { id: 'map', label: 'Carte Territoriale', icon: <MapPin className="w-4 h-4 text-teal-400" />, path: '/supervision' },
@@ -187,10 +136,10 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
 
     // ADMIN_SAAS : TOUTES LES FONCTIONNALITÉS DEMANDÉES DIRECTEMENT DANS LE MENU
     return [
-      { id: 'overview', label: 'Tour de Contrôle SaaS', icon: <Inbox className="w-4 h-4 text-emerald-400" />, path: '/', count: '48' },
-      { id: 'municipalities', label: 'Supervision des Mairies', icon: <Building2 className="w-4 h-4 text-blue-400" />, path: '/?tab=municipalities', count: '5' },
-      { id: 'infrastructure', label: 'Serveurs & Flux K8s', icon: <Server className="w-4 h-4 text-cyan-400" />, path: '/?tab=infrastructure', count: '99.9%' },
-      { id: 'alerts', label: 'Alertes Techniques', icon: <AlertTriangle className="w-4 h-4 text-amber-400" />, path: '/?tab=alerts', count: '3' },
+      { id: 'overview', label: 'Tour de Contrôle SaaS', icon: <Inbox className="w-4 h-4 text-emerald-400" />, path: '/' },
+      { id: 'municipalities', label: 'Supervision des Mairies', icon: <Building2 className="w-4 h-4 text-blue-400" />, path: '/?tab=municipalities' },
+      { id: 'infrastructure', label: 'Serveurs & Flux K8s', icon: <Server className="w-4 h-4 text-cyan-400" />, path: '/?tab=infrastructure', count: '11/11' },
+      { id: 'alerts', label: 'Alertes Techniques', icon: <AlertTriangle className="w-4 h-4 text-amber-400" />, path: '/?tab=alerts' },
       { id: 'ai-governance', label: 'Gouvernance IA & MLOps', icon: <Brain className="w-4 h-4 text-purple-400" />, path: '/admin/ai-governance' },
       { id: 'powerbi', label: 'Analyses Multi-Villes', icon: <BarChart3 className="w-4 h-4 text-indigo-400" />, path: '/admin/analytics' },
       { id: 'map', label: 'Carte Métropolitaine', icon: <MapPin className="w-4 h-4 text-emerald-400" />, path: '/supervision' },
@@ -202,12 +151,6 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
   const userInitials = user?.fullName
     ? user.fullName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
     : 'ET';
-
-  const handleSwitchRole = (preset: typeof DEMO_PRESETS[0]) => {
-    loginSuccess(preset.user, 'demo_access_token_2026');
-    setShowRoleModal(false);
-    navigate('/');
-  };
 
   return (
     <aside className="bg-[#102c35] flex flex-col justify-between h-screen w-[240px] px-[16px] py-[20px] shrink-0 text-white select-none z-30 overflow-y-auto">
@@ -350,32 +293,67 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
             </div>
 
             <p className="text-xs text-[#475569]">
-              Sélectionnez un rôle pour basculer instantanément de profil et tester ses fonctionnalités et droits d'accès spécifiques :
+              Comptes réels enregistrés dans la base MongoDB (seul Admin SaaS conservé par défaut) :
             </p>
 
-            <div className="space-y-2">
-              {DEMO_PRESETS.map((preset) => (
-                <button
-                  key={preset.role}
-                  onClick={() => handleSwitchRole(preset)}
-                  className={`w-full text-left p-3 rounded-lg border transition flex items-center justify-between ${
-                    role === preset.role
-                      ? 'bg-emerald-50 border-[#059669] text-[#065f46]'
-                      : 'bg-slate-50 border-[#e2e8f0] hover:bg-slate-100 text-[#0f172a]'
-                  }`}
-                >
-                  <div>
-                    <span className="font-bold text-xs block">{preset.label}</span>
-                    <span className="text-[11px] text-[#64748b]">{preset.desc}</span>
-                  </div>
-                  {role === preset.role && (
-                    <span className="text-[10px] font-bold bg-[#059669] text-white px-2 py-0.5 rounded">Actuel</span>
-                  )}
-                </button>
-              ))}
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {dbUsers.length > 0 ? (
+                dbUsers.map((u: any) => (
+                  <button
+                    key={u.id || u._id}
+                    onClick={() => {
+                      loginSuccess({
+                        id: u.id || u._id,
+                        email: u.email,
+                        fullName: u.fullName,
+                        role: u.role,
+                        municipality: u.municipality || 'Collectivité'
+                      }, 'jwt_access_token_real');
+                      setShowRoleModal(false);
+                      navigate('/');
+                    }}
+                    className={`w-full text-left p-2.5 rounded-lg border transition flex items-center justify-between ${
+                      user?.email === u.email
+                        ? 'bg-emerald-50 border-[#059669] text-[#065f46]'
+                        : 'bg-slate-50 border-[#e2e8f0] hover:bg-slate-100 text-[#0f172a]'
+                    }`}
+                  >
+                    <div>
+                      <span className="font-bold text-xs block">{u.fullName} ({u.role})</span>
+                      <span className="text-[11px] text-[#64748b]">{u.email} · {u.municipality || 'SaaS Global'}</span>
+                    </div>
+                    {user?.email === u.email && (
+                      <span className="text-[10px] font-bold bg-[#059669] text-white px-2 py-0.5 rounded">Connecté</span>
+                    )}
+                  </button>
+                ))
+              ) : (
+                <div className="p-3 bg-slate-50 rounded-lg text-xs text-[#64748b] text-center">
+                  Chargement des comptes...
+                </div>
+              )}
             </div>
 
-            <div className="pt-2 flex justify-end">
+            {dbUsers.length === 1 && (
+              <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-lg text-xs text-[#065f46] space-y-1">
+                <p className="font-bold">✨ Base épurée sans fausses données</p>
+                <p className="text-[11px] text-[#047857]">
+                  En tant qu'Admin SaaS, vous pouvez créer de nouvelles municipalités, agents et équipes depuis l'onglet <strong>Supervision des Mairies</strong>. Ils apparaîtront automatiquement ici.
+                </p>
+              </div>
+            )}
+
+            <div className="pt-2 flex justify-between items-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowRoleModal(false);
+                  navigate('/?tab=municipalities');
+                }}
+                className="text-xs font-semibold text-[#059669] hover:underline"
+              >
+                + Ajouter une Municipalité
+              </button>
               <button
                 type="button"
                 onClick={() => setShowRoleModal(false)}

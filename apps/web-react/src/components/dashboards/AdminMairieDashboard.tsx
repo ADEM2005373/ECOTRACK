@@ -38,13 +38,34 @@ export const AdminMairieDashboard: React.FC = () => {
     setSearchParams(tab === 'overview' ? {} : { tab });
   };
 
-  // Liste locale des agents & brigades (Figma: WEB_ADM_01_USERS)
-  const [agents, setAgents] = useState([
-    { id: '1', name: 'Agent Modérateur Mairie Tunis', email: 'agent.tunis@ecotrack.tn', role: 'AGENT_MAIRIE', active: true, assignedQueue: 14 },
-    { id: '2', name: 'Karim Ben Salem', email: 'chef.ouvrier@ecotrack.tn', role: 'CHEF_OUVRIER', active: true, brigade: 'Voirie Centre' },
-    { id: '3', name: 'Tarek Jouini', email: 'tarek.jouini@ecotrack.tn', role: 'CHEF_OUVRIER', active: true, brigade: 'Salubrité Menzah' },
-    { id: '4', name: 'Youssef Trabelsi', email: 'youssef.t@ecotrack.tn', role: 'OUVRIER', active: true, brigade: 'Espaces Publics' },
-  ]);
+  // Liste des agents & brigades de la municipalité (chargée depuis la base MongoDB)
+  const [agents, setAgents] = useState<any[]>([]);
+
+  const fetchAgents = () => {
+    fetch('/api/v1/auth/users')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data.users)) {
+          const list = data.users
+            .filter((u: any) => u.role === 'AGENT_MAIRIE' || u.role === 'CHEF_OUVRIER' || u.role === 'OUVRIER')
+            .map((u: any) => ({
+              id: u.id,
+              name: u.fullName,
+              email: u.email,
+              role: u.role,
+              active: u.isActive,
+              assignedQueue: 0,
+              brigade: u.role === 'CHEF_OUVRIER' ? 'Voirie & Salubrité' : 'Pôle Modération'
+            }));
+          setAgents(list);
+        }
+      })
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchAgents();
+  }, []);
 
   // Types et Seuils SLA locaux (Figma: WEB_ADM_02_CATEGORIES)
   const [categories] = useState([
@@ -59,23 +80,35 @@ export const AdminMairieDashboard: React.FC = () => {
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserRole, setNewUserRole] = useState('AGENT_MAIRIE');
 
-  const handleAddUser = (e: React.FormEvent) => {
+  const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUserName || !newUserEmail) return;
-    setAgents(prev => [
-      ...prev,
-      {
-        id: String(Date.now()),
-        name: newUserName,
-        email: newUserEmail,
-        role: newUserRole,
-        active: true,
-        assignedQueue: 0
+
+    try {
+      const res = await fetch('/api/v1/auth/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: newUserEmail.trim(),
+          password: 'Agent2026!',
+          fullName: newUserName.trim(),
+          role: newUserRole,
+          municipality
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Impossible de créer le compte');
       }
-    ]);
-    setShowAddUserModal(false);
-    setNewUserName('');
-    setNewUserEmail('');
+
+      setShowAddUserModal(false);
+      setNewUserName('');
+      setNewUserEmail('');
+      fetchAgents();
+    } catch (err: any) {
+      alert(`Erreur: ${err.message}`);
+    }
   };
 
   return (
@@ -267,32 +300,44 @@ export const AdminMairieDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#e2e8f0]">
-                {agents.map((a) => (
-                  <tr key={a.id} className="hover:bg-[#f8fafc] h-[52px]">
-                    <td className="py-2.5 px-4">
-                      <div className="font-semibold text-[#0f172a]">{a.name}</div>
-                      <div className="text-[#64748b] text-[11px]">{a.email}</div>
-                    </td>
-                    <td className="py-2.5 px-4">
-                      <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-100 text-[#0f172a] border border-[#e2e8f0]">
-                        {a.role}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-4 text-[#475569]">
-                      {a.brigade || 'Centre de modération'}
-                    </td>
-                    <td className="py-2.5 px-4">
-                      <span className="inline-flex items-center gap-1 text-[#059669] font-semibold text-[11px]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#059669]" /> Actif
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-4 text-right">
-                      <button className="text-[#1e3a8a] hover:underline font-semibold text-xs">
-                        Modifier
-                      </button>
+                {agents.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-10 text-[#64748b]">
+                      <Users className="w-8 h-8 mx-auto text-[#94a3b8] mb-2" />
+                      <p className="font-semibold text-sm text-[#0f172a]">Aucun collaborateur dans cette brigade</p>
+                      <p className="text-xs text-[#64748b] mt-1">
+                        Cliquez sur "Ajouter un Collaborateur" pour enregistrer un agent de modération ou un chef ouvrier.
+                      </p>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  agents.map((a) => (
+                    <tr key={a.id} className="hover:bg-[#f8fafc] h-[52px]">
+                      <td className="py-2.5 px-4">
+                        <div className="font-semibold text-[#0f172a]">{a.name}</div>
+                        <div className="text-[#64748b] text-[11px]">{a.email}</div>
+                      </td>
+                      <td className="py-2.5 px-4">
+                        <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-100 text-[#0f172a] border border-[#e2e8f0]">
+                          {a.role}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-4 text-[#475569]">
+                        {a.brigade || 'Centre de modération'}
+                      </td>
+                      <td className="py-2.5 px-4">
+                        <span className="inline-flex items-center gap-1 text-[#059669] font-semibold text-[11px]">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#059669]" /> Actif
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-4 text-right">
+                        <button className="text-[#1e3a8a] hover:underline font-semibold text-xs">
+                          Modifier
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

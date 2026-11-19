@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Wrench,
   MapPin,
@@ -24,42 +24,31 @@ interface WorkerTask {
 }
 
 export const ChefOuvrierDashboard: React.FC = () => {
-  const [tasks, setTasks] = useState<WorkerTask[]>([
-    {
-      id: 'tsk_1',
-      reference: 'REC-2026-0842',
-      title: 'Dépôt sauvage de gravats et sacs plastiques',
-      district: 'Centre-Ville',
-      address: '18 Rue de Marseille, Tunis',
-      priority: 'URGENTE',
-      status: 'ASSIGNE',
-      initialPhoto: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=500&auto=format&fit=crop&q=60',
-      assignedAt: 'Il y a 25 min'
-    },
-    {
-      id: 'tsk_2',
-      reference: 'REC-2026-0810',
-      title: 'Encombrants électroménagers abandonnés sur trottoir',
-      district: 'El Menzah',
-      address: '45 Avenue Habib Bourguiba, Menzah 1',
-      priority: 'HAUTE',
-      status: 'EN_COURS',
-      initialPhoto: 'https://images.unsplash.com/photo-1605600659873-d808a13e4d2a?w=500&auto=format&fit=crop&q=60',
-      assignedAt: 'Il y a 1h 10min'
-    },
-    {
-      id: 'tsk_3',
-      reference: 'REC-2026-0795',
-      title: 'Pots de peinture usagés et solvants chimiques',
-      district: 'Bab Bhar',
-      address: 'Rue d\'Italie, Tunis',
-      priority: 'MOYENNE',
-      status: 'RESOLU',
-      initialPhoto: 'https://images.unsplash.com/photo-1528323273322-d81458248d40?w=500&auto=format&fit=crop&q=60',
-      proofPhoto: 'https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=500&auto=format&fit=crop&q=60',
-      assignedAt: 'Hier'
-    }
-  ]);
+  const [tasks, setTasks] = useState<WorkerTask[]>([]);
+
+  useEffect(() => {
+    fetch('/api/v1/reports')
+      .then(res => res.json())
+      .then(data => {
+        const list = Array.isArray(data.reports) ? data.reports : (Array.isArray(data.data) ? data.data : []);
+        const formatted: WorkerTask[] = list
+          .filter((r: any) => r.status === 'EN_TRAITEMENT' || r.status === 'VALIDE' || r.status === 'RESOLU')
+          .map((r: any) => ({
+            id: r.id || r._id,
+            reference: r.id ? `REC-${r.id.slice(-4).toUpperCase()}` : 'REC-2026',
+            title: r.description || `Intervention ${r.category}`,
+            district: 'Secteur Municipal',
+            address: 'Coordonnées GPS transmises',
+            priority: 'HAUTE',
+            status: r.status === 'RESOLU' ? 'RESOLU' : 'EN_COURS',
+            initialPhoto: r.imageUrl || r.thumbnailUrl || 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=500',
+            proofPhoto: r.afterImageUrl,
+            assignedAt: 'Aujourd\'hui'
+          }));
+        setTasks(formatted);
+      })
+      .catch(() => {});
+  }, []);
 
   const [activeTaskForProof, setActiveTaskForProof] = useState<WorkerTask | null>(null);
   const [uploadedProofUrl, setUploadedProofUrl] = useState<string>('');
@@ -159,11 +148,20 @@ export const ChefOuvrierDashboard: React.FC = () => {
         <h2 className="text-base font-bold text-[#0f172a]">Chantiers Assignés à la Brigade</h2>
 
         <div className="grid grid-cols-1 gap-4">
-          {tasks.map((task) => (
-            <div
-              key={task.id}
-              className="bg-white border border-[#e2e8f0] rounded-[12px] p-5 shadow-sm hover:border-[#cbd5e1] transition flex flex-col md:flex-row gap-5 items-start md:items-center justify-between"
-            >
+          {tasks.length === 0 ? (
+            <div className="bg-white border border-[#e2e8f0] rounded-[12px] p-10 text-center text-[#64748b]">
+              <Wrench className="w-10 h-10 mx-auto text-[#94a3b8] mb-2" />
+              <p className="font-semibold text-sm text-[#0f172a]">Aucune mission assignée sur le terrain</p>
+              <p className="text-xs text-[#64748b] mt-1 max-w-md mx-auto">
+                Toutes les fausses données ont été supprimées. Dès qu'un signalement citoyen est validé et assigné à la brigade, il apparaîtra ici avec guidage GPS et capture de preuve photo après nettoyage.
+              </p>
+            </div>
+          ) : (
+            tasks.map((task) => (
+              <div
+                key={task.id}
+                className="bg-white border border-[#e2e8f0] rounded-[12px] p-5 shadow-sm hover:border-[#cbd5e1] transition flex flex-col md:flex-row gap-5 items-start md:items-center justify-between"
+              >
               <div className="flex flex-col sm:flex-row items-start gap-4">
                 <img
                   src={task.initialPhoto}
@@ -245,7 +243,7 @@ export const ChefOuvrierDashboard: React.FC = () => {
                 )}
               </div>
             </div>
-          ))}
+          )))}
         </div>
       </div>
 

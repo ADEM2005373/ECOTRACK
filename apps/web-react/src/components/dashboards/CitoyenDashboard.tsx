@@ -147,53 +147,68 @@ export const CitoyenDashboard: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {reports.map((r) => (
-            <div
-              key={r.id}
-              className="bg-[#f8fafc] border border-[#e2e8f0] rounded-[8px] p-4 flex gap-4 hover:border-[#cbd5e1] transition"
-            >
-              <img
-                src={r.imageUrl}
-                alt={r.title}
-                className="w-20 h-20 rounded-[6px] object-cover border border-[#e2e8f0] shrink-0"
-              />
-              <div className="space-y-1 min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-bold text-[#1e3a8a] text-xs truncate">{r.reference}</span>
-                  <span className="text-[10px] text-[#64748b]">{r.timeAgo}</span>
-                </div>
+          {reports.length === 0 ? (
+            <div className="col-span-2 py-10 text-center text-[#64748b]">
+              <FileText className="w-8 h-8 mx-auto text-[#94a3b8] mb-2" />
+              <p className="font-semibold text-sm text-[#0f172a]">Aucun signalement pour le moment</p>
+              <p className="text-xs text-[#64748b] mt-1">Vous n'avez pas encore déposé d'alerte de salubrité.</p>
+              <button
+                onClick={() => setShowNewModal(true)}
+                className="mt-3 inline-flex items-center gap-1.5 bg-[#059669] hover:bg-[#047857] text-white font-semibold px-3.5 py-1.5 rounded-[8px] text-xs transition"
+              >
+                <PlusCircle className="w-3.5 h-3.5" />
+                <span>Déposer un premier signalement</span>
+              </button>
+            </div>
+          ) : (
+            reports.map((r) => (
+              <div
+                key={r.id}
+                className="bg-[#f8fafc] border border-[#e2e8f0] rounded-[8px] p-4 flex gap-4 hover:border-[#cbd5e1] transition"
+              >
+                <img
+                  src={r.imageUrl}
+                  alt={r.title}
+                  className="w-20 h-20 rounded-[6px] object-cover border border-[#e2e8f0] shrink-0"
+                />
+                <div className="space-y-1 min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-[#1e3a8a] text-xs truncate">{r.reference}</span>
+                    <span className="text-[10px] text-[#64748b]">{r.timeAgo}</span>
+                  </div>
 
-                <h3 className="text-xs font-bold text-[#0f172a] truncate">{r.title}</h3>
+                  <h3 className="text-xs font-bold text-[#0f172a] truncate">{r.title}</h3>
 
-                <p className="text-[11px] text-[#475569] flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-[#059669]" />
-                  <span>{r.district}</span>
-                </p>
+                  <p className="text-[11px] text-[#475569] flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-[#059669]" />
+                    <span>{r.district}</span>
+                  </p>
 
-                <div className="pt-1.5 flex items-center justify-between">
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-[#4338ca] border border-[#e2e8f0]">
-                    {r.category}
-                  </span>
-
-                  {r.status === 'RESOLU' && (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#047857] bg-white border border-[#059669] px-2 py-0.5 rounded-[6px]">
-                      <CheckCircle2 className="w-3 h-3 text-[#059669]" /> Résolu
+                  <div className="pt-1.5 flex items-center justify-between">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-[#4338ca] border border-[#e2e8f0]">
+                      {r.category}
                     </span>
-                  )}
-                  {r.status === 'EN_TRAITEMENT' && (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#b45309] bg-white border border-[#d97706] px-2 py-0.5 rounded-[6px]">
-                      <Clock className="w-3 h-3 text-[#d97706]" /> En intervention
-                    </span>
-                  )}
-                  {(r.status === 'A_QUALIFIER' || r.status === 'NOUVEAU') && (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1e3a8a] bg-white border border-[#1e3a8a] px-2 py-0.5 rounded-[6px]">
-                      <Sparkles className="w-3 h-3 text-[#1e3a8a]" /> Transmis à la mairie
-                    </span>
-                  )}
+
+                    {r.status === 'RESOLU' && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#047857] bg-white border border-[#059669] px-2 py-0.5 rounded-[6px]">
+                        <CheckCircle2 className="w-3 h-3 text-[#059669]" /> Résolu
+                      </span>
+                    )}
+                    {r.status === 'EN_TRAITEMENT' && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#b45309] bg-white border border-[#d97706] px-2 py-0.5 rounded-[6px]">
+                        <Clock className="w-3 h-3 text-[#d97706]" /> En intervention
+                      </span>
+                    )}
+                    {(r.status === 'A_QUALIFIER' || r.status === 'NOUVEAU') && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1e3a8a] bg-white border border-[#1e3a8a] px-2 py-0.5 rounded-[6px]">
+                        <Sparkles className="w-3 h-3 text-[#1e3a8a]" /> Transmis à la mairie
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 

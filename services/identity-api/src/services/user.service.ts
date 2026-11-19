@@ -42,54 +42,18 @@ export class UserService {
   }
 
   /**
-   * Initialise automatiquement les 5 comptes types selon la matrice RBAC EcoTrack V2 :
-   * 1. Admin SaaS (Global)
-   * 2. Admin Municipalité / Mairie
-   * 3. Agent Mairie (réclamations, alertes, types)
-   * 4. Chef Ouvrier (mobile, dispatch terrain & photo après réparation)
-   * 5. Citoyen (mobile, déclarations)
+   * Initialise automatiquement le compte Admin SaaS racine
+   * Seul compte persistant par défaut (l'Admin SaaS peut créer ensuite toutes les collectivités et comptes).
    */
   async seedDefaultAdmin(): Promise<void> {
     const defaultAccounts = [
       {
         email: 'admin@ecotrack.tn',
         password: 'Admin2026!',
-        fullName: 'Administrateur SaaS Global',
+        fullName: 'Administrateur SaaS Principal',
         phoneNumber: '+216 71 000 000',
         role: UserRole.ADMIN_SAAS,
         municipality: 'Supervision Centrale'
-      },
-      {
-        email: 'mairie.tunis@ecotrack.tn',
-        password: 'Mairie2026!',
-        fullName: 'Directeur Services Mairie Tunis',
-        phoneNumber: '+216 71 111 222',
-        role: UserRole.ADMIN_MUNICIPALITE,
-        municipality: 'Municipalité de Tunis'
-      },
-      {
-        email: 'agent.tunis@ecotrack.tn',
-        password: 'Agent2026!',
-        fullName: 'Agent Modérateur Mairie Tunis',
-        phoneNumber: '+216 71 333 444',
-        role: UserRole.AGENT_MAIRIE,
-        municipality: 'Municipalité de Tunis'
-      },
-      {
-        email: 'chef.ouvrier@ecotrack.tn',
-        password: 'Ouvrier2026!',
-        fullName: 'Karim Ben Salem (Chef Voirie)',
-        phoneNumber: '+216 98 555 666',
-        role: UserRole.CHEF_OUVRIER,
-        municipality: 'Municipalité de Tunis'
-      },
-      {
-        email: 'citoyen@ecotrack.tn',
-        password: 'Citoyen2026!',
-        fullName: 'Anis Mahjoub (Citoyen)',
-        phoneNumber: '+216 22 777 888',
-        role: UserRole.CITOYEN,
-        municipality: 'Municipalité de Tunis'
       }
     ];
 
@@ -102,7 +66,7 @@ export class UserService {
             isActive: true
           });
           await user.save();
-          console.log(`[IDENTITY-API] ✅ Compte type créé: ${acc.email} (${acc.role})`);
+          console.log(`[IDENTITY-API] ✅ Compte Admin SaaS racine initialisé: ${acc.email} (${acc.role})`);
         } else if (existing.role === 'ADMIN') {
           // Mise à niveau transparente du compte admin existant vers ADMIN_SAAS
           existing.role = UserRole.ADMIN_SAAS;
@@ -153,6 +117,27 @@ export class UserService {
       { new: true, runValidators: true }
     );
     return user ? (user.toJSON() as IUser) : null;
+  }
+
+  /**
+   * Liste tous les utilisateurs enregistrés (sans les mots de passe)
+   */
+  async listUsers(): Promise<IUser[]> {
+    const users = await UserModel.find({}, { password: 0, refreshTokenHash: 0 }).sort({ createdAt: -1 });
+    return users.map(u => u.toJSON() as IUser);
+  }
+
+  /**
+   * Supprime un utilisateur (interdit pour le compte ADMIN_SAAS racine)
+   */
+  async deleteUser(userId: string): Promise<boolean> {
+    const user = await UserModel.findById(userId);
+    if (!user) return false;
+    if (user.role === UserRole.ADMIN_SAAS || user.email === 'admin@ecotrack.tn') {
+      throw new Error("Impossible de supprimer le compte Administrateur SaaS racine.");
+    }
+    await UserModel.findByIdAndDelete(userId);
+    return true;
   }
 }
 

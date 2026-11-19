@@ -89,53 +89,27 @@ export const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        {/* Sélecteur rapide de profil démo (5 rôles officiels) */}
+        {/* Compte racine officiel Admin SaaS */}
         <div className="mt-6 pt-5 border-t border-[#e2e8f0]">
           <p className="text-[11px] font-semibold text-[#64748b] mb-2 uppercase tracking-wider text-center">
-            Comptes démo préconfigurés (5 Rôles)
+            Compte Administrateur SaaS Racine
           </p>
-          <div className="grid grid-cols-2 gap-1.5 text-[11px]">
+          <div>
             <button
               type="button"
               onClick={() => { setEmail('admin@ecotrack.tn'); setPassword('Admin2026!'); }}
-              className="text-left px-2.5 py-2 rounded-[8px] bg-[#f8fafc] border border-[#e2e8f0] hover:border-purple-300 hover:bg-purple-50/50 transition text-[#0f172a]"
+              className="w-full text-left p-3 rounded-[8px] bg-emerald-50/60 border border-emerald-200 hover:bg-emerald-100/60 transition text-[#0f172a] flex items-center justify-between"
             >
-              <span className="font-bold text-purple-700 block">👑 Admin SaaS</span>
-              <span className="text-[10px] text-[#64748b]">Supervision Globale</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => { setEmail('mairie.tunis@ecotrack.tn'); setPassword('Mairie2026!'); }}
-              className="text-left px-2.5 py-2 rounded-[8px] bg-[#f8fafc] border border-[#e2e8f0] hover:border-blue-300 hover:bg-blue-50/50 transition text-[#0f172a]"
-            >
-              <span className="font-bold text-blue-700 block">🏛️ Admin Mairie</span>
-              <span className="text-[10px] text-[#64748b]">Mairie de Tunis</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => { setEmail('agent.tunis@ecotrack.tn'); setPassword('Agent2026!'); }}
-              className="text-left px-2.5 py-2 rounded-[8px] bg-[#f8fafc] border border-[#e2e8f0] hover:border-emerald-300 hover:bg-emerald-50/50 transition text-[#0f172a]"
-            >
-              <span className="font-bold text-emerald-700 block">📋 Agent Mairie</span>
-              <span className="text-[10px] text-[#64748b]">Modération & Tri</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => { setEmail('chef.ouvrier@ecotrack.tn'); setPassword('Ouvrier2026!'); }}
-              className="text-left px-2.5 py-2 rounded-[8px] bg-[#f8fafc] border border-[#e2e8f0] hover:border-amber-300 hover:bg-amber-50/50 transition text-[#0f172a]"
-            >
-              <span className="font-bold text-amber-700 block">👷 Chef Ouvrier</span>
-              <span className="text-[10px] text-[#64748b]">Terrain & Preuve Photo</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => { setEmail('citoyen@ecotrack.tn'); setPassword('Citoyen2026!'); }}
-              className="col-span-2 text-left px-2.5 py-2 rounded-[8px] bg-[#f8fafc] border border-[#e2e8f0] hover:border-teal-300 hover:bg-teal-50/50 transition text-[#0f172a]"
-            >
-              <span className="font-bold text-teal-700 block">📱 Citoyen (Mobile / Web)</span>
-              <span className="text-[10px] text-[#64748b]">Déclaration & Suivi des réclamations</span>
+              <div>
+                <span className="font-bold text-emerald-800 text-xs block">👑 Administrateur SaaS Global</span>
+                <span className="text-[11px] text-emerald-600">admin@ecotrack.tn (Superviseur racine)</span>
+              </div>
+              <span className="text-[10px] font-semibold bg-[#059669] text-white px-2 py-0.5 rounded">Remplir</span>
             </button>
           </div>
+          <p className="text-[11px] text-[#64748b] mt-2.5 text-center leading-tight">
+            Base épurée : L'administrateur SaaS dispose des droits complets pour créer les nouvelles municipalités et leurs équipes.
+          </p>
         </div>
 
         <p className="text-center text-xs text-[#64748b] mt-5">

@@ -44,74 +44,6 @@ interface TechnicalAlert {
   resolved: boolean;
 }
 
-const INITIAL_MUNICIPALITIES: MunicipalityItem[] = [
-  {
-    id: 'mun_tunis_01',
-    name: 'Ville de Tunis',
-    code: 'TN-TUNIS',
-    region: 'Grand Tunis',
-    adminName: 'Mondher Ben Amor',
-    adminEmail: 'admin.tunis@ecotrack.tn',
-    reportsCount: 342,
-    resolutionRate: 94.2,
-    activeBrigades: 18,
-    status: 'ACTIVE',
-    joinedDate: '2026-01-15',
-  },
-  {
-    id: 'mun_marsa_02',
-    name: 'Mairie de La Marsa',
-    code: 'TN-MARSA',
-    region: 'Banlieue Nord',
-    adminName: 'Fatma Khelil',
-    adminEmail: 'admin.marsa@ecotrack.tn',
-    reportsCount: 88,
-    resolutionRate: 91.5,
-    activeBrigades: 6,
-    status: 'ACTIVE',
-    joinedDate: '2026-02-10',
-  },
-  {
-    id: 'mun_ariana_03',
-    name: 'Mairie de l’Ariana',
-    code: 'TN-ARIANA',
-    region: 'Ariana Ville',
-    adminName: 'Sami Bouaziz',
-    adminEmail: 'admin.ariana@ecotrack.tn',
-    reportsCount: 70,
-    resolutionRate: 88.0,
-    activeBrigades: 5,
-    status: 'ACTIVE',
-    joinedDate: '2026-03-01',
-  },
-  {
-    id: 'mun_sfax_04',
-    name: 'Mairie de Sfax',
-    code: 'TN-SFAX',
-    region: 'Sfax Métropole',
-    adminName: 'Nadia Trabelsi',
-    adminEmail: 'admin.sfax@ecotrack.tn',
-    reportsCount: 0,
-    resolutionRate: 0,
-    activeBrigades: 0,
-    status: 'ONBOARDING',
-    joinedDate: '2026-11-18',
-  },
-  {
-    id: 'mun_sousse_05',
-    name: 'Mairie de Sousse',
-    code: 'TN-SOUSSE',
-    region: 'Sahel',
-    adminName: 'Hichem Dridi',
-    adminEmail: 'admin.sousse@ecotrack.tn',
-    reportsCount: 0,
-    resolutionRate: 0,
-    activeBrigades: 0,
-    status: 'ONBOARDING',
-    joinedDate: '2026-11-19',
-  },
-];
-
 const INITIAL_ALERTS: TechnicalAlert[] = [
   {
     id: 'alt_01',
@@ -180,7 +112,9 @@ export const AdminSaasDashboard: React.FC = () => {
   };
 
   // Municipalities State
-  const [municipalities, setMunicipalities] = useState<MunicipalityItem[]>(INITIAL_MUNICIPALITIES);
+  const [municipalities, setMunicipalities] = useState<MunicipalityItem[]>([]);
+  const [reportsCount, setReportsCount] = useState<number>(0);
+  const [isSubmittingMun, setIsSubmittingMun] = useState(false);
   const [newMunModalOpen, setNewMunModalOpen] = useState(false);
   const [newMunName, setNewMunName] = useState('');
   const [newMunCode, setNewMunCode] = useState('');
@@ -200,8 +134,42 @@ export const AdminSaasDashboard: React.FC = () => {
   // Audit Logs State
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
 
-  useEffect(() => {
-    // Load live audit logs from API
+  const fetchRealData = () => {
+    // 1. Fetch real reports count
+    fetch('/api/v1/reports')
+      .then(res => res.json())
+      .then(data => {
+        const count = typeof data.count === 'number' ? data.count : (Array.isArray(data.reports) ? data.reports.length : 0);
+        setReportsCount(count);
+      })
+      .catch(() => {});
+
+    // 2. Fetch real municipalities (users with role ADMIN_MUNICIPALITE)
+    fetch('/api/v1/auth/users')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data.users)) {
+          const muns: MunicipalityItem[] = data.users
+            .filter((u: any) => u.role === 'ADMIN_MUNICIPALITE')
+            .map((u: any) => ({
+              id: u.id,
+              name: u.municipality || 'Collectivité sans nom',
+              code: `TN-${(u.municipality || 'MUN').toUpperCase().slice(0, 5)}`,
+              region: 'Tunisie',
+              adminName: u.fullName,
+              adminEmail: u.email,
+              reportsCount: 0,
+              resolutionRate: 100,
+              activeBrigades: 1,
+              status: 'ACTIVE',
+              joinedDate: u.createdAt ? new Date(u.createdAt).toISOString().slice(0, 10) : '2026-11-19',
+            }));
+          setMunicipalities(muns);
+        }
+      })
+      .catch(() => {});
+
+    // 3. Load live audit logs from API
     fetch('/api/v1/audit/logs?limit=10', {
       headers: { 'x-user-role': 'ADMIN_SAAS' }
     })
@@ -210,37 +178,64 @@ export const AdminSaasDashboard: React.FC = () => {
         if (data.logs) setAuditLogs(data.logs);
       })
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchRealData();
   }, []);
 
-  const handleCreateMunicipality = (e: React.FormEvent) => {
+  const handleCreateMunicipality = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMunName.trim() || !newMunAdminEmail.trim()) return;
 
-    const newMun: MunicipalityItem = {
-      id: `mun_${Date.now()}`,
-      name: newMunName.trim(),
-      code: newMunCode.trim() || `TN-${newMunName.toUpperCase().slice(0, 5)}`,
-      region: newMunRegion.trim() || 'Tunisie',
-      adminName: newMunAdminName.trim() || 'Admin Collectivité',
-      adminEmail: newMunAdminEmail.trim(),
-      reportsCount: 0,
-      resolutionRate: 100,
-      activeBrigades: 1,
-      status: 'ACTIVE',
-      joinedDate: new Date().toISOString().slice(0, 10),
-    };
+    setIsSubmittingMun(true);
+    try {
+      const res = await fetch('/api/v1/auth/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: newMunAdminEmail.trim(),
+          password: 'Mairie2026!',
+          fullName: newMunAdminName.trim() || `Directeur Services ${newMunName.trim()}`,
+          role: 'ADMIN_MUNICIPALITE',
+          municipality: newMunName.trim()
+        })
+      });
 
-    setMunicipalities([newMun, ...municipalities]);
-    setNewMunModalOpen(false);
-    setNewMunName('');
-    setNewMunCode('');
-    setNewMunRegion('');
-    setNewMunAdminName('');
-    setNewMunAdminEmail('');
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Impossible de créer la municipalité');
+      }
 
-    // Trigger feedback message
-    setFeedbackSuccess(`Collectivité "${newMun.name}" intégrée avec succès ! Le compte administrateur ${newMun.adminEmail} a été provisionné.`);
-    setTimeout(() => setFeedbackSuccess(null), 6000);
+      setFeedbackSuccess(`Collectivité "${newMunName.trim()}" et compte administrateur ${newMunAdminEmail.trim()} enregistrés avec succès dans MongoDB !`);
+      setNewMunModalOpen(false);
+      setNewMunName('');
+      setNewMunCode('');
+      setNewMunRegion('');
+      setNewMunAdminName('');
+      setNewMunAdminEmail('');
+      fetchRealData();
+    } catch (err: any) {
+      alert(`Erreur: ${err.message}`);
+    } finally {
+      setIsSubmittingMun(false);
+      setTimeout(() => setFeedbackSuccess(null), 6000);
+    }
+  };
+
+  const handleDeleteMunicipality = async (id: string, name: string) => {
+    if (!window.confirm(`Confirmez-vous la suppression de la collectivité "${name}" et de son compte administrateur ?`)) return;
+    try {
+      const res = await fetch(`/api/v1/auth/users/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setFeedbackSuccess(`Collectivité "${name}" supprimée avec succès.`);
+        fetchRealData();
+      }
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setTimeout(() => setFeedbackSuccess(null), 4000);
+    }
   };
 
   const handleConfirmReopen = () => {
@@ -393,7 +388,9 @@ export const AdminSaasDashboard: React.FC = () => {
                 <Layers className="w-4 h-4 text-[#2563eb]" />
               </div>
               <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">{municipalities.length}</div>
-              <p className="text-[11px] text-[#059669] font-medium mt-1">3 actives · 2 en onboarding</p>
+              <p className="text-[11px] text-[#059669] font-medium mt-1">
+                {municipalities.length === 0 ? 'Aucune collectivité' : `${municipalities.length} active(s)`}
+              </p>
             </div>
 
             <div className="bg-white border border-[#e2e8f0] p-5 rounded-xl shadow-sm">
@@ -419,7 +416,7 @@ export const AdminSaasDashboard: React.FC = () => {
                 <span>Signalements Métropolitains</span>
                 <ShieldCheck className="w-4 h-4 text-[#059669]" />
               </div>
-              <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">500</div>
+              <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">{reportsCount}</div>
               <p className="text-[11px] text-[#64748b] mt-1">Audit immuable SHA-256 actif</p>
             </div>
           </div>
@@ -530,61 +527,89 @@ export const AdminSaasDashboard: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#e2e8f0]">
-                  {municipalities.map((mun) => (
-                    <tr key={mun.id} className="hover:bg-slate-50/80 transition">
-                      <td className="py-3.5 px-4 font-bold text-[#0f172a]">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-[#059669]" />
-                          <span>{mun.name}</span>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span className="font-mono font-medium text-[#2563eb] bg-blue-50 px-1.5 py-0.5 rounded text-[11px]">
-                          {mun.code}
-                        </span>
-                        <span className="text-[#64748b] block text-[11px] mt-0.5">{mun.region}</span>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <p className="font-semibold text-[#0f172a]">{mun.adminName}</p>
-                        <p className="text-[11px] text-[#64748b]">{mun.adminEmail}</p>
-                      </td>
-                      <td className="py-3.5 px-4 text-center font-mono font-semibold text-[#0f172a]">
-                        {mun.reportsCount}
-                      </td>
-                      <td className="py-3.5 px-4 text-center">
-                        <div className="inline-flex items-center gap-1.5 font-bold text-[#059669]">
-                          <span>{mun.resolutionRate > 0 ? `${mun.resolutionRate}%` : '—'}</span>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4 text-center font-semibold text-[#475569]">
-                        {mun.activeBrigades} brigades
-                      </td>
-                      <td className="py-3.5 px-4 text-center">
-                        {mun.status === 'ACTIVE' ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-[#059669] border border-emerald-200">
-                            <span className="size-1.5 rounded-full bg-[#059669]" />
-                            Actif
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                            <span className="size-1.5 rounded-full bg-amber-500" />
-                            Déploiement
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-4 text-center">
+                  {municipalities.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="text-center py-12 text-[#64748b]">
+                        <Building2 className="w-10 h-10 mx-auto text-[#94a3b8] mb-2" />
+                        <p className="font-semibold text-sm text-[#0f172a]">Aucune municipalité enregistrée</p>
+                        <p className="text-xs text-[#64748b] mt-1 max-w-md mx-auto">
+                          Toutes les données de test ont été purgées. En tant qu'Administrateur SaaS, vous avez les pleins pouvoirs pour créer de nouvelles municipalités et leurs équipes.
+                        </p>
                         <button
-                          onClick={() => {
-                            setFeedbackSuccess(`Rapport de conformité généré pour ${mun.name}.`);
-                            setTimeout(() => setFeedbackSuccess(null), 4000);
-                          }}
-                          className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-[#0f172a] rounded text-[11px] font-semibold transition"
+                          onClick={() => setNewMunModalOpen(true)}
+                          className="mt-4 inline-flex items-center gap-1.5 bg-[#059669] hover:bg-[#047857] text-white font-semibold px-4 py-2 rounded-lg text-xs transition shadow-sm"
                         >
-                          Détails
+                          <Plus className="w-4 h-4" />
+                          <span>Ajouter la Première Municipalité</span>
                         </button>
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    municipalities.map((mun) => (
+                      <tr key={mun.id} className="hover:bg-slate-50/80 transition">
+                        <td className="py-3.5 px-4 font-bold text-[#0f172a]">
+                          <div className="flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-[#059669]" />
+                            <span>{mun.name}</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span className="font-mono font-medium text-[#2563eb] bg-blue-50 px-1.5 py-0.5 rounded text-[11px]">
+                            {mun.code}
+                          </span>
+                          <span className="text-[#64748b] block text-[11px] mt-0.5">{mun.region}</span>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <p className="font-semibold text-[#0f172a]">{mun.adminName}</p>
+                          <p className="text-[11px] text-[#64748b]">{mun.adminEmail}</p>
+                        </td>
+                        <td className="py-3.5 px-4 text-center font-mono font-semibold text-[#0f172a]">
+                          {mun.reportsCount}
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <div className="inline-flex items-center gap-1.5 font-bold text-[#059669]">
+                            <span>{mun.resolutionRate > 0 ? `${mun.resolutionRate}%` : '—'}</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 text-center font-semibold text-[#475569]">
+                          {mun.activeBrigades} brigades
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          {mun.status === 'ACTIVE' ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-[#059669] border border-emerald-200">
+                              <span className="size-1.5 rounded-full bg-[#059669]" />
+                              Actif
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                              <span className="size-1.5 rounded-full bg-amber-500" />
+                              Déploiement
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              onClick={() => {
+                                setFeedbackSuccess(`Rapport de conformité généré pour ${mun.name}.`);
+                                setTimeout(() => setFeedbackSuccess(null), 4000);
+                              }}
+                              className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-[#0f172a] rounded text-[11px] font-semibold transition"
+                            >
+                              Détails
+                            </button>
+                            <button
+                              onClick={() => handleDeleteMunicipality(mun.id, mun.name)}
+                              className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded text-[11px] font-semibold transition"
+                              title="Supprimer la collectivité et son compte administrateur"
+                            >
+                              Supprimer
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -1037,9 +1062,10 @@ export const AdminSaasDashboard: React.FC = () => {
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-lg text-xs font-semibold bg-[#059669] hover:bg-[#047857] text-white shadow-sm"
+                disabled={isSubmittingMun}
+                className="px-4 py-2 rounded-lg text-xs font-semibold bg-[#059669] hover:bg-[#047857] disabled:opacity-50 text-white shadow-sm"
               >
-                Créer &amp; Déployer la Collectivité
+                {isSubmittingMun ? 'Création en cours...' : 'Créer & Déployer la Collectivité'}
               </button>
             </div>
           </form>

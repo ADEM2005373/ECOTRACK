@@ -115,4 +115,92 @@ router.post('/refresh', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * GET /auth/users
+ * Récupère la liste de tous les utilisateurs enregistrés
+ */
+router.get('/users', async (_req: Request, res: Response) => {
+  try {
+    const users = await userService.listUsers();
+    return res.status(200).json({ users, count: users.length });
+  } catch (err: any) {
+    return res.status(500).json({ error: 'INTERNAL_SERVER_ERROR', message: err.message });
+  }
+});
+
+/**
+ * POST /auth/users & POST /auth/admin/create-user
+ * Création d'utilisateurs par l'administrateur (tous rôles autorisés)
+ */
+const createUserHandler = async (req: Request, res: Response) => {
+  try {
+    const { email, password, fullName, phoneNumber, role, municipality } = req.body;
+
+    if (!email || !EMAIL_REGEX.test(email.trim())) {
+      return res.status(400).json({
+        error: 'VALIDATION_ERROR',
+        message: 'Une adresse e-mail valide est obligatoire.'
+      });
+    }
+
+    if (!password || password.length < 8) {
+      return res.status(400).json({
+        error: 'VALIDATION_ERROR',
+        message: 'Le mot de passe doit contenir au moins 8 caractères.'
+      });
+    }
+
+    if (!fullName || fullName.trim().length === 0) {
+      return res.status(400).json({
+        error: 'VALIDATION_ERROR',
+        message: 'Le nom complet (fullName) est obligatoire.'
+      });
+    }
+
+    const user = await userService.createUser({
+      email: email.trim().toLowerCase(),
+      password,
+      fullName: fullName.trim(),
+      phoneNumber: phoneNumber ? String(phoneNumber).trim() : undefined,
+      role: role || UserRole.CITOYEN,
+      municipality: municipality ? String(municipality).trim() : undefined
+    });
+
+    return res.status(201).json({
+      message: 'Utilisateur créé avec succès',
+      user
+    });
+  } catch (err: any) {
+    if (err.message?.includes('existe déjà') || err.code === 11000) {
+      return res.status(409).json({
+        error: 'EMAIL_ALREADY_EXISTS',
+        message: 'Un compte existe déjà avec cette adresse e-mail.'
+      });
+    }
+    return res.status(400).json({
+      error: 'BAD_REQUEST',
+      message: err.message
+    });
+  }
+};
+
+router.post('/users', createUserHandler);
+router.post('/admin/create-user', createUserHandler);
+
+/**
+ * DELETE /auth/users/:id
+ * Suppression d'un utilisateur
+ */
+router.delete('/users/:id', async (req: Request, res: Response) => {
+  try {
+    const success = await userService.deleteUser(req.params.id);
+    if (!success) {
+      return res.status(404).json({ error: 'NOT_FOUND', message: 'Utilisateur introuvable.' });
+    }
+    return res.status(200).json({ message: 'Utilisateur supprimé avec succès.' });
+  } catch (err: any) {
+    return res.status(400).json({ error: 'BAD_REQUEST', message: err.message });
+  }
+});
+
 export const authRouter = router;
