@@ -18,8 +18,8 @@ describe('AiGovernancePage (ECO-43 / SCRUM-61)', () => {
     render(<AiGovernancePage />);
 
     // Header & Subtitle
-    expect(screen.getByText('Observabilité MLOps & Active Learning (US-11)')).toBeDefined();
-    expect(screen.getByText('ECO-43 / SCRUM-61')).toBeDefined();
+    expect(screen.getByText('Observabilité MLOps & Apprentissage Continu')).toBeDefined();
+    expect(screen.getByText('Gouvernance IA Active')).toBeDefined();
 
     // KPIs
     expect(screen.getByText('Total Signalements Évalués')).toBeDefined();

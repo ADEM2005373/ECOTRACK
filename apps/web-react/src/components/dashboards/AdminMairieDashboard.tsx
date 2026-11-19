@@ -2,16 +2,14 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../store/authStore';
 import {
-  Building2,
   Users,
-  Tags,
   BarChart3,
   MapPin,
   Clock,
   CheckCircle2,
   AlertTriangle,
-  Plus,
-  TrendingUp
+  TrendingUp,
+  UserPlus
 } from 'lucide-react';
 
 export const AdminMairieDashboard: React.FC = () => {
@@ -19,7 +17,7 @@ export const AdminMairieDashboard: React.FC = () => {
   const municipality = authState.user?.municipality || 'Municipalité de Tunis';
 
   // Liste locale des agents & brigades (Figma: WEB_ADM_01_USERS)
-  const [agents] = useState([
+  const [agents, setAgents] = useState([
     { id: '1', name: 'Agent Modérateur Mairie Tunis', email: 'agent.tunis@ecotrack.tn', role: 'AGENT_MAIRIE', active: true, assignedQueue: 14 },
     { id: '2', name: 'Karim Ben Salem', email: 'chef.ouvrier@ecotrack.tn', role: 'CHEF_OUVRIER', active: true, brigade: 'Voirie Centre' },
     { id: '3', name: 'Tarek Jouini', email: 'tarek.jouini@ecotrack.tn', role: 'CHEF_OUVRIER', active: true, brigade: 'Salubrité Menzah' },
@@ -35,260 +33,363 @@ export const AdminMairieDashboard: React.FC = () => {
   ]);
 
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'categories'>('overview');
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [newUserName, setNewUserName] = useState('');
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserRole, setNewUserRole] = useState('AGENT_MAIRIE');
+
+  const handleAddUser = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUserName || !newUserEmail) return;
+    setAgents(prev => [
+      ...prev,
+      {
+        id: String(Date.now()),
+        name: newUserName,
+        email: newUserEmail,
+        role: newUserRole,
+        active: true,
+        assignedQueue: 0
+      }
+    ]);
+    setShowAddUserModal(false);
+    setNewUserName('');
+    setNewUserEmail('');
+  };
 
   return (
     <div className="space-y-6">
-      {/* Header Admin Municipalité */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+      {/* Header Admin Municipalité (Figma: WEB_ADM_01_USERS) */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-extrabold text-white font-heading">Direction Municipale</h1>
-            <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
-              {municipality}
-            </span>
-          </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Pilotage stratégique des services urbains de la commune, suivi des délais d'intervention (SLA) et gestion des équipes.
+          <h1 className="text-[26px] font-bold text-[#0f172a] font-heading tracking-tight">
+            Direction Municipale
+          </h1>
+          <p className="text-[13px] text-[#475569] mt-0.5">
+            {municipality} · Pilotage stratégique des services urbains, respect des délais d'intervention (SLA) et gestion des équipes.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Link
             to="/admin/analytics"
-            className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs transition shadow-lg shadow-blue-600/30"
+            className="inline-flex items-center gap-2 bg-[#059669] hover:bg-[#047857] text-white font-semibold px-4 h-[44px] rounded-[8px] text-[13px] transition shadow-sm"
           >
             <BarChart3 className="w-4 h-4" />
-            <span>Power BI Local (ECO-42)</span>
+            <span>Pilotage & Analyses</span>
           </Link>
           <Link
             to="/supervision"
-            className="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-3.5 py-2.5 rounded-xl text-xs transition border border-slate-700"
+            className="inline-flex items-center gap-2 bg-white border border-[#1e3a8a] text-[#1e3a8a] hover:bg-[#eff6ff] font-semibold px-4 h-[44px] rounded-[8px] text-[13px] transition shadow-sm"
           >
-            <MapPin className="w-4 h-4 text-emerald-400" />
+            <MapPin className="w-4 h-4" />
             <span>Carte Territoriale</span>
           </Link>
         </div>
       </div>
 
-      {/* KPIs Stratégiques Mairie */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Taux de Résolution Municipal</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          </div>
-          <div className="text-2xl font-bold text-white mt-2">94.2%</div>
-          <div className="flex items-center gap-1 text-[10px] text-emerald-400 mt-1">
-            <TrendingUp className="w-3 h-3" />
-            <span>+3.8% ce mois</span>
-          </div>
-        </div>
-
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Délai Moyen (Lead Time)</span>
-            <Clock className="w-4 h-4 text-blue-400" />
-          </div>
-          <div className="text-2xl font-bold text-white mt-2">26.4 h</div>
-          <p className="text-[10px] text-slate-500 mt-1">Objectif SLA &lt; 48 h respecté</p>
-        </div>
-
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Agents & Brigades</span>
-            <Users className="w-4 h-4 text-purple-400" />
-          </div>
-          <div className="text-2xl font-bold text-white mt-2">{agents.length} Actifs</div>
-          <p className="text-[10px] text-purple-400 mt-1">1 modérateur • 3 équipes terrain</p>
-        </div>
-
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Dépassements SLA</span>
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
-          </div>
-          <div className="text-2xl font-bold text-white mt-2">2 Alertes</div>
-          <p className="text-[10px] text-amber-400 mt-1">Relances automatiques envoyées</p>
-        </div>
-      </div>
-
-      {/* Tabs de Navigation Mairie */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-2 text-xs">
+      {/* Onglets de navigation interne (Figma: Users / Categories / KPIs) */}
+      <div className="flex items-center gap-2 border-b border-[#e2e8f0] pb-2">
         <button
           onClick={() => setActiveTab('overview')}
-          className={`px-3 py-2 rounded-xl font-bold transition ${
-            activeTab === 'overview' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-400 hover:text-white'
+          className={`px-4 py-2 rounded-[8px] text-[13px] font-semibold transition ${
+            activeTab === 'overview'
+              ? 'bg-[#102c35] text-white'
+              : 'text-[#475569] hover:bg-slate-100 hover:text-[#0f172a]'
           }`}
         >
-          Vue Générale des Réclamations
+          Vue d'ensemble & KPIs
         </button>
         <button
           onClick={() => setActiveTab('users')}
-          className={`px-3 py-2 rounded-xl font-bold transition flex items-center gap-1.5 ${
-            activeTab === 'users' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-400 hover:text-white'
+          className={`px-4 py-2 rounded-[8px] text-[13px] font-semibold transition ${
+            activeTab === 'users'
+              ? 'bg-[#102c35] text-white'
+              : 'text-[#475569] hover:bg-slate-100 hover:text-[#0f172a]'
           }`}
         >
-          <Users className="w-3.5 h-3.5" />
-          <span>Agents & Brigades Municipales ({agents.length})</span>
+          Utilisateurs & Brigades ({agents.length})
         </button>
         <button
           onClick={() => setActiveTab('categories')}
-          className={`px-3 py-2 rounded-xl font-bold transition flex items-center gap-1.5 ${
-            activeTab === 'categories' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-400 hover:text-white'
+          className={`px-4 py-2 rounded-[8px] text-[13px] font-semibold transition ${
+            activeTab === 'categories'
+              ? 'bg-[#102c35] text-white'
+              : 'text-[#475569] hover:bg-slate-100 hover:text-[#0f172a]'
           }`}
         >
-          <Tags className="w-3.5 h-3.5" />
-          <span>Types d'Anomalies & Seuils SLA</span>
+          Catégories & Seuils SLA ({categories.length})
         </button>
       </div>
 
-      {/* Contenu selon l'onglet actif */}
-      {activeTab === 'users' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-          <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-bold text-white">Personnel affecté à la {municipality}</h2>
-              <p className="text-xs text-slate-400">Gestion des accès RBAC et composition des brigades de salubrité.</p>
-            </div>
-            <button className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
-              <Plus className="w-3.5 h-3.5" />
-              <span>Ajouter un Agent / Ouvrier</span>
-            </button>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950/70 text-slate-400 uppercase font-semibold">
-                <tr>
-                  <th className="py-3 px-4">Nom & Identifiant</th>
-                  <th className="py-3 px-4">Rôle</th>
-                  <th className="py-3 px-4">Brigade / Affectation</th>
-                  <th className="py-3 px-4">Statut</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60 font-sans">
-                {agents.map((a) => (
-                  <tr key={a.id} className="hover:bg-slate-850/40 transition">
-                    <td className="py-3 px-4">
-                      <p className="font-bold text-white">{a.name}</p>
-                      <p className="text-[10px] text-slate-400">{a.email}</p>
-                    </td>
-                    <td className="py-3 px-4 font-mono font-semibold text-blue-400">{a.role}</td>
-                    <td className="py-3 px-4 text-slate-300">{a.brigade || 'Modération Centrale Mairie'}</td>
-                    <td className="py-3 px-4">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                        Actif
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <button className="text-xs text-blue-400 hover:text-blue-300 font-semibold">Modifier</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'categories' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-          <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-bold text-white">Types de Nuisances & Contrats de Service (SLA)</h2>
-              <p className="text-xs text-slate-400">Délai d'intervention maximal imparti aux brigades avant déclenchement d'alerte.</p>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950/70 text-slate-400 uppercase font-semibold">
-                <tr>
-                  <th className="py-3 px-4">Type d'Anomalie</th>
-                  <th className="py-3 px-4">Sévérité Par Défaut</th>
-                  <th className="py-3 px-4">Délai SLA Garanti</th>
-                  <th className="py-3 px-4">Brigade Référente</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60 font-sans">
-                {categories.map((c) => (
-                  <tr key={c.slug} className="hover:bg-slate-850/40 transition">
-                    <td className="py-3 px-4 font-bold text-white">{c.label}</td>
-                    <td className="py-3 px-4">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                        {c.defaultSeverity}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 font-mono font-bold text-emerald-400">{c.slaHours} heures</td>
-                    <td className="py-3 px-4 text-slate-300">{c.brigade}</td>
-                    <td className="py-3 px-4 text-right">
-                      <button className="text-xs text-blue-400 hover:text-blue-300 font-semibold">Ajuster SLA</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
+      {/* ================= ONGLET 1 : VUE D'ENSEMBLE ================= */}
       {activeTab === 'overview' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-          <h2 className="text-sm font-bold text-white flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-blue-400" />
-            <span>Synthèse Opérationnelle Municipale — {municipality}</span>
-          </h2>
-          <p className="text-xs text-slate-400">
-            Toutes les interventions de salubrité publique sur le périmètre communal sont monitorées en temps réel.
-            L'algorithme MLOps catégorise automatiquement les réclamations citoyennes dès réception et alerte le chef de voirie si le délai approche 80% du SLA légal.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-              <h3 className="text-xs font-bold text-white mb-2">Répartition territoriale des signalements</h3>
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between text-slate-300">
-                  <span>Centre-Ville (Avenue Bourguiba & Médina)</span>
-                  <span className="font-bold text-emerald-400">42% (Résolution 96%)</span>
-                </div>
-                <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                  <div className="bg-emerald-500 h-full w-[42%]" />
-                </div>
-
-                <div className="flex justify-between text-slate-300 pt-2">
-                  <span>El Menzah & Ennasr</span>
-                  <span className="font-bold text-blue-400">28% (Résolution 93%)</span>
-                </div>
-                <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                  <div className="bg-blue-500 h-full w-[28%]" />
-                </div>
-
-                <div className="flex justify-between text-slate-300 pt-2">
-                  <span>Les Berges du Lac</span>
-                  <span className="font-bold text-purple-400">18% (Résolution 98%)</span>
-                </div>
-                <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                  <div className="bg-purple-500 h-full w-[18%]" />
-                </div>
+        <div className="space-y-6">
+          {/* Cartes KPI Figma */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div className="bg-white border border-[#e2e8f0] p-5 rounded-[12px] shadow-sm">
+              <div className="flex items-center justify-between text-[12px] text-[#475569]">
+                <span>Taux de Résolution Municipal</span>
+                <CheckCircle2 className="w-4 h-4 text-[#059669]" />
+              </div>
+              <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">94.2%</div>
+              <div className="flex items-center gap-1 text-[11px] text-[#059669] mt-1 font-semibold">
+                <TrendingUp className="w-3.5 h-3.5" />
+                <span>+3.8% ce mois</span>
               </div>
             </div>
 
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
-              <div>
-                <h3 className="text-xs font-bold text-white mb-2">Conformité RGPD & Audits</h3>
-                <p className="text-[11px] text-slate-400">
-                  Les données de géolocalisation citoyennes sont stockées au format RFC 7946 sans persistance des adresses IP complètes (masquage conforme ADR-05).
-                </p>
+            <div className="bg-white border border-[#e2e8f0] p-5 rounded-[12px] shadow-sm">
+              <div className="flex items-center justify-between text-[12px] text-[#475569]">
+                <span>Délai Moyen d'Intervention</span>
+                <Clock className="w-4 h-4 text-[#2563eb]" />
               </div>
-              <div className="pt-4 flex items-center justify-between text-xs">
-                <span className="text-emerald-400 font-bold">✓ Audit Sécurité Validé</span>
-                <Link to="/admin/analytics" className="text-blue-400 hover:text-blue-300 font-semibold">
-                  Accéder aux Rapports DAX &rarr;
+              <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">26.4 h</div>
+              <p className="text-[11px] text-[#059669] font-medium mt-1">Conforme SLA communal (&lt; 48h)</p>
+            </div>
+
+            <div className="bg-white border border-[#e2e8f0] p-5 rounded-[12px] shadow-sm">
+              <div className="flex items-center justify-between text-[12px] text-[#475569]">
+                <span>Agents & Brigades Actifs</span>
+                <Users className="w-4 h-4 text-[#7c3aed]" />
+              </div>
+              <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">{agents.length}</div>
+              <p className="text-[11px] text-[#475569] mt-1">1 modérateur · 3 chefs d'équipe</p>
+            </div>
+
+            <div className="bg-white border border-[#e2e8f0] p-5 rounded-[12px] shadow-sm">
+              <div className="flex items-center justify-between text-[12px] text-[#475569]">
+                <span>Alertes Dépassement SLA</span>
+                <AlertTriangle className="w-4 h-4 text-[#d97706]" />
+              </div>
+              <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">0</div>
+              <p className="text-[11px] text-[#059669] font-medium mt-1">Aucune réclamation en retard critique</p>
+            </div>
+          </div>
+
+          {/* Synthèse Opérationnelle & Cartographie */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white border border-[#e2e8f0] p-6 rounded-[12px] shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-[#0f172a]">Performance par Arrondissement</h3>
+                <span className="text-xs text-[#059669] font-semibold">Mise à jour en temps réel</span>
+              </div>
+              <div className="space-y-3">
+                {[
+                  { name: 'Centre-Ville', score: 96, count: 18, delay: '18h' },
+                  { name: 'El Menzah', score: 94, count: 12, delay: '24h' },
+                  { name: 'Bab Bhar', score: 91, count: 9, delay: '29h' },
+                  { name: 'La Marsa / Berges', score: 98, count: 6, delay: '14h' },
+                ].map(d => (
+                  <div key={d.name} className="flex items-center justify-between p-3 rounded-[8px] bg-[#f8fafc] border border-[#e2e8f0] text-xs">
+                    <div>
+                      <span className="font-semibold text-[#0f172a]">{d.name}</span>
+                      <p className="text-[#64748b] text-[11px]">{d.count} interventions clôturées</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-bold text-[#059669]">{d.score}% conformité</span>
+                      <p className="text-[#64748b] text-[11px]">Délai moy. {d.delay}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white border border-[#e2e8f0] p-6 rounded-[12px] shadow-sm space-y-4">
+              <h3 className="text-base font-bold text-[#0f172a]">Ressources Décisionnelles</h3>
+              <p className="text-xs text-[#475569] leading-relaxed">
+                EcoTrack fournit un entrepôt de données décisionnel avec Row-Level Security (RLS) pour isoler les données de chaque municipalité tout en permettant les audits métropolitains.
+              </p>
+              <div className="p-4 bg-[#eff6ff] border border-[#bfdbfe] rounded-[8px] text-xs space-y-2">
+                <p className="font-semibold text-[#1e3a8a]">Connecteur Décisionnel Power BI</p>
+                <p className="text-[#3b82f6]">
+                  Générez un jeton d'intégration RLS filtré sur la municipalité de <strong>{municipality}</strong> pour vos rapports exécutifs.
+                </p>
+                <Link
+                  to="/admin/analytics"
+                  className="inline-flex items-center gap-1.5 text-[#1e3a8a] font-bold text-xs underline mt-1"
+                >
+                  Accéder à l'espace décisionnel →
                 </Link>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= ONGLET 2 : UTILISATEURS & BRIGADES (Figma: WEB_ADM_01_USERS) ================= */}
+      {activeTab === 'users' && (
+        <div className="bg-white border border-[#e2e8f0] rounded-[12px] shadow-sm overflow-hidden space-y-4 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-bold text-[#0f172a]">Personnel & Brigades Municipales</h3>
+              <p className="text-xs text-[#475569]">Gérez les comptes autorisés à modérer ou intervenir sur le territoire communal.</p>
+            </div>
+            <button
+              onClick={() => setShowAddUserModal(true)}
+              className="inline-flex items-center gap-1.5 bg-[#059669] hover:bg-[#047857] text-white font-semibold px-3.5 py-2 rounded-[8px] text-xs shadow-sm"
+            >
+              <UserPlus className="w-4 h-4" />
+              <span>Ajouter un Collaborateur</span>
+            </button>
+          </div>
+
+          <div className="border border-[#e2e8f0] rounded-[8px] overflow-hidden">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-[#f8fafc] text-[#475569] font-semibold border-b border-[#e2e8f0] h-[40px]">
+                  <th className="py-2.5 px-4">Collaborateur</th>
+                  <th className="py-2.5 px-4">Rôle</th>
+                  <th className="py-2.5 px-4">Affectation / Brigade</th>
+                  <th className="py-2.5 px-4">Statut</th>
+                  <th className="py-2.5 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#e2e8f0]">
+                {agents.map((a) => (
+                  <tr key={a.id} className="hover:bg-[#f8fafc] h-[52px]">
+                    <td className="py-2.5 px-4">
+                      <div className="font-semibold text-[#0f172a]">{a.name}</div>
+                      <div className="text-[#64748b] text-[11px]">{a.email}</div>
+                    </td>
+                    <td className="py-2.5 px-4">
+                      <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-100 text-[#0f172a] border border-[#e2e8f0]">
+                        {a.role}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-4 text-[#475569]">
+                      {a.brigade || 'Centre de modération'}
+                    </td>
+                    <td className="py-2.5 px-4">
+                      <span className="inline-flex items-center gap-1 text-[#059669] font-semibold text-[11px]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#059669]" /> Actif
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-4 text-right">
+                      <button className="text-[#1e3a8a] hover:underline font-semibold text-xs">
+                        Modifier
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ================= ONGLET 3 : CATÉGORIES & SLA (Figma: WEB_ADM_02_CATEGORIES) ================= */}
+      {activeTab === 'categories' && (
+        <div className="bg-white border border-[#e2e8f0] rounded-[12px] shadow-sm overflow-hidden p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-bold text-[#0f172a]">Configuration des Catégories & Seuils SLA</h3>
+              <p className="text-xs text-[#475569]">Définissez les délais légaux de prise en charge et les brigades par défaut.</p>
+            </div>
+          </div>
+
+          <div className="border border-[#e2e8f0] rounded-[8px] overflow-hidden">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-[#f8fafc] text-[#475569] font-semibold border-b border-[#e2e8f0] h-[40px]">
+                  <th className="py-2.5 px-4">Type d'Anomalie</th>
+                  <th className="py-2.5 px-4">Sévérité Initiale</th>
+                  <th className="py-2.5 px-4">Délai Max (SLA)</th>
+                  <th className="py-2.5 px-4">Brigade Assignée</th>
+                  <th className="py-2.5 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#e2e8f0]">
+                {categories.map((c) => (
+                  <tr key={c.slug} className="hover:bg-[#f8fafc] h-[52px]">
+                    <td className="py-2.5 px-4 font-semibold text-[#0f172a]">{c.label}</td>
+                    <td className="py-2.5 px-4">
+                      <span className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
+                        c.defaultSeverity === 'Critique' ? 'bg-rose-50 text-rose-700 border border-rose-200' :
+                        c.defaultSeverity === 'Élevée' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                        'bg-slate-100 text-slate-700'
+                      }`}>
+                        {c.defaultSeverity}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-4 font-bold text-[#059669]">{c.slaHours} heures</td>
+                    <td className="py-2.5 px-4 text-[#475569]">{c.brigade}</td>
+                    <td className="py-2.5 px-4 text-right">
+                      <button className="text-[#1e3a8a] hover:underline font-semibold text-xs">
+                        Ajuster SLA
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Ajout Utilisateur */}
+      {showAddUserModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white border border-[#e2e8f0] rounded-[12px] p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-3">
+              <h3 className="text-base font-bold text-[#0f172a]">Nouveau Collaborateur Municipal</h3>
+              <button onClick={() => setShowAddUserModal(false)} className="text-[#94a3b8] hover:text-[#0f172a]">✕</button>
+            </div>
+
+            <form onSubmit={handleAddUser} className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-[#0f172a] mb-1">Nom complet</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ex: Moncef Ben Ali"
+                  value={newUserName}
+                  onChange={e => setNewUserName(e.target.value)}
+                  className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#0f172a] mb-1">Adresse e-mail</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="moncef@mairie.tn"
+                  value={newUserEmail}
+                  onChange={e => setNewUserEmail(e.target.value)}
+                  className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#0f172a] mb-1">Rôle opérationnel</label>
+                <select
+                  value={newUserRole}
+                  onChange={e => setNewUserRole(e.target.value)}
+                  className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
+                >
+                  <option value="AGENT_MAIRIE">Agent Mairie (Modérateur & Qualification)</option>
+                  <option value="CHEF_OUVRIER">Chef Ouvrier (Missions Terrain)</option>
+                  <option value="OUVRIER">Ouvrier Technique (Exécution)</option>
+                </select>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#e2e8f0]">
+                <button
+                  type="button"
+                  onClick={() => setShowAddUserModal(false)}
+                  className="px-4 py-2 rounded-[8px] text-xs font-semibold text-[#475569] hover:bg-[#f1f5f9]"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-[8px] text-xs font-semibold bg-[#059669] hover:bg-[#047857] text-white shadow-sm"
+                >
+                  Créer le Compte
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

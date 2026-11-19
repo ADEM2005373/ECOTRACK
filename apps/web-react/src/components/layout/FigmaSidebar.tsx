@@ -15,9 +15,9 @@ import {
   PlusCircle,
   FileText,
   LogOut,
-  Building2,
   AlertTriangle,
-  Clock
+  Clock,
+  HelpCircle
 } from 'lucide-react';
 
 interface FigmaSidebarProps {
@@ -31,203 +31,208 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ currentTab, onSelect
   const user = authState.user;
   const role = user?.role || 'CITOYEN';
 
-  const getRoleLabel = () => {
+  const getRoleConfig = () => {
     switch (role) {
       case 'ADMIN_SAAS':
       case 'ADMIN':
-        return { label: 'Admin SaaS Global', badge: 'bg-purple-500/20 text-purple-300 border-purple-500/30', icon: '👑' };
+        return {
+          roleLabel: 'Superviseur SaaS',
+          roleSubtitle: 'Plateforme Métropolitaine',
+          sectionTitle: '06 / SUPERVISION GLOBALE'
+        };
       case 'ADMIN_MUNICIPALITE':
-        return { label: 'Admin Municipalité', badge: 'bg-blue-500/20 text-blue-300 border-blue-500/30', icon: '🏛️' };
+        return {
+          roleLabel: 'Directeur Services Urbains',
+          roleSubtitle: `${user?.municipality || 'Ville de Tunis'} · Direction Générale`,
+          sectionTitle: '06 / ADMINISTRATION'
+        };
       case 'AGENT_MAIRIE':
       case 'AGENT':
-        return { label: 'Agent Mairie', badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30', icon: '📋' };
+        return {
+          roleLabel: 'Agent de Modération',
+          roleSubtitle: `${user?.municipality || 'Ville de Tunis'} · Centre de Tri`,
+          sectionTitle: '05 / OPÉRATIONS AGENT'
+        };
       case 'CHEF_OUVRIER':
       case 'OUVRIER':
-        return { label: 'Chef Ouvrier (Terrain)', badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30', icon: '👷' };
+        return {
+          roleLabel: 'Chef d\'Équipe Terrain',
+          roleSubtitle: `${user?.municipality || 'Ville de Tunis'} · Brigade Voirie`,
+          sectionTitle: '04 / MISSIONS TERRAIN'
+        };
       case 'CITOYEN':
       default:
-        return { label: 'Citoyen', badge: 'bg-teal-500/20 text-teal-300 border-teal-500/30', icon: '📱' };
+        return {
+          roleLabel: 'Citoyen',
+          roleSubtitle: `${user?.municipality || 'Ville de Tunis'} · Démarches de Salubrité`,
+          sectionTitle: '03 / ESPACE CITOYEN'
+        };
     }
   };
 
-  const roleInfo = getRoleLabel();
+  const roleConfig = getRoleConfig();
 
-  // Navigation configurée strictement selon le rôle utilisateur (Figma: 05_Flow_Agent_Web & 06_Flow_Admin_Web)
-  const getNavSections = () => {
+  // Navigation stricte par rôle (100% conforme aux flux Figma 05_Flow_Agent_Web et 06_Flow_Admin_Web)
+  const getNavItems = () => {
     if (role === 'CITOYEN') {
       return [
-        {
-          title: 'Espace Citoyen',
-          items: [
-            { id: 'my-reports', label: 'Mes Réclamations', icon: <FileText className="w-4 h-4" />, path: '/' },
-            { id: 'new-report', label: 'Nouveau Signalement', icon: <PlusCircle className="w-4 h-4 text-emerald-400" />, path: '/' },
-            { id: 'map', label: 'Carte des Incidents', icon: <MapPin className="w-4 h-4" />, path: '/supervision' },
-          ]
-        }
+        { id: 'my-reports', label: 'Mes Réclamations', icon: <FileText className="w-4 h-4" />, path: '/' },
+        { id: 'new-report', label: 'Nouveau Signalement', icon: <PlusCircle className="w-4 h-4 text-emerald-400" />, path: '/' },
+        { id: 'map', label: 'Carte des Incidents', icon: <MapPin className="w-4 h-4" />, path: '/supervision' },
       ];
     }
 
     if (role === 'CHEF_OUVRIER' || role === 'OUVRIER') {
       return [
-        {
-          title: 'Interventions Terrain',
-          items: [
-            { id: 'missions', label: 'Feuille de Route (Missions)', icon: <Wrench className="w-4 h-4 text-amber-400" />, path: '/' },
-            { id: 'active-jobs', label: 'Chantiers en cours (T3)', icon: <Clock className="w-4 h-4 text-blue-400" />, path: '/' },
-            { id: 'proof-upload', label: 'Clôture & Preuve Photo (T4)', icon: <Camera className="w-4 h-4 text-emerald-400" />, path: '/' },
-            { id: 'map', label: 'Carte des Chantiers', icon: <MapPin className="w-4 h-4" />, path: '/supervision' },
-          ]
-        }
+        { id: 'missions', label: 'Feuille de Route (Missions)', icon: <Wrench className="w-4 h-4 text-amber-400" />, path: '/', count: '3' },
+        { id: 'active-jobs', label: 'Chantiers en cours', icon: <Clock className="w-4 h-4 text-blue-400" />, path: '/' },
+        { id: 'proof-upload', label: 'Clôture & Preuve Photo', icon: <Camera className="w-4 h-4 text-emerald-400" />, path: '/' },
+        { id: 'map', label: 'Carte des Chantiers', icon: <MapPin className="w-4 h-4" />, path: '/supervision' },
       ];
     }
 
     if (role === 'AGENT_MAIRIE' || role === 'AGENT') {
       return [
-        {
-          title: 'Modération & Salubrité',
-          items: [
-            { id: 'inbox', label: 'Boîte de Réception (Inbox)', icon: <Inbox className="w-4 h-4 text-emerald-400" />, path: '/' },
-            { id: 'qualification', label: 'Qualification IA (ECO-31)', icon: <ShieldCheck className="w-4 h-4 text-purple-400" />, path: '/agent/qualification' },
-            { id: 'map', label: 'Carte Opérationnelle GIS', icon: <MapPin className="w-4 h-4 text-blue-400" />, path: '/supervision' },
-            { id: 'alerts', label: 'Alertes Prioritaires', icon: <AlertTriangle className="w-4 h-4 text-amber-400" />, path: '/' },
-          ]
-        }
+        { id: 'inbox', label: 'Boîte de réception', icon: <Inbox className="w-4 h-4" />, path: '/', count: '24' },
+        { id: 'qualification', label: 'Atelier de Qualification', icon: <ShieldCheck className="w-4 h-4 text-purple-400" />, path: '/agent/qualification' },
+        { id: 'map', label: 'Carte opérationnelle', icon: <MapPin className="w-4 h-4" />, path: '/supervision' },
+        { id: 'alerts', label: 'Alertes prioritaires', icon: <AlertTriangle className="w-4 h-4 text-amber-400" />, path: '/' },
       ];
     }
 
     if (role === 'ADMIN_MUNICIPALITE') {
       return [
-        {
-          title: 'Direction Municipale',
-          items: [
-            { id: 'overview', label: 'Vue d’ensemble Mairie', icon: <Building2 className="w-4 h-4 text-blue-400" />, path: '/' },
-            { id: 'powerbi', label: 'Pilotage & KPIs (ECO-42)', icon: <BarChart3 className="w-4 h-4 text-emerald-400" />, path: '/admin/analytics' },
-            { id: 'teams', label: 'Agents & Brigades Terrain', icon: <Users className="w-4 h-4 text-purple-400" />, path: '/' },
-            { id: 'categories', label: 'Seuils SLA & Types', icon: <Tags className="w-4 h-4 text-amber-400" />, path: '/' },
-            { id: 'map', label: 'Carte Territoriale', icon: <MapPin className="w-4 h-4 text-cyan-400" />, path: '/supervision' },
-          ]
-        }
+        { id: 'overview', label: 'Vue d’ensemble', icon: <Inbox className="w-4 h-4" />, path: '/', count: '14' },
+        { id: 'users', label: 'Utilisateurs & Brigades', icon: <Users className="w-4 h-4" />, path: '/' },
+        { id: 'categories', label: 'Catégories & Seuils SLA', icon: <Tags className="w-4 h-4" />, path: '/' },
+        { id: 'powerbi', label: 'Pilotage & Analyses', icon: <BarChart3 className="w-4 h-4 text-blue-400" />, path: '/admin/analytics' },
+        { id: 'map', label: 'Carte opérationnelle', icon: <MapPin className="w-4 h-4" />, path: '/supervision' },
       ];
     }
 
-    // ADMIN_SAAS ou ADMIN (Global)
+    // ADMIN_SAAS
     return [
-      {
-        title: 'Supervision Globale',
-        items: [
-          { id: 'overview', label: 'Tour de Contrôle SaaS', icon: <Inbox className="w-4 h-4 text-emerald-400" />, path: '/' },
-          { id: 'ai-governance', label: 'Gouvernance IA (ECO-43)', icon: <Brain className="w-4 h-4 text-purple-400" />, path: '/admin/ai-governance' },
-          { id: 'powerbi', label: 'Power BI Multi-Villes (ECO-42)', icon: <BarChart3 className="w-4 h-4 text-blue-400" />, path: '/admin/analytics' },
-          { id: 'map', label: 'Carte Métropolitaine (ECO-33)', icon: <MapPin className="w-4 h-4 text-cyan-400" />, path: '/supervision' },
-          { id: 'audit', label: 'Journal d’Audit Immuable', icon: <ShieldCheck className="w-4 h-4 text-emerald-400" />, path: '/' },
-        ]
-      }
+      { id: 'overview', label: 'Tour de Contrôle SaaS', icon: <Inbox className="w-4 h-4" />, path: '/', count: '48' },
+      { id: 'ai-governance', label: 'Gouvernance IA & MLOps', icon: <Brain className="w-4 h-4 text-purple-400" />, path: '/admin/ai-governance' },
+      { id: 'powerbi', label: 'Analyses Multi-Villes', icon: <BarChart3 className="w-4 h-4 text-blue-400" />, path: '/admin/analytics' },
+      { id: 'map', label: 'Carte Métropolitaine', icon: <MapPin className="w-4 h-4 text-cyan-400" />, path: '/supervision' },
+      { id: 'audit', label: 'Journal d’Audit Immuable', icon: <ShieldCheck className="w-4 h-4 text-emerald-400" />, path: '/' },
     ];
   };
 
-  const navSections = getNavSections();
+  const navItems = getNavItems();
+  const userInitials = user?.fullName
+    ? user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+    : 'ET';
 
   return (
-    <aside className="w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between shrink-0 min-h-screen text-slate-200 select-none">
-      <div>
-        {/* Figma: ECOTRACK Logo Header */}
-        <div className="p-5 border-b border-slate-800/80 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-600/30">
-            <Leaf className="w-5 h-5 text-white" />
+    <aside className="bg-[#102c35] flex flex-col justify-between h-screen w-[240px] px-[16px] py-[24px] shrink-0 text-white select-none z-30">
+      <div className="flex flex-col gap-[24px]">
+        {/* Figma: Logo & Marque ECOTRACK CONSOLE V2 */}
+        <div className="flex items-center gap-[10px] px-[8px]">
+          <div className="bg-[#059669] flex items-center justify-center rounded-[9px] size-[34px] shadow-sm">
+            <Leaf className="size-[20px] text-white" />
           </div>
-          <div>
-            <div className="font-extrabold text-base tracking-tight font-heading text-white flex items-center gap-1.5">
-              <span>ECOTRACK</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 font-bold">V2</span>
-            </div>
-            <p className="text-[10px] text-slate-400 tracking-wide font-sans">Smart City Municipal Platform</p>
-          </div>
-        </div>
-
-        {/* Figma: Territoire & Collectivité Badge */}
-        <div className="mx-3.5 my-3.5 p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-          <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1">
-            <span className="uppercase tracking-wider font-semibold">Collectivité</span>
-            <Building2 className="w-3.5 h-3.5 text-blue-400" />
-          </div>
-          <p className="font-bold text-white text-xs truncate">
-            {user?.municipality || 'Supervision Métropolitaine'}
-          </p>
-          <div className="mt-2 flex items-center gap-1.5">
-            <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold ${roleInfo.badge}`}>
-              {roleInfo.icon} {roleInfo.label}
+          <div className="flex flex-col">
+            <span className="font-heading font-bold text-[18px] text-white tracking-tight leading-tight">
+              ECOTRACK
+            </span>
+            <span className="text-[#aec5cb] text-[10px] tracking-[2px] font-sans font-semibold">
+              CONSOLE V2
             </span>
           </div>
         </div>
 
-        {/* Figma: Navigation Sections */}
-        <nav className="px-3 space-y-4 mt-2">
-          {navSections.map((sec, idx) => (
-            <div key={idx}>
-              <p className="px-3 text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1.5">
-                {sec.title}
-              </p>
-              <div className="space-y-1">
-                {sec.items.map((item) => {
-                  const isActive = (item.path !== '/' && location.pathname.startsWith(item.path)) ||
-                    (item.path === '/' && location.pathname === '/' && (!currentTab || currentTab === item.id));
+        {/* Figma: Territoire & Collectivité */}
+        <div className="bg-[#1b4449] rounded-[8px] p-[12px] flex flex-col gap-[4px]">
+          <p className="font-semibold text-[13px] text-white leading-tight">
+            {user?.municipality || 'Ville de Tunis'}
+          </p>
+          <p className="text-[#aec5cb] text-[11px] leading-tight">
+            {roleConfig.roleSubtitle}
+          </p>
+        </div>
 
-                  if (item.path !== '/' && item.path !== location.pathname) {
-                    return (
-                      <Link
-                        key={item.id}
-                        to={item.path}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition ${
-                          isActive
-                            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 font-semibold'
-                            : 'text-slate-300 hover:text-white hover:bg-slate-900'
-                        }`}
-                      >
-                        {item.icon}
-                        <span className="truncate">{item.label}</span>
-                      </Link>
-                    );
-                  }
+        {/* Figma: Section Navigation */}
+        <div className="flex flex-col gap-[8px]">
+          <p className="text-[#aec5cb] text-[10px] font-semibold tracking-[1.2px] uppercase px-[4px]">
+            {roleConfig.sectionTitle}
+          </p>
 
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => onSelectTab && onSelectTab(item.id)}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-left transition ${
-                        isActive
-                          ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 font-semibold'
-                          : 'text-slate-300 hover:text-white hover:bg-slate-900'
-                      }`}
-                    >
+          <nav className="flex flex-col gap-[4px]">
+            {navItems.map(item => {
+              const isActive = (item.path !== '/' && location.pathname === item.path) || 
+                               (item.path === '/' && location.pathname === '/' && (!currentTab || currentTab === item.id || (item.id === 'inbox' && currentTab === 'overview')));
+
+              const content = (
+                <div
+                  className={`flex items-center justify-between h-[44px] px-[12px] rounded-[8px] transition-colors cursor-pointer ${
+                    isActive 
+                      ? 'bg-[#1b4449] text-white font-semibold' 
+                      : 'text-[#aec5cb] hover:bg-[#1b4449]/50 hover:text-white font-normal'
+                  }`}
+                  onClick={() => onSelectTab && onSelectTab(item.id)}
+                >
+                  <div className="flex items-center gap-[10px] min-w-0">
+                    <span className="shrink-0 size-[18px] flex items-center justify-center">
                       {item.icon}
-                      <span className="truncate">{item.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </nav>
+                    </span>
+                    <span className="text-[12px] truncate">{item.label}</span>
+                  </div>
+                  {item.count && (
+                    <span className="text-[#6ee7b7] text-[11px] font-semibold shrink-0 ml-2">
+                      {item.count}
+                    </span>
+                  )}
+                </div>
+              );
+
+              if (item.path.startsWith('/admin') || item.path.startsWith('/agent') || item.path.startsWith('/supervision')) {
+                return (
+                  <Link key={item.id} to={item.path} className="block">
+                    {content}
+                  </Link>
+                );
+              }
+
+              return (
+                <div key={item.id}>
+                  {content}
+                </div>
+              );
+            })}
+          </nav>
+        </div>
       </div>
 
-      {/* Figma: Profil Footer & Logout */}
-      <div className="p-3.5 border-t border-slate-800/80 bg-slate-950/60">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center font-bold text-emerald-400 text-xs shrink-0">
-              {user?.fullName ? user.fullName.split(' ').map(n => n[0]).slice(0, 2).join('') : 'U'}
+      {/* Figma: Pied de navigation & Profil */}
+      <div className="flex flex-col gap-[16px] pt-[16px] border-t border-[#355259]">
+        <div className="flex items-center gap-[10px] px-[8px] text-[#aec5cb] hover:text-white text-[12px] cursor-pointer transition">
+          <HelpCircle className="size-[18px]" />
+          <span>Centre d'aide & Manuel</span>
+        </div>
+
+        <div className="flex items-center justify-between pt-[12px] border-t border-[#1b4449]">
+          <div className="flex items-center gap-[10px] min-w-0">
+            <div className="bg-[#355259] rounded-full size-[34px] flex items-center justify-center text-white font-semibold text-[11px] shrink-0">
+              {userInitials}
             </div>
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-white truncate">{user?.fullName || 'Utilisateur'}</p>
-              <p className="text-[10px] text-slate-400 truncate">{user?.email}</p>
+            <div className="flex flex-col min-w-0">
+              <p className="font-semibold text-[12px] text-white truncate leading-tight">
+                {user?.fullName || 'Utilisateur'}
+              </p>
+              <p className="text-[#aec5cb] text-[10px] truncate leading-tight">
+                {roleConfig.roleLabel}
+              </p>
             </div>
           </div>
+
           <button
-            onClick={() => logout()}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-950/20 transition shrink-0"
+            onClick={logout}
+            className="p-1.5 rounded-lg text-[#aec5cb] hover:text-rose-400 hover:bg-[#1b4449] transition shrink-0"
             title="Se déconnecter"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="size-4" />
           </button>
         </div>
       </div>

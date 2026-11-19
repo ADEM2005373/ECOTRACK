@@ -42,7 +42,6 @@ export const CitoyenDashboard: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      // Simulation d'envoi API
       const newReport: ReportItem = {
         id: `cit_${Date.now()}`,
         reference: `REC-2026-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -56,7 +55,7 @@ export const CitoyenDashboard: React.FC = () => {
       };
 
       setReports(prev => [newReport, ...prev]);
-      setSubmitSuccess(`Votre signalement ${newReport.reference} a été transmis à la Mairie avec succès !`);
+      setSubmitSuccess(`Votre signalement ${newReport.reference} a été transmis aux services municipaux avec succès !`);
       setShowNewModal(false);
       setTitle('');
       setDescription('');
@@ -67,27 +66,24 @@ export const CitoyenDashboard: React.FC = () => {
   };
 
   const resolvedCount = reports.filter(r => r.status === 'RESOLU').length;
-  const inProgressCount = reports.filter(r => r.status === 'EN_TRAITEMENT' || r.status === 'A_QUALIFIER').length;
+  const inProgressCount = reports.filter(r => r.status === 'EN_TRAITEMENT' || r.status === 'A_QUALIFIER' || r.status === 'NOUVEAU').length;
 
   return (
     <div className="space-y-6">
-      {/* Header Citoyen */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+      {/* Header Citoyen (Figma: MOB_CIT_01_MAP_HOME / MOB_CIT_04_MY_REPORTS) */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-extrabold text-white font-heading">Espace Citoyen</h1>
-            <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-teal-500/20 text-teal-300 border border-teal-500/30">
-              Mes Démarches Urbaines
-            </span>
-          </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Signalez des anomalies dans votre quartier et suivez les réparations effectuées par les équipes municipales.
+          <h1 className="text-[26px] font-bold text-[#0f172a] font-heading tracking-tight">
+            Espace Citoyen
+          </h1>
+          <p className="text-[13px] text-[#475569] mt-0.5">
+            Signalez des anomalies dans votre quartier et suivez l'intervention des équipes municipales en temps réel.
           </p>
         </div>
 
         <button
           onClick={() => setShowNewModal(true)}
-          className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-600/30 text-xs transition"
+          className="inline-flex items-center gap-2 bg-[#059669] hover:bg-[#047857] text-white font-semibold px-4 h-[44px] rounded-[8px] text-[13px] transition shadow-sm"
         >
           <PlusCircle className="w-4 h-4" />
           <span>Faire un Signalement</span>
@@ -95,95 +91,96 @@ export const CitoyenDashboard: React.FC = () => {
       </div>
 
       {submitSuccess && (
-        <div className="bg-emerald-950/70 border border-emerald-500/40 p-4 rounded-xl flex items-center justify-between text-xs text-emerald-200">
+        <div className="bg-[#ecfdf5] border border-[#a7f3d0] p-4 rounded-[8px] flex items-center justify-between text-xs text-[#065f46]">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>{submitSuccess}</span>
+            <CheckCircle2 className="w-4 h-4 text-[#059669]" />
+            <span className="font-semibold">{submitSuccess}</span>
           </div>
-          <button onClick={() => setSubmitSuccess(null)} className="text-emerald-400 hover:text-white">✕</button>
+          <button onClick={() => setSubmitSuccess(null)} className="text-[#059669] hover:text-[#064e3b] font-bold">✕</button>
         </div>
       )}
 
-      {/* KPIs Personnels Citoyen */}
+      {/* Cartes d'État Citoyen */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Mes Réclamations</span>
-            <FileText className="w-4 h-4 text-teal-400" />
+        <div className="bg-white border border-[#e2e8f0] p-5 rounded-[12px] shadow-sm">
+          <div className="flex items-center justify-between text-[12px] text-[#475569]">
+            <span>Total des Démarches</span>
+            <FileText className="w-4 h-4 text-[#2563eb]" />
           </div>
-          <div className="text-2xl font-bold text-white mt-2">{reports.length}</div>
-          <p className="text-[10px] text-slate-500 mt-1">Transmises à la collectivité</p>
+          <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">{reports.length}</div>
+          <p className="text-[11px] text-[#475569] mt-1">Signalements transmis par votre compte</p>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>En Traitement</span>
-            <Clock className="w-4 h-4 text-amber-400" />
+        <div className="bg-white border border-[#e2e8f0] p-5 rounded-[12px] shadow-sm">
+          <div className="flex items-center justify-between text-[12px] text-[#475569]">
+            <span>En Traitement / Assigné</span>
+            <Clock className="w-4 h-4 text-[#d97706]" />
           </div>
-          <div className="text-2xl font-bold text-white mt-2">{inProgressCount}</div>
-          <p className="text-[10px] text-amber-400 mt-1">Ouvriers dépêchés sur site</p>
+          <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">{inProgressCount}</div>
+          <p className="text-[11px] text-[#d97706] font-semibold mt-1">Prise en charge par les brigades</p>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Résolues & Clôturées</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+        <div className="bg-white border border-[#e2e8f0] p-5 rounded-[12px] shadow-sm">
+          <div className="flex items-center justify-between text-[12px] text-[#475569]">
+            <span>Résolus & Propreté Restaurée</span>
+            <CheckCircle2 className="w-4 h-4 text-[#059669]" />
           </div>
-          <div className="text-2xl font-bold text-white mt-2">{resolvedCount}</div>
-          <p className="text-[10px] text-emerald-400 mt-1">Avec preuve photo après travaux</p>
+          <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">{resolvedCount}</div>
+          <p className="text-[11px] text-[#059669] font-semibold mt-1">Interventions finalisées avec succès</p>
         </div>
       </div>
 
-      {/* Liste des réclamations du citoyen */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-white flex items-center gap-2">
-            <FileText className="w-4 h-4 text-emerald-400" />
-            <span>Historique de mes réclamations</span>
-          </h2>
-          <span className="text-xs text-slate-400">{reports.length} déclarations enregistrées</span>
+      {/* Liste de Suivi Citoyen (Figma: MOB_CIT_04_MY_REPORTS) */}
+      <div className="bg-white border border-[#e2e8f0] rounded-[12px] shadow-sm overflow-hidden p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-bold text-[#0f172a]">Historique de mes Signalements</h2>
+          <span className="text-xs text-[#64748b]">{reports.length} réclamations enregistrées</span>
         </div>
 
-        <div className="divide-y divide-slate-800/60">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {reports.map((r) => (
-            <div key={r.id} className="p-4 hover:bg-slate-850/50 transition flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-start gap-3 min-w-0">
-                <img
-                  src={r.imageUrl}
-                  alt={r.title}
-                  className="w-14 h-14 rounded-xl object-cover border border-slate-800 shrink-0"
-                />
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-white">{r.reference}</span>
-                    <span className="text-[10px] text-slate-500">{r.timeAgo}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                      {r.category}
-                    </span>
-                  </div>
-                  <h3 className="text-xs font-semibold text-slate-200 mt-0.5 truncate">{r.title}</h3>
-                  <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-1">
-                    <MapPin className="w-3 h-3 text-emerald-400" />
-                    <span>{r.district}, Tunis</span>
-                    <span>•</span>
-                    <span>Équipe: {r.worker || 'En attente d’assignation'}</span>
-                  </div>
+            <div
+              key={r.id}
+              className="bg-[#f8fafc] border border-[#e2e8f0] rounded-[8px] p-4 flex gap-4 hover:border-[#cbd5e1] transition"
+            >
+              <img
+                src={r.imageUrl}
+                alt={r.title}
+                className="w-20 h-20 rounded-[6px] object-cover border border-[#e2e8f0] shrink-0"
+              />
+              <div className="space-y-1 min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-bold text-[#1e3a8a] text-xs truncate">{r.reference}</span>
+                  <span className="text-[10px] text-[#64748b]">{r.timeAgo}</span>
                 </div>
-              </div>
 
-              {/* Timeline Statut FSM */}
-              <div className="flex items-center gap-2 shrink-0">
-                <div className={`px-2.5 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 ${
-                  r.status === 'RESOLU'
-                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                    : r.status === 'EN_TRAITEMENT'
-                    ? 'bg-blue-500/20 text-blue-400 border-blue-500/30'
-                    : r.status === 'A_QUALIFIER'
-                    ? 'bg-amber-500/20 text-amber-400 border-amber-500/30'
-                    : 'bg-purple-500/20 text-purple-400 border-purple-500/30'
-                }`}>
-                  {r.status === 'RESOLU' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
-                  <span>{r.status}</span>
+                <h3 className="text-xs font-bold text-[#0f172a] truncate">{r.title}</h3>
+
+                <p className="text-[11px] text-[#475569] flex items-center gap-1">
+                  <MapPin className="w-3 h-3 text-[#059669]" />
+                  <span>{r.district}</span>
+                </p>
+
+                <div className="pt-1.5 flex items-center justify-between">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-[#4338ca] border border-[#e2e8f0]">
+                    {r.category}
+                  </span>
+
+                  {r.status === 'RESOLU' && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#047857] bg-white border border-[#059669] px-2 py-0.5 rounded-[6px]">
+                      <CheckCircle2 className="w-3 h-3 text-[#059669]" /> Résolu
+                    </span>
+                  )}
+                  {r.status === 'EN_TRAITEMENT' && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#b45309] bg-white border border-[#d97706] px-2 py-0.5 rounded-[6px]">
+                      <Clock className="w-3 h-3 text-[#d97706]" /> En intervention
+                    </span>
+                  )}
+                  {(r.status === 'A_QUALIFIER' || r.status === 'NOUVEAU') && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1e3a8a] bg-white border border-[#1e3a8a] px-2 py-0.5 rounded-[6px]">
+                      <Sparkles className="w-3 h-3 text-[#1e3a8a]" /> Transmis à la mairie
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -191,92 +188,100 @@ export const CitoyenDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal Nouveau Signalement (Figma: MOB_CIT_03_REPORT_FORM) */}
+      {/* ================= MODALE NOUVEAU SIGNALEMENT FIGMA (MOB_CIT_03_REPORT_FORM) ================= */}
       {showNewModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white border border-[#e2e8f0] rounded-[12px] p-6 max-w-lg w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-3">
               <div className="flex items-center gap-2">
-                <Camera className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-base font-bold text-white">Nouveau Signalement Citoyen</h3>
+                <Camera className="w-5 h-5 text-[#059669]" />
+                <h3 className="text-base font-bold text-[#0f172a]">Nouveau Signalement Citoyen</h3>
               </div>
-              <button onClick={() => setShowNewModal(false)} className="text-slate-400 hover:text-white">✕</button>
+              <button
+                onClick={() => setShowNewModal(false)}
+                className="text-[#94a3b8] hover:text-[#0f172a]"
+              >
+                ✕
+              </button>
             </div>
 
-            <form onSubmit={handleCreateReport} className="space-y-4 text-xs">
+            <form onSubmit={handleCreateReport} className="space-y-4">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Catégorie d'anomalie</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500"
-                >
-                  <option value="DEPOT_SAUVAGE">Dépôt sauvage d'ordures</option>
-                  <option value="ENCOMBRANTS">Objets encombrants sur voie publique</option>
-                  <option value="GRAFFITI">Dégradation & Graffiti</option>
-                  <option value="DECHETS_DANGEREUX">Déchets dangereux / Produits chimiques</option>
-                  <option value="AUTRE">Autre nuisance de voirie</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Quartier / Localisation</label>
-                <select
-                  value={district}
-                  onChange={(e) => setDistrict(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500"
-                >
-                  <option value="Centre-Ville">Centre-Ville (Tunis)</option>
-                  <option value="El Menzah">El Menzah</option>
-                  <option value="Ariana">Ariana</option>
-                  <option value="La Marsa">La Marsa</option>
-                  <option value="Les Berges du Lac">Les Berges du Lac</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Titre court</label>
+                <label className="block text-xs font-semibold text-[#0f172a] mb-1">Titre de l'anomalie</label>
                 <input
                   type="text"
-                  placeholder="Ex: Sacs et gravats abandonnés près du trottoir"
+                  required
+                  placeholder="Ex: Dépôt d'ordures devant l'école"
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500"
+                  onChange={e => setTitle(e.target.value)}
+                  className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-[#0f172a] mb-1">Catégorie constatée</label>
+                  <select
+                    value={category}
+                    onChange={e => setCategory(e.target.value)}
+                    className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
+                  >
+                    <option value="DEPOT_SAUVAGE">Dépôt sauvage</option>
+                    <option value="ENCOMBRANTS">Objets encombrants</option>
+                    <option value="DECHETS_DANGEREUX">Déchets dangereux</option>
+                    <option value="GRAFFITI">Graffiti & Dégradation</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#0f172a] mb-1">Quartier / Arrondissement</label>
+                  <select
+                    value={district}
+                    onChange={e => setDistrict(e.target.value)}
+                    className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
+                  >
+                    <option value="Centre-Ville">Centre-Ville</option>
+                    <option value="El Menzah">El Menzah</option>
+                    <option value="Bab Bhar">Bab Bhar</option>
+                    <option value="La Marsa">La Marsa</option>
+                    <option value="Les Berges du Lac">Les Berges du Lac</option>
+                  </select>
+                </div>
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Description précise de l'anomalie</label>
+                <label className="block text-xs font-semibold text-[#0f172a] mb-1">Description & Localisation précise</label>
                 <textarea
-                  rows={3}
                   required
-                  placeholder="Décrivez l'emplacement exact, la taille de l'anomalie et tout danger potentiel..."
+                  rows={3}
+                  placeholder="Indiquez l'adresse exacte, des repères visibles pour aider l'équipe municipale..."
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500"
+                  onChange={e => setDescription(e.target.value)}
+                  className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
                 />
               </div>
 
-              <div className="p-3 bg-emerald-950/30 border border-emerald-500/20 rounded-xl flex items-center gap-2 text-emerald-300 text-[11px]">
-                <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>L'IA Vision analysera la photo pour catégoriser automatiquement l'anomalie. Les métadonnées EXIF sensibles seront purgées (RGPD).</span>
+              <div className="p-3 bg-[#f8fafc] border border-dashed border-[#cbd5e1] rounded-[8px] text-center space-y-1">
+                <Camera className="w-6 h-6 text-[#059669] mx-auto" />
+                <p className="text-xs font-semibold text-[#0f172a]">Photo capturée via mobile</p>
+                <p className="text-[10px] text-[#64748b]">La géolocalisation GPS et la date seront automatiquement jointes</p>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#e2e8f0]">
                 <button
                   type="button"
                   onClick={() => setShowNewModal(false)}
-                  className="px-4 py-2 rounded-xl text-slate-400 hover:text-white"
+                  className="px-4 py-2 rounded-[8px] text-xs font-semibold text-[#475569] hover:bg-[#f1f5f9]"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-600/30 transition disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-[8px] text-xs font-semibold bg-[#059669] hover:bg-[#047857] text-white shadow-sm disabled:opacity-50"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>{isSubmitting ? 'Transmission...' : 'Envoyer à la Mairie'}</span>
+                  <span>{isSubmitting ? 'Transmission...' : 'Transmettre à la Mairie'}</span>
                 </button>
               </div>
             </form>

@@ -145,11 +145,11 @@ export const AiGovernancePage: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-base font-bold text-white tracking-tight">ECOTRACK V2</h1>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                ECO-43 / SCRUM-61
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                Gouvernance IA Active
               </span>
             </div>
-            <p className="text-xs text-slate-400">Observabilité MLOps & Active Learning (US-11)</p>
+            <p className="text-xs text-slate-400">Observabilité MLOps & Apprentissage Continu</p>
           </div>
         </div>
 
@@ -378,7 +378,7 @@ export const AiGovernancePage: React.FC = () => {
           <div className="bg-dark-card border border-dark-border rounded-xl p-5 space-y-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-purple-400" />
-              <span>Stratégie Active Learning (US-11)</span>
+              <span>Stratégie d'Apprentissage Continu (Active Learning)</span>
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed">
               Le protocole MLOps d'EcoTrack intègre une boucle d'amélioration continue sans intervention manuelle lourde :

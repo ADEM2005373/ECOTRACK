@@ -91,7 +91,7 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose })
             </div>
             <div>
               <h3 className="text-base font-bold text-white">Inscription Citoyenne</h3>
-              <p className="text-xs text-slate-400">Composant Officiel EcoTrack V2 (SCRUM-43 / ECO-12)</p>
+              <p className="text-xs text-slate-400">Plateforme Métropolitaine EcoTrack V2</p>
             </div>
           </div>
           <button

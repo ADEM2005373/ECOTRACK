@@ -413,12 +413,12 @@ export const QualificationPage: React.FC = () => {
               {isCurrentValidated ? (
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  Validé (T1)
+                  Validé
                 </span>
               ) : isCurrentRejected ? (
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 flex items-center gap-1">
                   <XCircle className="w-3.5 h-3.5" />
-                  Rejeté (T5)
+                  Rejeté
                 </span>
               ) : (
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 flex items-center gap-1">
@@ -578,14 +578,14 @@ export const QualificationPage: React.FC = () => {
               {/* Boutons d'Action / Décision d'arbitrage (Figma: Décision) */}
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  {/* Bouton Vert: Valider (T1) */}
+                  {/* Bouton Vert: Valider */}
                   <button
                     type="button"
                     onClick={handleValidate}
                     className="flex items-center justify-center gap-2 min-h-[44px] px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-md shadow-emerald-600/20 active:scale-95 transition-all duration-150"
                   >
                     <Check className="w-4 h-4" />
-                    <span>Valider (T1)</span>
+                    <span>Valider la détection</span>
                   </button>
 
                   {/* Bouton Bleu: Corriger (Override) */}
@@ -601,18 +601,18 @@ export const QualificationPage: React.FC = () => {
                     <span>Modifier</span>
                   </button>
 
-                  {/* Bouton Rouge: Rejeter (T5) */}
+                  {/* Bouton Rouge: Rejeter */}
                   <button
                     type="button"
                     onClick={() => setIsRejectModalOpen(true)}
                     className="flex items-center justify-center gap-2 min-h-[44px] px-3 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs shadow-md shadow-rose-600/20 active:scale-95 transition-all duration-150"
                   >
                     <XCircle className="w-4 h-4" />
-                    <span>Rejeter (T5)</span>
+                    <span>Rejeter l'anomalie</span>
                   </button>
                 </div>
 
-                {/* Bouton Dispatch (Affectation - T2) */}
+                {/* Bouton Dispatch (Affectation) */}
                 <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                   {isCurrentValidated ? (
                     <Link
@@ -620,7 +620,7 @@ export const QualificationPage: React.FC = () => {
                       className="w-full flex items-center justify-center gap-2 min-h-[44px] px-4 rounded-lg bg-sapphire-900 hover:bg-sapphire-800 text-white font-semibold text-xs shadow-md shadow-sapphire-900/30 transition-all"
                     >
                       <Unlock className="w-4 h-4 text-emerald-400" />
-                      <span>Affecter à une équipe (T2)</span>
+                      <span>Affecter à une brigade</span>
                     </Link>
                   ) : (
                     <button
@@ -742,7 +742,7 @@ export const QualificationPage: React.FC = () => {
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-2 text-rose-600 border-b border-slate-100 dark:border-slate-800 pb-3">
               <AlertTriangle className="w-5 h-5 shrink-0" />
-              <h3 className="text-base font-bold font-heading">Rejeter le signalement (T5)</h3>
+              <h3 className="text-base font-bold font-heading">Rejeter le signalement</h3>
             </div>
 
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -794,7 +794,7 @@ export const QualificationPage: React.FC = () => {
                 onClick={handleConfirmReject}
                 className="px-4 py-2 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white shadow"
               >
-                Confirmer le Rejet (T5)
+                Confirmer le Rejet
               </button>
             </div>
           </div>

@@ -29,25 +29,25 @@ describe('QualificationPage (ECO-31 / SCRUM-51)', () => {
     expect(screen.getByText('Dépôt sauvage')).toBeDefined();
 
     // 3 Action Buttons
-    expect(screen.getByText('Valider (T1)')).toBeDefined();
+    expect(screen.getByText('Valider la détection')).toBeDefined();
     expect(screen.getByText('Modifier')).toBeDefined();
-    expect(screen.getByText('Rejeter (T5)')).toBeDefined();
+    expect(screen.getByText('Rejeter l\'anomalie')).toBeDefined();
 
     // Dispatch button is initially locked
     expect(screen.getByText('Valider pour affecter')).toBeDefined();
   });
 
-  it('validates the report (T1) and unlocks the dispatch button', () => {
+  it('validates the report and unlocks the dispatch button', () => {
     render(<QualificationPage />);
 
-    const validateBtn = screen.getByText('Valider (T1)');
+    const validateBtn = screen.getByText('Valider la détection');
     fireEvent.click(validateBtn);
 
-    // Status updates to Validé (T1)
-    expect(screen.getByText('Validé (T1)')).toBeDefined();
+    // Status updates to Validé
+    expect(screen.getByText('Validé')).toBeDefined();
 
-    // Dispatch button unlocks to "Affecter à une équipe (T2)"
-    expect(screen.getByText('Affecter à une équipe (T2)')).toBeDefined();
+    // Dispatch button unlocks to "Affecter à une brigade"
+    expect(screen.getByText('Affecter à une brigade')).toBeDefined();
   });
 
   it('opens category override modal and allows changing the category', () => {
@@ -64,20 +64,20 @@ describe('QualificationPage (ECO-31 / SCRUM-51)', () => {
     expect(screen.getByText('Corrigé par l’agent')).toBeDefined();
   });
 
-  it('opens rejection modal (T5) and allows rejecting with a reason', () => {
+  it('opens rejection modal and allows rejecting with a reason', () => {
     render(<QualificationPage />);
 
-    const rejectBtn = screen.getByText('Rejeter (T5)');
+    const rejectBtn = screen.getByText('Rejeter l\'anomalie');
     fireEvent.click(rejectBtn);
 
-    expect(screen.getByText('Rejeter le signalement (T5)')).toBeDefined();
-    expect(screen.getByText('Confirmer le Rejet (T5)')).toBeDefined();
+    expect(screen.getByText('Rejeter le signalement')).toBeDefined();
+    expect(screen.getByText('Confirmer le Rejet')).toBeDefined();
 
-    const confirmRejectBtn = screen.getByText('Confirmer le Rejet (T5)');
+    const confirmRejectBtn = screen.getByText('Confirmer le Rejet');
     fireEvent.click(confirmRejectBtn);
 
-    // Status badge becomes Rejeté (T5)
-    expect(screen.getByText('Rejeté (T5)')).toBeDefined();
+    // Status badge becomes Rejeté
+    expect(screen.getByText('Rejeté')).toBeDefined();
   });
 
   it('navigates through queue items with Next and Previous buttons', () => {

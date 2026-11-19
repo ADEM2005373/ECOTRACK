@@ -43,7 +43,7 @@ const REPORTS: ReportOption[] = [
     id: 'rpt_teams_003',
     name: 'Performance des Équipes',
     category: 'Ressources Humaines',
-    description: 'Lead time moyen par ouvrier, interventions clôturées avec photo après travaux (T4).',
+    description: 'Lead time moyen par ouvrier, interventions clôturées avec photo après travaux.',
     dataset: 'Fact_Interventions & Dim_Ouvrier',
   },
   {
@@ -114,9 +114,6 @@ export default function AnalyticsPage() {
               <h1 className="text-base font-bold text-white tracking-tight">
                 Tableaux de Bord Décisionnels Power BI
               </h1>
-              <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                ECO-42 / US-10
-              </span>
             </div>
             <p className="text-xs text-slate-400">
               Intégration Sécurisée Azure AD & Row-Level Security (RLS)
@@ -306,7 +303,7 @@ export default function AnalyticsPage() {
                 </h3>
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center justify-between bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs">
-                    <span className="text-emerald-400 font-semibold">Résolus (T4 avec Photo)</span>
+                    <span className="text-emerald-400 font-semibold">Résolus avec Preuve Photo</span>
                     <span className="text-white font-bold">300 (60%)</span>
                   </div>
                   <div className="flex items-center justify-between bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs">

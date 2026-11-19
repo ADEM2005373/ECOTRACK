@@ -2,22 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getStats, getReports, type ReportStats, type ReportItem, MOCK_STATS } from '../../services/reportApi';
 import {
-  Inbox,
   ShieldCheck,
   MapPin,
   Clock,
   Sparkles,
-  AlertTriangle,
   CheckCircle2,
   Eye,
   UserCheck,
-  XCircle
+  XCircle,
+  Search,
+  Filter,
+  Info
 } from 'lucide-react';
 
 export const AgentMairieDashboard: React.FC = () => {
   const [reports, setReports] = useState<ReportItem[]>([]);
-  const [stats, setStats] = useState<ReportStats>(MOCK_STATS);
+  const [, setStats] = useState<ReportStats>(MOCK_STATS);
   const [notice, setNotice] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
 
   // Modal d'assignation rapide
   const [assignTarget, setAssignTarget] = useState<ReportItem | null>(null);
@@ -27,7 +30,7 @@ export const AgentMairieDashboard: React.FC = () => {
 
   // Modal de rejet rapide
   const [rejectTarget, setRejectTarget] = useState<ReportItem | null>(null);
-  const [rejectReason, setRejectReason] = useState('Photo inexploitable / floue');
+  const [rejectReason, setRejectReason] = useState('Photo inexploitable ou hors compétence communale');
 
   const loadData = async () => {
     try {
@@ -63,163 +66,197 @@ export const AgentMairieDashboard: React.FC = () => {
     setTimeout(() => setNotice(null), 4000);
   };
 
-  const toQualifyCount = reports.filter(r => r.status === 'A_QUALIFIER' || r.status === 'NOUVEAU').length;
+  const filteredReports = reports.filter(r => {
+    const matchesSearch = r.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          r.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          r.district.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'ALL' || r.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <div className="space-y-6">
       {/* Header Agent Mairie (Figma: WEB_AGT_01_INBOX) */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-extrabold text-white font-heading">Boîte de Réception & Modération</h1>
-            <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              Agent Mairie
-            </span>
-          </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Qualifiez les signalements citoyens entrants, validez les prédictions de l'IA Vision et dispatchez les brigades de terrain.
+          <h1 className="text-[26px] font-bold text-[#0f172a] font-heading tracking-tight">
+            Boîte de réception
+          </h1>
+          <p className="text-[13px] text-[#475569] mt-0.5">
+            Qualifiez les signalements et coordonnez les interventions sur votre territoire.
           </p>
         </div>
 
-        <Link
-          to="/agent/qualification"
-          className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-600/30 text-xs transition"
-        >
-          <ShieldCheck className="w-4 h-4" />
-          <span>Ouvrir l'Atelier de Qualification (ECO-31)</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/supervision"
+            className="inline-flex items-center gap-2 bg-white border border-[#1e3a8a] text-[#1e3a8a] hover:bg-[#eff6ff] font-semibold px-4 h-[44px] rounded-[8px] text-[13px] transition shadow-sm"
+          >
+            <MapPin className="w-4 h-4" />
+            <span>Voir la carte</span>
+          </Link>
+          <Link
+            to="/agent/qualification"
+            className="inline-flex items-center gap-2 bg-[#059669] hover:bg-[#047857] text-white font-semibold px-4 h-[44px] rounded-[8px] text-[13px] transition shadow-sm shadow-emerald-600/20"
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span>Atelier de Qualification</span>
+          </Link>
+        </div>
       </div>
 
       {notice && (
-        <div className="bg-emerald-950/70 border border-emerald-500/40 p-4 rounded-xl flex items-center justify-between text-xs text-emerald-200">
+        <div className="bg-[#ecfdf5] border border-[#a7f3d0] p-4 rounded-[8px] flex items-center justify-between text-xs text-[#065f46]">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>{notice}</span>
+            <CheckCircle2 className="w-4 h-4 text-[#059669]" />
+            <span className="font-medium">{notice}</span>
           </div>
-          <button onClick={() => setNotice(null)} className="text-emerald-400 hover:text-white">✕</button>
+          <button onClick={() => setNotice(null)} className="text-[#059669] hover:text-[#064e3b] font-bold">✕</button>
         </div>
       )}
 
-      {/* KPIs Agent */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>À Qualifier</span>
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
-          </div>
-          <div className="text-2xl font-bold text-white mt-2">{toQualifyCount}</div>
-          <p className="text-[10px] text-amber-400 mt-1">En attente d'arbitrage</p>
+      {/* Bannière de notification Figma (WEB_AGT_01_INBOX) */}
+      <div className="bg-[#eff6ff] border border-[#bfdbfe] p-3 rounded-[8px] flex items-center gap-3 text-[12px] text-[#1e3a8a]">
+        <Info className="w-4 h-4 text-[#2563eb] shrink-0" />
+        <p className="leading-snug">
+          <strong>Nouveau signalement reçu à l'instant</strong> · Dépôt sauvage détecté par l'IA Vision avec 94% de confiance. Prêt pour qualification par l'agent municipal.
+        </p>
+      </div>
+
+      {/* Barre de Filtres Figma */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 text-[#94a3b8] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Rechercher par référence, adresse ou mot-clé..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="w-full bg-white border border-[#e2e8f0] rounded-[8px] pl-10 pr-4 h-[44px] text-[13px] text-[#0f172a] focus:outline-none focus:border-[#059669] transition"
+          />
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Score F1 IA Vision</span>
-            <Sparkles className="w-4 h-4 text-purple-400" />
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Filter className="w-3.5 h-3.5 text-[#94a3b8] absolute left-3 top-1/2 -translate-y-1/2" />
+            <select
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              className="bg-white border border-[#e2e8f0] rounded-[8px] pl-8 pr-8 h-[44px] text-[13px] text-[#0f172a] focus:outline-none focus:border-[#059669] transition appearance-none cursor-pointer"
+            >
+              <option value="ALL">Tous les statuts</option>
+              <option value="NOUVEAU">Nouveau (À qualifier)</option>
+              <option value="A_QUALIFIER">À vérifier</option>
+              <option value="EN_TRAITEMENT">En intervention</option>
+              <option value="RESOLU">Résolu</option>
+              <option value="REJETE">Rejeté</option>
+            </select>
           </div>
-          <div className="text-2xl font-bold text-white mt-2">{(stats.aiF1Score * 100).toFixed(1)}%</div>
-          <p className="text-[10px] text-purple-400 mt-1">MobileNetV3 Inférence 38 ms</p>
-        </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>En Intervention</span>
-            <Clock className="w-4 h-4 text-blue-400" />
-          </div>
-          <div className="text-2xl font-bold text-white mt-2">{stats.inProgress}</div>
-          <p className="text-[10px] text-blue-400 mt-1">Ouvriers mobilisés</p>
-        </div>
-
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Taux de Résolution</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          </div>
-          <div className="text-2xl font-bold text-white mt-2">{(stats.resolutionRate * 100).toFixed(1)}%</div>
-          <p className="text-[10px] text-emerald-400 mt-1">SLA respecté &lt; 48h</p>
+          <button
+            onClick={() => { setSearchTerm(''); setStatusFilter('ALL'); }}
+            className="h-[44px] px-4 rounded-[8px] text-[13px] font-semibold text-[#1e3a8a] hover:bg-[#eff6ff] transition"
+          >
+            Réinitialiser
+          </button>
         </div>
       </div>
 
-      {/* Tableau Inbox des Signalements (Figma: WEB_AGT_01_INBOX) */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Inbox className="w-4 h-4 text-emerald-400" />
-            <h2 className="text-sm font-bold text-white">File d'arbitrage & anomalies urbaines</h2>
-          </div>
-          <Link to="/supervision" className="text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1">
-            <MapPin className="w-3.5 h-3.5" />
-            <span>Voir sur la carte GIS</span>
-          </Link>
-        </div>
-
+      {/* Table de données officielle Figma (WEB_AGT_01_INBOX) */}
+      <div className="bg-white border border-[#e2e8f0] rounded-[12px] shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950/70 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
-              <tr>
-                <th className="py-3 px-4">Référence</th>
-                <th className="py-3 px-4">Photo & Description</th>
-                <th className="py-3 px-4">Prédiction IA</th>
-                <th className="py-3 px-4">Quartier</th>
-                <th className="py-3 px-4">Statut</th>
-                <th className="py-3 px-4 text-right">Actions Modérateur</th>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-[#f8fafc] text-[#475569] text-[11px] font-semibold uppercase tracking-wider border-b border-[#e2e8f0] h-[44px]">
+                <th className="py-2.5 px-4">Signalement</th>
+                <th className="py-2.5 px-4">Catégorie</th>
+                <th className="py-2.5 px-4">Localisation</th>
+                <th className="py-2.5 px-4">Statut</th>
+                <th className="py-2.5 px-4">Brigade & Ouvrier</th>
+                <th className="py-2.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 font-sans">
-              {reports.map((r) => (
-                <tr key={r.id} className="hover:bg-slate-850/40 transition">
-                  <td className="py-3.5 px-4 font-bold text-white font-mono">{r.reference}</td>
-                  <td className="py-3.5 px-4">
+            <tbody className="divide-y divide-[#e2e8f0] text-[12px]">
+              {filteredReports.map((incident) => (
+                <tr key={incident.id} className="hover:bg-[#f8fafc] transition-colors h-[64px]">
+                  <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
-                      <img src={r.imageUrl} alt={r.title} className="w-10 h-10 rounded-lg object-cover border border-slate-800 shrink-0" />
-                      <div className="truncate max-w-xs">
-                        <p className="font-semibold text-slate-200 truncate">{r.title}</p>
-                        <p className="text-[10px] text-slate-500">{r.timeAgo}</p>
+                      <img
+                        src={incident.imageUrl}
+                        alt="Photo anomalie"
+                        className="w-10 h-10 rounded-[6px] object-cover border border-[#e2e8f0] shrink-0"
+                      />
+                      <div>
+                        <div className="font-semibold text-[#1e3a8a] flex items-center gap-1.5">
+                          <span>{incident.reference}</span>
+                          <span className="text-[10px] text-[#64748b] font-normal">({incident.timeAgo})</span>
+                        </div>
+                        <div className="text-[#475569] text-[11px] truncate max-w-xs">{incident.title}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="py-3.5 px-4">
-                    <span className="inline-flex items-center gap-1 font-mono text-[11px] text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">
-                      {r.category} ({(r.confidence * 100).toFixed(0)}%)
+                  <td className="py-3 px-4 font-medium text-[#0f172a]">
+                    <span className="inline-flex items-center gap-1 font-mono text-[11px] text-[#4338ca] bg-[#eef2ff] px-2 py-0.5 rounded border border-[#c7d2fe]">
+                      {incident.category} ({(incident.confidence * 100).toFixed(0)}%)
                     </span>
                   </td>
-                  <td className="py-3.5 px-4 font-semibold text-slate-300">{r.district}</td>
-                  <td className="py-3.5 px-4">
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                      r.status === 'RESOLU' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
-                      r.status === 'EN_TRAITEMENT' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
-                      r.status === 'REJETE' ? 'bg-rose-500/10 text-rose-400 border-rose-500/30' :
-                      'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                    }`}>
-                      {r.status}
+                  <td className="py-3 px-4 text-[#475569]">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5 text-[#059669]" />
+                      <span>{incident.district}</span>
                     </span>
                   </td>
-                  <td className="py-3.5 px-4 text-right">
+                  <td className="py-3 px-4">
+                    {incident.status === 'RESOLU' && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[6px] text-[11px] font-semibold bg-white text-[#047857] border border-[#059669]">
+                        <CheckCircle2 className="w-3 h-3 text-[#059669]" /> Résolu
+                      </span>
+                    )}
+                    {incident.status === 'EN_TRAITEMENT' && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[6px] text-[11px] font-semibold bg-white text-[#b45309] border border-[#d97706]">
+                        <Clock className="w-3 h-3 text-[#d97706]" /> En intervention
+                      </span>
+                    )}
+                    {(incident.status === 'A_QUALIFIER' || incident.status === 'NOUVEAU') && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[6px] text-[11px] font-semibold bg-white text-[#1e3a8a] border border-[#1e3a8a]">
+                        <Sparkles className="w-3 h-3 text-[#1e3a8a]" /> À qualifier
+                      </span>
+                    )}
+                    {incident.status === 'REJETE' && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[6px] text-[11px] font-semibold bg-white text-[#dc2626] border border-[#dc2626]">
+                        <XCircle className="w-3 h-3 text-[#dc2626]" /> Rejeté
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-3 px-4">
+                    {incident.worker ? (
+                      <span className="text-[#0f172a] font-medium">{incident.worker}</span>
+                    ) : (
+                      <span className="text-[#94a3b8] italic">Non assigné</span>
+                    )}
+                  </td>
+                  <td className="py-3 px-4 text-right">
                     <div className="flex items-center justify-end gap-1.5">
                       <Link
                         to="/agent/qualification"
-                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition"
-                        title="Qualifier en split-screen"
+                        className="p-2 rounded-[6px] bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#334155] transition"
+                        title="Ouvrir dans l'Atelier de Qualification"
                       >
                         <Eye className="w-3.5 h-3.5" />
                       </Link>
-                      {r.status !== 'RESOLU' && r.status !== 'REJETE' && (
-                        <>
-                          <button
-                            onClick={() => setAssignTarget(r)}
-                            className="p-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 transition"
-                            title="Assigner brigade"
-                          >
-                            <UserCheck className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => setRejectTarget(r)}
-                            className="p-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 transition"
-                            title="Rejeter"
-                          >
-                            <XCircle className="w-3.5 h-3.5" />
-                          </button>
-                        </>
-                      )}
+                      <button
+                        onClick={() => setAssignTarget(incident)}
+                        className="bg-[#059669] hover:bg-[#047857] text-white font-semibold text-[11px] px-2.5 py-1.5 rounded-[6px] transition flex items-center gap-1"
+                      >
+                        <UserCheck className="w-3 h-3" />
+                        <span>Assigner</span>
+                      </button>
+                      <button
+                        onClick={() => setRejectTarget(incident)}
+                        className="bg-white border border-[#dc2626] text-[#dc2626] hover:bg-rose-50 font-semibold text-[11px] px-2.5 py-1.5 rounded-[6px] transition"
+                      >
+                        Rejeter
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -229,110 +266,122 @@ export const AgentMairieDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal d'Assignation (Figma: WEB_AGT_MODAL_ASSIGN) */}
+      {/* ================= MODALE ASSIGNATION FIGMA (WEB_AGT_MODAL_ASSIGN) ================= */}
       {assignTarget && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <UserCheck className="w-5 h-5 text-blue-400" />
-              <span>Assignation de Brigade Terrain (T2)</span>
-            </h3>
-            <p className="text-xs text-slate-400">
-              Affectez une équipe opérationnelle pour traiter le signalement <strong>{assignTarget.reference}</strong> ({assignTarget.district}).
-            </p>
-
-            <div className="space-y-3 text-xs">
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Brigade Municipale</label>
-                <select
-                  value={selectedBrigade}
-                  onChange={e => setSelectedBrigade(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500"
-                >
-                  <option value="Brigade Voirie Centre-Ville">Brigade Voirie Centre-Ville (Tunis)</option>
-                  <option value="Brigade Salubrité El Menzah">Brigade Salubrité El Menzah</option>
-                  <option value="Équipe Intervention Rapide Ariana">Équipe Intervention Rapide Ariana</option>
-                  <option value="Brigade Espaces Publics La Marsa">Brigade Espaces Publics La Marsa</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Chef d'Équipe / Ouvrier Référent</label>
-                <select
-                  value={selectedWorker}
-                  onChange={e => setSelectedWorker(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500"
-                >
-                  <option value="Karim Ben Salem">Karim Ben Salem (Chef Ouvrier Voirie)</option>
-                  <option value="Tarek Jouini">Tarek Jouini (Opérateur Poids Lourd)</option>
-                  <option value="Youssef Trabelsi">Youssef Trabelsi (Agent Salubrité)</option>
-                  <option value="Mehdi Gharbi">Mehdi Gharbi (Chef Équipe Voirie)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Priorité de Résolution</label>
-                <select
-                  value={priority}
-                  onChange={e => setPriority(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500"
-                >
-                  <option value="URGENTE">🚨 Urgente (SLA &lt; 12h)</option>
-                  <option value="HAUTE">⚡ Haute (SLA &lt; 24h)</option>
-                  <option value="NORMALE">Standard (SLA &lt; 48h)</option>
-                </select>
-              </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white border border-[#e2e8f0] rounded-[12px] p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-3">
+              <h3 className="text-base font-bold text-[#0f172a]">Assignation de Brigade Terrain</h3>
+              <button onClick={() => setAssignTarget(null)} className="text-[#94a3b8] hover:text-[#0f172a]">✕</button>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button onClick={() => setAssignTarget(null)} className="px-4 py-2 rounded-xl text-slate-400 hover:text-white text-xs">Annuler</button>
-              <button
-                onClick={handleConfirmAssign}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-lg shadow-blue-600/30 transition"
+            <div className="p-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-[8px] text-xs space-y-1">
+              <p><strong>Référence :</strong> {assignTarget.reference}</p>
+              <p><strong>Type d'anomalie :</strong> {assignTarget.category}</p>
+              <p><strong>Localisation :</strong> {assignTarget.district}</p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#0f172a] mb-1">Brigade Municipale Dédiée</label>
+              <select
+                value={selectedBrigade}
+                onChange={e => setSelectedBrigade(e.target.value)}
+                className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
               >
-                Confirmer l'Assignation
+                <option value="Brigade Voirie Centre-Ville">Brigade Voirie Centre-Ville</option>
+                <option value="Brigade Salubrité & Déchets">Brigade Salubrité & Déchets</option>
+                <option value="Brigade Éclairage & Réseaux">Brigade Éclairage & Réseaux</option>
+                <option value="Équipe Intervention Rapide">Équipe Intervention Rapide</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#0f172a] mb-1">Chef Ouvrier Responsable</label>
+              <select
+                value={selectedWorker}
+                onChange={e => setSelectedWorker(e.target.value)}
+                className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
+              >
+                <option value="Karim Ben Salem">Karim Ben Salem (Chef Brigade Voirie)</option>
+                <option value="Tarek Jouini">Tarek Jouini (Chef Salubrité)</option>
+                <option value="Youssef Trabelsi">Youssef Trabelsi (Équipe Mobile)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#0f172a] mb-1">Niveau de Priorité</label>
+              <select
+                value={priority}
+                onChange={e => setPriority(e.target.value)}
+                className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
+              >
+                <option value="HAUTE">Haute (Intervention &lt; 24h)</option>
+                <option value="MOYENNE">Moyenne (Intervention &lt; 48h)</option>
+                <option value="URGENTE">Urgente (Immédiate &lt; 6h)</option>
+              </select>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#e2e8f0]">
+              <button
+                type="button"
+                onClick={() => setAssignTarget(null)}
+                className="px-4 py-2 rounded-[8px] text-xs font-semibold text-[#475569] hover:bg-[#f1f5f9]"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmAssign}
+                className="px-4 py-2 rounded-[8px] text-xs font-semibold bg-[#059669] hover:bg-[#047857] text-white shadow-sm"
+              >
+                Confirmer l'Affectation
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal de Rejet (Figma: WEB_AGT_MODAL_REJECT) */}
+      {/* ================= MODALE REJET FIGMA (WEB_AGT_MODAL_REJECT) ================= */}
       {rejectTarget && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-            <h3 className="text-base font-bold text-rose-400 flex items-center gap-2">
-              <XCircle className="w-5 h-5 text-rose-500" />
-              <span>Rejet Motivé du Signalement (T5)</span>
-            </h3>
-            <p className="text-xs text-slate-400">
-              Conformément à la procédure CDCF V2, un motif documenté est obligatoire pour rejeter <strong>{rejectTarget.reference}</strong>.
-            </p>
-
-            <div className="space-y-3 text-xs">
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Motif réglementaire</label>
-                <select
-                  value={rejectReason}
-                  onChange={e => setRejectReason(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-rose-500"
-                >
-                  <option value="Photo inexploitable / floue">Photo inexploitable / floue</option>
-                  <option value="Hors périmètre municipal">Hors périmètre municipal</option>
-                  <option value="Doublon déjà pris en charge">Doublon déjà pris en charge par la brigade</option>
-                  <option value="Signalement abusif / Non écologique">Signalement abusif / Non écologique</option>
-                  <option value="Propriété privée non accessible">Propriété privée non accessible</option>
-                </select>
-              </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white border border-[#e2e8f0] rounded-[12px] p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-3">
+              <h3 className="text-base font-bold text-[#dc2626]">Rejet Motivé du Signalement</h3>
+              <button onClick={() => setRejectTarget(null)} className="text-[#94a3b8] hover:text-[#0f172a]">✕</button>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button onClick={() => setRejectTarget(null)} className="px-4 py-2 rounded-xl text-slate-400 hover:text-white text-xs">Annuler</button>
-              <button
-                onClick={handleConfirmReject}
-                className="bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-lg shadow-rose-600/30 transition"
+            <p className="text-xs text-[#475569]">
+              Indiquez le motif officiel du rejet pour informer le citoyen et clore le dossier :
+            </p>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#0f172a] mb-1">Motif de Rejet</label>
+              <select
+                value={rejectReason}
+                onChange={e => setRejectReason(e.target.value)}
+                className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
               >
-                Confirmer le Rejet Définitif
+                <option value="Photo inexploitable ou floue">Photo inexploitable ou floue</option>
+                <option value="Domaine privé / Hors compétence municipale">Domaine privé / Hors compétence municipale</option>
+                <option value="Doublon / Déjà pris en charge">Doublon / Déjà pris en charge</option>
+                <option value="Signalement infondé / Aucune anomalie constatée">Signalement infondé / Aucune anomalie constatée</option>
+              </select>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#e2e8f0]">
+              <button
+                type="button"
+                onClick={() => setRejectTarget(null)}
+                className="px-4 py-2 rounded-[8px] text-xs font-semibold text-[#475569] hover:bg-[#f1f5f9]"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmReject}
+                className="px-4 py-2 rounded-[8px] text-xs font-semibold bg-[#dc2626] hover:bg-[#b91c1c] text-white shadow-sm"
+              >
+                Confirmer le Rejet
               </button>
             </div>
           </div>
