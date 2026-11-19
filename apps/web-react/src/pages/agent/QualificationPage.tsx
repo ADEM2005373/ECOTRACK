@@ -227,6 +227,26 @@ export const QualificationPage: React.FC = () => {
 
     console.info('[ECO-31] Validation T1 transmise:', payload);
 
+    try {
+      const token = localStorage.getItem('ecotrack_access_token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      fetch('/api/v1/interventions/transition', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          reportId: report.id,
+          transition: 'T1',
+          actorRole: 'AGENT_MAIRIE',
+          categoryValidated: isOverridden ? selectedCategory : aiSuggestion.categoryCode,
+          reviewValidated: true
+        })
+      }).catch(() => {});
+    } catch {
+      // ignore
+    }
+
     setQueue((prevQueue) =>
       prevQueue.map((item, idx) =>
         idx === currentIndex
@@ -260,6 +280,25 @@ export const QualificationPage: React.FC = () => {
     };
 
     console.info('[ECO-31] Rejet T5 transmis:', payload);
+
+    try {
+      const token = localStorage.getItem('ecotrack_access_token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      fetch('/api/v1/interventions/transition', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          reportId: report.id,
+          transition: 'T5',
+          actorRole: 'AGENT_MAIRIE',
+          reason: customRejectNote ? `${rejectReason} — Note: ${customRejectNote}` : rejectReason
+        })
+      }).catch(() => {});
+    } catch {
+      // ignore
+    }
 
     setQueue((prevQueue) =>
       prevQueue.map((item, idx) =>
