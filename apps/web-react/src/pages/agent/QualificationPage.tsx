@@ -15,7 +15,10 @@ import {
   ShieldCheck,
   CheckCircle2,
   UserCheck,
-  Send
+  Send,
+  Inbox,
+  Layers,
+  RefreshCw
 } from 'lucide-react';
 import { AnomalyCard, AnomalyReportData } from '../../components/moderation/AnomalyCard';
 import { FigmaSidebar } from '../../components/layout/FigmaSidebar';
@@ -190,8 +193,9 @@ export const QualificationPage: React.FC = () => {
   // Notification Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const currentItem = queue[currentIndex] || queue[0] || INITIAL_QUEUE[0];
-  const { report, aiSuggestion } = currentItem;
+  const currentItem = queue[currentIndex] || queue[0];
+  const report = currentItem?.report;
+  const aiSuggestion = currentItem?.aiSuggestion;
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -214,8 +218,21 @@ export const QualificationPage: React.FC = () => {
           ? raw.data
           : [];
 
+        // Ne retenir pour la file de modération QUE les signalements non encore qualifiés/affectés
+        const pendingList = list.filter((r: any) => {
+          const s = (r.status || 'NOUVEAU').toUpperCase();
+          return s === 'NOUVEAU' || s === 'A_TRAITER' || s === 'SIGNALÉ' || s === 'PENDING';
+        });
+
         if (list.length > 0) {
-          const liveQueue: QueueItem[] = list.map((r: any, idx: number) => {
+          if (pendingList.length === 0) {
+            // Tous les signalements en base sont déjà qualifiés -> Espace vide !
+            setQueue([]);
+            setCurrentIndex(0);
+            return;
+          }
+
+          const liveQueue: QueueItem[] = pendingList.map((r: any, idx: number) => {
             const rawCat = r.categoryValidated || r.category || 'DEPOT_SAUVAGE';
             const catLabel = CATEGORY_OPTIONS.find(c => c.value === rawCat)?.label || rawCat;
             const conf = typeof r.aiConfidenceScore === 'number'
@@ -323,22 +340,27 @@ export const QualificationPage: React.FC = () => {
     }
   };
 
-  const confidenceBadge = getConfidenceBadge(aiSuggestion.confidenceScore);
+  const confidenceBadge = getConfidenceBadge(aiSuggestion?.confidenceScore ?? 92);
 
   const activeCategory = isOverridden
     ? CATEGORY_OPTIONS.find((c) => c.value === selectedCategory)?.label || selectedCategory
-    : aiSuggestion.categoryLabel;
+    : (aiSuggestion?.categoryLabel || 'Dépôt sauvage');
 
   const activeSeverity = isOverridden
     ? SEVERITY_OPTIONS.find((s) => s.value === selectedSeverity)?.label || selectedSeverity
-    : aiSuggestion.severity;
+    : (aiSuggestion?.severity || 'Élevée');
 
   // Décision 1 : Valider la suggestion IA (T1)
   const handleValidate = async () => {
+    if (!report || !aiSuggestion) return;
+    const code = isOverridden ? selectedCategory : aiSuggestion.categoryCode;
+    const autoBrigade = CATEGORY_BRIGADE_ROUTING[code] || 'Brigade Voirie & Salubrité';
+    setTargetBrigade(autoBrigade);
+
     const payload = {
       reportId: report.id,
       action: 'VALIDATE',
-      confirmedCategory: isOverridden ? selectedCategory : aiSuggestion.categoryCode,
+      confirmedCategory: code,
       aiOverridden: isOverridden,
       agentId: authState.user?.id || '672f08a0b9e1a2001c45a001',
     };
@@ -358,7 +380,7 @@ export const QualificationPage: React.FC = () => {
           transition: 'T1',
           actorRole: authState.user?.role || 'AGENT_MAIRIE',
           actorId: authState.user?.email || authState.user?.id,
-          categoryValidated: isOverridden ? selectedCategory : aiSuggestion.categoryCode,
+          categoryValidated: code,
           reviewValidated: true
         })
       }).catch(() => {});
@@ -377,12 +399,7 @@ export const QualificationPage: React.FC = () => {
       )
     );
 
-    // Préparation de l'affectation automatique
-    const code = isOverridden ? selectedCategory : aiSuggestion.categoryCode;
-    const autoBrigade = CATEGORY_BRIGADE_ROUTING[code] || 'Brigade Voirie & Salubrité';
-    setTargetBrigade(autoBrigade);
-
-    showToast(`Signalement ${report.reference} validé avec succès (T1) !`);
+    showToast(`Signalement ${report.reference} validé ! Prêt pour le dispatching vers ${autoBrigade}.`);
   };
 
   // Décision 2 : Confirmer la correction manuelle de la catégorie
@@ -394,6 +411,7 @@ export const QualificationPage: React.FC = () => {
 
   // Décision 3 : Rejeter le signalement (T5)
   const handleConfirmReject = async () => {
+    if (!report) return;
     const payload = {
       reportId: report.id,
       action: 'REJECT',
@@ -442,7 +460,7 @@ export const QualificationPage: React.FC = () => {
 
   // Décision 4 : Ouvrir la modale d'affectation à une brigade
   const handleOpenAssignModal = () => {
-    const code = isOverridden ? selectedCategory : aiSuggestion.categoryCode;
+    const code = isOverridden ? selectedCategory : (aiSuggestion?.categoryCode || 'DEPOT_SAUVAGE');
     setTargetBrigade(CATEGORY_BRIGADE_ROUTING[code] || 'Brigade Voirie & Salubrité');
     if (communalStaff.length > 0 && !targetWorker) {
       setTargetWorker(communalStaff[0].fullName);
@@ -452,8 +470,10 @@ export const QualificationPage: React.FC = () => {
     setIsAssignModalOpen(true);
   };
 
-  // Décision 5 : Confirmer l'affectation à la brigade (T2)
+  // Décision 5 : Confirmer l'affectation à la brigade (T2) et retirer de la file
   const handleConfirmAssign = async () => {
+    if (!report) return;
+    const catCode = isOverridden ? selectedCategory : (aiSuggestion?.categoryCode || 'DEPOT_SAUVAGE');
     try {
       const token = authState.accessToken || localStorage.getItem('ecotrack_access_token');
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -471,24 +491,21 @@ export const QualificationPage: React.FC = () => {
           assigneeId: targetWorker || 'Chef de Brigade',
           priority: targetPriority,
           reviewValidated: true,
-          categoryValidated: isOverridden ? selectedCategory : aiSuggestion.categoryCode
+          categoryValidated: catCode
         })
       });
 
-      setQueue((prevQueue) =>
-        prevQueue.map((item, idx) =>
-          idx === currentIndex
-            ? {
-                ...item,
-                report: { ...item.report, status: 'ASSIGNE' },
-              }
-            : item
-        )
-      );
+      // Retirer le signalement traité de la file d'attente
+      setQueue((prevQueue) => prevQueue.filter((_, idx) => idx !== currentIndex));
+      setCurrentIndex((prevIndex) => Math.max(0, Math.min(prevIndex, queue.length - 2)));
+      setIsOverridden(false);
+      setZoomScale(100);
 
       setIsAssignModalOpen(false);
-      showToast(`Signalement ${report.reference} dispatché avec succès à ${targetBrigade} (${targetWorker}) !`);
+      showToast(`Signalement ${report.reference} affecté à ${targetBrigade} avec succès !`);
     } catch {
+      setQueue((prevQueue) => prevQueue.filter((_, idx) => idx !== currentIndex));
+      setCurrentIndex((prevIndex) => Math.max(0, Math.min(prevIndex, queue.length - 2)));
       setIsAssignModalOpen(false);
       showToast(`Signalement ${report.reference} dispatché à ${targetBrigade}`);
     }
@@ -511,8 +528,8 @@ export const QualificationPage: React.FC = () => {
     }
   };
 
-  const isCurrentValidated = report.status === 'VALIDE' || report.status === 'ASSIGNE';
-  const isCurrentRejected = report.status === 'REJETE';
+  const isCurrentValidated = report?.status === 'VALIDE' || report?.status === 'ASSIGNE';
+  const isCurrentRejected = report?.status === 'REJETE';
 
   const todayFormatted = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long',
@@ -558,65 +575,9 @@ export const QualificationPage: React.FC = () => {
           </div>
         </header>
 
-        {/* Sub-header: Titre, Navigateur de File & Badge Statut */}
-        <div className="px-4 sm:px-8 py-3.5 bg-white border-b border-[#e2e8f0] flex flex-wrap items-center justify-between gap-3 shrink-0">
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg sm:text-xl font-extrabold text-[#0f172a] font-heading tracking-tight">
-                Qualification du signalement
-              </h1>
-              {/* Badge Statut */}
-              {isCurrentValidated ? (
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-[#059669] border border-emerald-200 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  Validé
-                </span>
-              ) : isCurrentRejected ? (
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-600 border border-rose-200 flex items-center gap-1">
-                  <XCircle className="w-3.5 h-3.5" />
-                  Rejeté
-                </span>
-              ) : (
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-600 border border-blue-200 flex items-center gap-1">
-                  <Hourglass className="w-3.5 h-3.5" />
-                  À traiter
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-[#64748b] mt-0.5">
-              Boîte de réception / <span className="font-mono font-medium text-[#1e3a8a]">{report.reference}</span> · Reçu le {report.receivedAt}
-            </p>
-          </div>
-
-          {/* Queue Navigation & Actualisation */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-[#64748b] mr-1">
-              File : <strong>{currentIndex + 1}</strong> sur <strong>{queue.length}</strong>
-            </span>
-            <button
-              type="button"
-              onClick={handlePrevious}
-              disabled={currentIndex === 0}
-              className="p-1.5 rounded-lg border border-[#e2e8f0] hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
-              title="Signalement précédent"
-            >
-              <ArrowLeft className="w-4 h-4 text-[#475569]" />
-            </button>
-            <button
-              type="button"
-              onClick={handleNext}
-              disabled={currentIndex === queue.length - 1}
-              className="p-1.5 rounded-lg border border-[#e2e8f0] hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
-              title="Signalement suivant"
-            >
-              <ArrowRight className="w-4 h-4 text-[#475569]" />
-            </button>
-          </div>
-        </div>
-
         {/* Toast Alert */}
         {toastMessage && (
-          <div className="mx-4 sm:mx-8 mt-3 p-3 bg-[#059669] text-white rounded-lg shadow-lg text-xs font-medium flex items-center justify-between transition-all duration-300">
+          <div className="mx-4 sm:mx-8 mt-3 p-3 bg-[#059669] text-white rounded-lg shadow-lg text-xs font-medium flex items-center justify-between transition-all duration-300 z-50">
             <div className="flex items-center gap-2">
               <Check className="w-4 h-4 shrink-0" />
               <span>{toastMessage}</span>
@@ -627,8 +588,150 @@ export const QualificationPage: React.FC = () => {
           </div>
         )}
 
-        {/* ── WORKSPACE SPLIT-SCREEN EN 2 COLONNES (FIGMA) ────────────────────────── */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-[#f8fafc]">
+        {queue.length === 0 || !report || !aiSuggestion ? (
+          /* ── ESPACE VIDE : TOUTES LES DÉTECTIONS SONT QUALIFIÉES (Exigence : Espace revient vide) ── */
+          <div className="flex-1 overflow-y-auto p-6 sm:p-12 flex items-center justify-center bg-[#f8fafc]">
+            <div className="max-w-xl w-full bg-white border border-[#e2e8f0] rounded-2xl p-8 sm:p-10 text-center shadow-sm">
+              <div className="size-16 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto mb-5 text-[#059669]">
+                <ShieldCheck className="size-8" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#0f172a] font-heading">
+                Atelier de Qualification à jour
+              </h2>
+              <p className="text-sm text-[#475569] mt-2.5 leading-relaxed">
+                Toutes les anomalies signalées par les citoyens ont été qualifiées et affectées aux brigades de <strong>{municipality}</strong>.
+              </p>
+              <div className="mt-6 p-4 rounded-xl bg-[#f8fafc] border border-[#e2e8f0] flex items-center justify-around text-center text-xs">
+                <div>
+                  <span className="block text-2xl font-black text-[#059669] font-mono">0</span>
+                  <span className="text-[#64748b]">En attente</span>
+                </div>
+                <div className="w-px h-8 bg-[#e2e8f0]" />
+                <div>
+                  <span className="block text-2xl font-black text-[#0f172a] font-mono">100%</span>
+                  <span className="text-[#64748b]">Conformité SLA</span>
+                </div>
+                <div className="w-px h-8 bg-[#e2e8f0]" />
+                <div>
+                  <span className="block text-2xl font-black text-[#0f172a] font-mono">Actif</span>
+                  <span className="text-[#64748b]">Brigades alertées</span>
+                </div>
+              </div>
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <Link
+                  to="/"
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-semibold shadow-sm transition flex items-center justify-center gap-2"
+                >
+                  <Inbox className="size-4" />
+                  <span>Consulter la Boîte de réception</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void fetchLiveReports();
+                    showToast('Actualisation des signalements...');
+                  }}
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-[#cbd5e1] hover:bg-slate-50 text-[#0f172a] text-xs font-semibold transition flex items-center justify-center gap-2"
+                >
+                  <RefreshCw className="size-4 text-[#64748b]" />
+                  <span>Actualiser la file</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Sub-header: Titre, Navigateur de File & Badge Statut */}
+            <div className="px-4 sm:px-8 py-3.5 bg-white border-b border-[#e2e8f0] flex flex-wrap items-center justify-between gap-3 shrink-0">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-lg sm:text-xl font-extrabold text-[#0f172a] font-heading tracking-tight">
+                    Qualification du signalement
+                  </h1>
+                  {/* Badge Statut */}
+                  {isCurrentValidated ? (
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-[#059669] border border-emerald-200 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Validé
+                    </span>
+                  ) : isCurrentRejected ? (
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-600 border border-rose-200 flex items-center gap-1">
+                      <XCircle className="w-3.5 h-3.5" />
+                      Rejeté
+                    </span>
+                  ) : (
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-600 border border-blue-200 flex items-center gap-1">
+                      <Hourglass className="w-3.5 h-3.5" />
+                      À traiter
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-[#64748b] mt-0.5">
+                  Boîte de réception / <span className="font-mono font-medium text-[#1e3a8a]">{report.reference}</span> · Reçu le {report.receivedAt}
+                </p>
+              </div>
+
+              {/* Queue Navigation & Actualisation */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-[#64748b] mr-1">
+                  File : <strong>{currentIndex + 1}</strong> sur <strong>{queue.length}</strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={handlePrevious}
+                  disabled={currentIndex === 0}
+                  className="p-1.5 rounded-lg border border-[#e2e8f0] hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                  title="Signalement précédent"
+                >
+                  <ArrowLeft className="w-4 h-4 text-[#475569]" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={currentIndex === queue.length - 1}
+                  className="p-1.5 rounded-lg border border-[#e2e8f0] hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                  title="Signalement suivant"
+                >
+                  <ArrowRight className="w-4 h-4 text-[#475569]" />
+                </button>
+              </div>
+            </div>
+
+            {/* Strip des autres détections en attente (Exigence : Lister les autres détections) */}
+            {queue.length > 1 && (
+              <div className="px-4 sm:px-8 py-2 bg-[#f1f5f9] border-b border-[#e2e8f0] flex items-center gap-2 overflow-x-auto text-xs shrink-0">
+                <span className="text-[11px] font-semibold text-[#64748b] uppercase tracking-wider shrink-0 flex items-center gap-1.5">
+                  <Layers className="size-3.5 text-[#059669]" />
+                  Détections en attente ({queue.length}) :
+                </span>
+                <div className="flex items-center gap-2 overflow-x-auto py-0.5">
+                  {queue.map((item, idx) => (
+                    <button
+                      key={item.report.id}
+                      type="button"
+                      onClick={() => {
+                        setCurrentIndex(idx);
+                        setIsOverridden(false);
+                        setZoomScale(100);
+                      }}
+                      className={`px-3 py-1 rounded-lg text-xs font-mono transition flex items-center gap-2 shrink-0 ${
+                        idx === currentIndex
+                          ? 'bg-[#059669] text-white shadow-sm ring-2 ring-emerald-600/30 font-bold'
+                          : 'bg-white border border-[#cbd5e1] text-[#334155] hover:bg-slate-100 font-medium'
+                      }`}
+                    >
+                      <span>{item.report.reference}</span>
+                      <span className={`text-[10px] px-1.5 py-0.2 rounded ${idx === currentIndex ? 'bg-white/20 text-white' : 'bg-slate-100 text-[#64748b]'}`}>
+                        Cat: {item.aiSuggestion.categoryLabel}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── WORKSPACE SPLIT-SCREEN EN 2 COLONNES (FIGMA) ────────────────────────── */}
+            <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-[#f8fafc]">
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* PANNEAU GAUCHE : Preuves & Contexte */}
             <section className="lg:col-span-7 w-full">
@@ -768,39 +871,103 @@ export const QualificationPage: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Bouton Dispatch (Affectation déverrouillée) */}
-                <div className="pt-2 border-t border-[#e2e8f0]">
+                {/* Section Dispatching & Transition suivante */}
+                <div className="pt-2 border-t border-[#e2e8f0] space-y-2.5">
                   {isCurrentValidated ? (
-                    <button
-                      type="button"
-                      onClick={handleOpenAssignModal}
-                      className="w-full flex items-center justify-center gap-2 min-h-[44px] px-4 rounded-lg bg-[#059669] hover:bg-[#047857] text-white font-semibold text-xs shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
-                    >
-                      <UserCheck className="w-4 h-4" />
-                      <span>Affecter à une brigade</span>
-                    </button>
+                    <>
+                      {/* Encart Informatif Auto-Routing */}
+                      <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-[#047857] flex items-center gap-1.5">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" />
+                            Détection validée
+                          </span>
+                          <span className="text-[11px] font-mono text-[#059669] bg-white px-2 py-0.5 rounded border border-emerald-200">
+                            Auto-Routing
+                          </span>
+                        </div>
+                        <p className="text-[#334155] text-xs mt-1">
+                          Brigade recommandée : <strong>{targetBrigade}</strong>
+                        </p>
+                      </div>
+
+                      {/* Bouton Principal : Dispatching Direct & Passage au Suivant ou Vider */}
+                      <button
+                        type="button"
+                        onClick={handleConfirmAssign}
+                        className="w-full flex items-center justify-center gap-2 min-h-[44px] px-4 rounded-lg bg-[#059669] hover:bg-[#047857] text-white font-semibold text-xs shadow-md shadow-emerald-600/20 active:scale-95 transition-all cursor-pointer"
+                      >
+                        <Send className="w-4 h-4" />
+                        <span>
+                          {queue.length > 1
+                            ? `Confirmer le Dispatching & Traiter le suivant (${queue.length - 1} restant${queue.length > 2 ? 's' : ''})`
+                            : 'Confirmer le Dispatching & Terminer (Vider la file)'}
+                        </span>
+                      </button>
+
+                      {/* Bouton Secondaire : Personnaliser l'ouvrier ou la priorité */}
+                      <button
+                        type="button"
+                        onClick={handleOpenAssignModal}
+                        className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-white border border-[#cbd5e1] hover:bg-slate-50 text-[#334155] font-medium text-xs transition"
+                      >
+                        <UserCheck className="w-3.5 h-3.5 text-[#059669]" />
+                        <span>Affecter à une brigade</span>
+                      </button>
+                    </>
+                  ) : isCurrentRejected ? (
+                    <div className="space-y-2">
+                      <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-700">
+                        <span className="font-semibold flex items-center gap-1.5">
+                          <XCircle className="w-4 h-4 text-rose-600" />
+                          Signalement rejeté (T5)
+                        </span>
+                        <p className="text-xs text-rose-600 mt-1">Motif : {rejectReason}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setQueue((prevQueue) => prevQueue.filter((_, idx) => idx !== currentIndex));
+                          setCurrentIndex((prevIndex) => Math.max(0, Math.min(prevIndex, queue.length - 2)));
+                          setIsOverridden(false);
+                          setZoomScale(100);
+                        }}
+                        className="w-full flex items-center justify-center gap-2 min-h-[44px] px-4 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs transition"
+                      >
+                        <ArrowRight className="w-4 h-4" />
+                        <span>
+                          {queue.length > 1
+                            ? `Retirer de la file & Traiter le suivant (${queue.length - 1} restant${queue.length > 2 ? 's' : ''})`
+                            : 'Retirer de la file & Terminer'}
+                        </span>
+                      </button>
+                    </div>
                   ) : (
-                    <button
-                      type="button"
-                      disabled
-                      className="w-full flex items-center justify-center gap-2 min-h-[44px] px-4 rounded-lg bg-slate-100 text-slate-400 font-medium text-xs border border-slate-200 cursor-not-allowed opacity-80"
-                    >
-                      <Lock className="w-4 h-4" />
-                      <span>Valider pour affecter</span>
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        disabled
+                        className="w-full flex items-center justify-center gap-2 min-h-[44px] px-4 rounded-lg bg-slate-100 text-slate-400 font-medium text-xs border border-slate-200 cursor-not-allowed opacity-80"
+                      >
+                        <Lock className="w-4 h-4" />
+                        <span>Valider pour affecter</span>
+                      </button>
+                      <p className="text-[11px] text-[#64748b] text-center mt-2">
+                        L’affectation est déverrouillée dès validation de la catégorie par l’agent.
+                      </p>
+                    </>
                   )}
-                  <p className="text-[11px] text-[#64748b] text-center mt-2">
-                    L’affectation est déverrouillée dès validation de la catégorie par l’agent.
-                  </p>
                 </div>
               </div>
             </section>
           </div>
         </main>
+        </>
+      )}
       </div>
 
       {/* ── MODALE 1 : PLEIN ÉCRAN IMAGE ─────────────────────────────────────── */}
-      {isMaximizeOpen && (
+      {report && isMaximizeOpen && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4">
           <div className="absolute top-4 right-4 flex items-center gap-3">
             <span className="text-white text-xs font-mono">{report.reference}</span>
@@ -821,7 +988,7 @@ export const QualificationPage: React.FC = () => {
       )}
 
       {/* ── MODALE 2 : CORRECTION CATÉGORIE (OVERRIDE) ────────────────────────── */}
-      {isOverrideModalOpen && (
+      {report && isOverrideModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-white border border-[#e2e8f0] rounded-[14px] max-w-md w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-3">
@@ -894,7 +1061,7 @@ export const QualificationPage: React.FC = () => {
       )}
 
       {/* ── MODALE 3 : REJET DU SIGNALEMENT (T5) ─────────────────────────────── */}
-      {isRejectModalOpen && (
+      {report && isRejectModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-white border border-[#e2e8f0] rounded-[14px] max-w-md w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-2 text-[#dc2626] border-b border-[#e2e8f0] pb-3">
@@ -959,7 +1126,7 @@ export const QualificationPage: React.FC = () => {
       )}
 
       {/* ── MODALE 4 : AFFECTATION À UNE BRIGADE TECHNIQUE (T2) ────────────────── */}
-      {isAssignModalOpen && (
+      {report && isAssignModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-white border border-[#e2e8f0] rounded-[14px] max-w-lg w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-3">
