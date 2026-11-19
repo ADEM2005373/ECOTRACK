@@ -70,8 +70,8 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
       case 'ADMIN_MUNICIPALITE':
         return {
           roleLabel: 'Directeur Services Urbains',
-          roleSubtitle: `${user?.municipality || 'Ville de Tunis'} · Direction Générale`,
-          sectionTitle: '06 / ADMINISTRATION'
+          roleSubtitle: 'Direction Générale des Services Urbains',
+          sectionTitle: '06 / ADMINISTRATION MUNICIPALE'
         };
       case 'AGENT_MAIRIE':
       case 'AGENT':
@@ -127,6 +127,7 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
     if (role === 'ADMIN_MUNICIPALITE') {
       return [
         { id: 'overview', label: 'Direction Municipale', icon: <Inbox className="w-4 h-4 text-blue-400" />, path: '/' },
+        { id: 'reports', label: 'Signalements & Suivi', icon: <FileText className="w-4 h-4 text-amber-400" />, path: '/?tab=reports' },
         { id: 'users', label: 'Utilisateurs & Brigades', icon: <Users className="w-4 h-4 text-emerald-400" />, path: '/?tab=users' },
         { id: 'categories', label: 'Catégories & Seuils SLA', icon: <Tags className="w-4 h-4 text-purple-400" />, path: '/?tab=categories' },
         { id: 'powerbi', label: 'Pilotage & Analyses', icon: <BarChart3 className="w-4 h-4 text-indigo-400" />, path: '/admin/analytics' },

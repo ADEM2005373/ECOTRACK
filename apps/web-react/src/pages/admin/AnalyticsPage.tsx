@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../store/authStore';
 import { 
   ShieldCheck, 
   Filter, 
@@ -63,12 +64,30 @@ const DISTRICTS = [
 ];
 
 export function AnalyticsPage() {
+  let user: any = null;
+  let isMaire = false;
+  let municipality = 'Direction Municipale';
+  try {
+    const auth = useAuth();
+    user = auth.state?.user;
+    isMaire = user?.role === 'ADMIN_MUNICIPALITE';
+    municipality = user?.municipality || 'Direction Municipale';
+  } catch {
+    // Graceful fallback for test runners
+  }
+
   const [selectedReportId, setSelectedReportId] = useState<string>('rpt_op_001');
-  const [selectedDistrict, setSelectedDistrict] = useState<string>('Tous Quartiers (Vue Globale)');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>(isMaire ? municipality : 'Tous Quartiers (Vue Globale)');
   const [tokenStatus, setTokenStatus] = useState<'VALID' | 'GENERATING' | 'FAILED'>('VALID');
   const [tokenExpiresIn, setTokenExpiresIn] = useState<number>(3600);
 
   const selectedReport = REPORTS.find((r) => r.id === selectedReportId) || REPORTS[0];
+
+  useEffect(() => {
+    if (isMaire && municipality) {
+      setSelectedDistrict(municipality);
+    }
+  }, [isMaire, municipality]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -92,16 +111,21 @@ export function AnalyticsPage() {
   };
 
   return (
-    <FigmaLayout pageSpace="Pilotage &amp; Décisionnel" pageTitle="Analyses Multi-Collectivités Power BI">
+    <FigmaLayout
+      pageSpace={isMaire ? `${municipality} · Pilotage` : "Pilotage & Décisionnel"}
+      pageTitle={isMaire ? `Tableau de Bord Exécutif - ${municipality}` : "Analyses Multi-Collectivités Power BI"}
+    >
       <div className="space-y-6">
         {/* Header Title */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-[26px] font-bold text-[#0f172a] font-heading tracking-tight">
-              Tableaux de Bord Décisionnels Power BI
+              {isMaire ? `Analyses Décisionnelles (${municipality})` : 'Tableaux de Bord Décisionnels Power BI'}
             </h1>
             <p className="text-[13px] text-[#475569] mt-0.5">
-              Intégration sécurisée Azure AD &amp; Row-Level Security (RLS) multi-collectivités.
+              {isMaire
+                ? `Données opérationnelles et indicateurs de performance isolés pour ${municipality} (Row-Level Security actif).`
+                : 'Intégration sécurisée Azure AD & Row-Level Security (RLS) multi-collectivités.'}
             </p>
           </div>
 
@@ -151,7 +175,7 @@ export function AnalyticsPage() {
               onChange={(e) => setSelectedDistrict(e.target.value)}
               className="bg-white border border-[#e2e8f0] text-xs text-[#0f172a] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#059669] w-full md:w-56"
             >
-              {DISTRICTS.map((d) => (
+              {(isMaire && !DISTRICTS.includes(municipality) ? [municipality, ...DISTRICTS] : DISTRICTS).map((d) => (
                 <option key={d} value={d}>
                   {d}
                 </option>
