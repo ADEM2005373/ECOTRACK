@@ -17,6 +17,7 @@ export class UserService {
       password: dto.password, // Le hook pre-save se charge du hachage Argon2id
       fullName: dto.fullName,
       phoneNumber: dto.phoneNumber,
+      municipality: dto.municipality,
       role: dto.role || UserRole.CITOYEN,
       isActive: true
     });
@@ -41,26 +42,75 @@ export class UserService {
   }
 
   /**
-   * Initialise automatiquement un compte administrateur par défaut en base s'il n'existe pas.
+   * Initialise automatiquement les 5 comptes types selon la matrice RBAC EcoTrack V2 :
+   * 1. Admin SaaS (Global)
+   * 2. Admin Municipalité / Mairie
+   * 3. Agent Mairie (réclamations, alertes, types)
+   * 4. Chef Ouvrier (mobile, dispatch terrain & photo après réparation)
+   * 5. Citoyen (mobile, déclarations)
    */
   async seedDefaultAdmin(): Promise<void> {
-    try {
-      const email = 'admin@ecotrack.tn';
-      const existing = await UserModel.findOne({ email });
-      if (!existing) {
-        const admin = new UserModel({
-          email,
-          password: 'Admin2026!',
-          fullName: 'Administrateur Principal',
-          phoneNumber: '+216 71 000 000',
-          role: UserRole.ADMIN,
-          isActive: true
-        });
-        await admin.save();
-        console.log('[IDENTITY-API] ✅ Compte administrateur par défaut initialisé en base: admin@ecotrack.tn / Admin2026!');
+    const defaultAccounts = [
+      {
+        email: 'admin@ecotrack.tn',
+        password: 'Admin2026!',
+        fullName: 'Administrateur SaaS Global',
+        phoneNumber: '+216 71 000 000',
+        role: UserRole.ADMIN_SAAS,
+        municipality: 'Supervision Centrale'
+      },
+      {
+        email: 'mairie.tunis@ecotrack.tn',
+        password: 'Mairie2026!',
+        fullName: 'Directeur Services Mairie Tunis',
+        phoneNumber: '+216 71 111 222',
+        role: UserRole.ADMIN_MUNICIPALITE,
+        municipality: 'Municipalité de Tunis'
+      },
+      {
+        email: 'agent.tunis@ecotrack.tn',
+        password: 'Agent2026!',
+        fullName: 'Agent Modérateur Mairie Tunis',
+        phoneNumber: '+216 71 333 444',
+        role: UserRole.AGENT_MAIRIE,
+        municipality: 'Municipalité de Tunis'
+      },
+      {
+        email: 'chef.ouvrier@ecotrack.tn',
+        password: 'Ouvrier2026!',
+        fullName: 'Karim Ben Salem (Chef Voirie)',
+        phoneNumber: '+216 98 555 666',
+        role: UserRole.CHEF_OUVRIER,
+        municipality: 'Municipalité de Tunis'
+      },
+      {
+        email: 'citoyen@ecotrack.tn',
+        password: 'Citoyen2026!',
+        fullName: 'Anis Mahjoub (Citoyen)',
+        phoneNumber: '+216 22 777 888',
+        role: UserRole.CITOYEN,
+        municipality: 'Municipalité de Tunis'
       }
-    } catch (err) {
-      console.warn('[IDENTITY-API] ⚠️ Initialisation de l\'admin ignorée:', err);
+    ];
+
+    for (const acc of defaultAccounts) {
+      try {
+        const existing = await UserModel.findOne({ email: acc.email });
+        if (!existing) {
+          const user = new UserModel({
+            ...acc,
+            isActive: true
+          });
+          await user.save();
+          console.log(`[IDENTITY-API] ✅ Compte type créé: ${acc.email} (${acc.role})`);
+        } else if (existing.role === 'ADMIN') {
+          // Mise à niveau transparente du compte admin existant vers ADMIN_SAAS
+          existing.role = UserRole.ADMIN_SAAS;
+          await existing.save();
+        }
+      } catch (err) {
+        console.warn(`[IDENTITY-API] ⚠️ Impossible d'initialiser ${acc.email}:`, err);
+      }
     }
   }
 
@@ -71,8 +121,8 @@ export class UserService {
     const normalizedEmail = email.toLowerCase().trim();
     let user = await this.findByEmailWithPassword(normalizedEmail);
 
-    // Auto-création si l'admin tente de se connecter et n'existe pas encore en base
-    if (!user && normalizedEmail === 'admin@ecotrack.tn' && plainTextPassword === 'Admin2026!') {
+    // Auto-création si un compte par défaut tente de se connecter pour la 1ère fois
+    if (!user) {
       await this.seedDefaultAdmin();
       user = await this.findByEmailWithPassword(normalizedEmail);
     }

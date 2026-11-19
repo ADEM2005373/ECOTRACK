@@ -186,17 +186,27 @@ export async function loginUser(
     }
     return { kind: 'serverError', status: response.status };
   } catch {
-    // Mode secours hors-ligne pour l'administrateur par défaut
-    if (payload.email.toLowerCase().trim() === 'admin@ecotrack.tn' && payload.password === 'Admin2026!') {
+    // Mode secours hors-ligne pour les profils types EcoTrack V2
+    const normEmail = payload.email.toLowerCase().trim();
+    const demoMobileAccounts: Record<string, { pass: string; role: string; fullName: string }> = {
+      'admin@ecotrack.tn': { pass: 'Admin2026!', role: 'ADMIN_SAAS', fullName: 'Administrateur SaaS' },
+      'mairie.tunis@ecotrack.tn': { pass: 'Mairie2026!', role: 'ADMIN_MUNICIPALITE', fullName: 'Directeur Mairie' },
+      'agent.tunis@ecotrack.tn': { pass: 'Agent2026!', role: 'AGENT_MAIRIE', fullName: 'Agent Mairie' },
+      'chef.ouvrier@ecotrack.tn': { pass: 'Ouvrier2026!', role: 'CHEF_OUVRIER', fullName: 'Karim Ben Salem (Chef Voirie)' },
+      'citoyen@ecotrack.tn': { pass: 'Citoyen2026!', role: 'CITOYEN', fullName: 'Anis Mahjoub (Citoyen)' },
+    };
+
+    const demo = demoMobileAccounts[normEmail];
+    if (demo && demo.pass === payload.password) {
       return {
         kind: 'success',
-        accessToken: 'mock_admin_jwt_token_offline',
-        refreshToken: 'mock_admin_refresh_token_offline',
+        accessToken: `mock_${demo.role.toLowerCase()}_token_offline`,
+        refreshToken: `mock_${demo.role.toLowerCase()}_refresh_offline`,
         user: {
-          id: 'admin_local_001',
-          email: 'admin@ecotrack.tn',
-          fullName: 'Administrateur Principal',
-          role: 'ADMIN',
+          id: `demo_${demo.role.toLowerCase()}_001`,
+          email: normEmail,
+          fullName: demo.fullName,
+          role: demo.role,
         },
       };
     }

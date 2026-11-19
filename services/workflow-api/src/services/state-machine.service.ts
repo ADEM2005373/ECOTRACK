@@ -31,7 +31,7 @@ export const TRANSITIONS: Record<TransitionCode, TransitionRule> = {
     action: 'ASSIGN',
     from: ReportStatus.EN_COURS_DE_VALIDATION,
     to: ReportStatus.ASSIGNE,
-    allowedRoles: [UserRole.AGENT, UserRole.ADMIN],
+    allowedRoles: [UserRole.AGENT_MAIRIE, UserRole.AGENT, UserRole.ADMIN_MUNICIPALITE, UserRole.ADMIN_SAAS, UserRole.ADMIN],
     requiresAssignment: true,
     requiresReview: true,
     requiresPriority: true
@@ -41,7 +41,7 @@ export const TRANSITIONS: Record<TransitionCode, TransitionRule> = {
     action: 'START_WORK',
     from: ReportStatus.ASSIGNE,
     to: ReportStatus.EN_TRAITEMENT,
-    allowedRoles: [UserRole.OUVRIER, UserRole.ADMIN],
+    allowedRoles: [UserRole.CHEF_OUVRIER, UserRole.OUVRIER, UserRole.ADMIN_MUNICIPALITE, UserRole.ADMIN_SAAS, UserRole.ADMIN],
     requiresAssignment: true
   },
   T4: {
@@ -49,7 +49,7 @@ export const TRANSITIONS: Record<TransitionCode, TransitionRule> = {
     action: 'CLOSE',
     from: ReportStatus.EN_TRAITEMENT,
     to: ReportStatus.RESOLU,
-    allowedRoles: [UserRole.OUVRIER, UserRole.ADMIN],
+    allowedRoles: [UserRole.CHEF_OUVRIER, UserRole.OUVRIER, UserRole.ADMIN_MUNICIPALITE, UserRole.ADMIN_SAAS, UserRole.ADMIN],
     requiresCompletionPhoto: true
   },
   T5: {
@@ -57,7 +57,7 @@ export const TRANSITIONS: Record<TransitionCode, TransitionRule> = {
     action: 'REJECT',
     from: [ReportStatus.NOUVEAU, ReportStatus.EN_COURS_DE_VALIDATION],
     to: ReportStatus.REJETE,
-    allowedRoles: [UserRole.AGENT, UserRole.ADMIN],
+    allowedRoles: [UserRole.AGENT_MAIRIE, UserRole.AGENT, UserRole.ADMIN_MUNICIPALITE, UserRole.ADMIN_SAAS, UserRole.ADMIN],
     requiresReason: true
   }
 };
@@ -107,12 +107,16 @@ const TARGET_STATUS_ALIASES: Record<string, ReportStatus> = {
 const ROLE_ALIASES: Record<string, WorkflowActorRole> = {
   CITIZEN: UserRole.CITOYEN,
   CITOYEN: UserRole.CITOYEN,
-  DISPATCHER: UserRole.AGENT,
-  AGENT: UserRole.AGENT,
-  WORKER: UserRole.OUVRIER,
-  OUVRIER: UserRole.OUVRIER,
-  ADMIN: UserRole.ADMIN,
-  ADMINISTRATOR: UserRole.ADMIN,
+  AGENT_MAIRIE: UserRole.AGENT_MAIRIE,
+  DISPATCHER: UserRole.AGENT_MAIRIE,
+  AGENT: UserRole.AGENT_MAIRIE,
+  CHEF_OUVRIER: UserRole.CHEF_OUVRIER,
+  WORKER: UserRole.CHEF_OUVRIER,
+  OUVRIER: UserRole.CHEF_OUVRIER,
+  ADMIN_MUNICIPALITE: UserRole.ADMIN_MUNICIPALITE,
+  ADMIN_SAAS: UserRole.ADMIN_SAAS,
+  ADMIN: UserRole.ADMIN_SAAS,
+  ADMINISTRATOR: UserRole.ADMIN_SAAS,
   SYSTEM: 'SYSTEM'
 };
 
@@ -306,11 +310,11 @@ export class StateMachineService {
 
     if (
       (code === 'T3' || code === 'T4') &&
-      actorRole === UserRole.OUVRIER &&
+      (actorRole === UserRole.CHEF_OUVRIER || actorRole === UserRole.OUVRIER) &&
       (!report.assignedWorkerId || report.assignedWorkerId !== input.actorId)
     ) {
       throw new WorkflowForbiddenError(
-        "L'ouvrier n'est pas assigné à ce signalement."
+        "L'ouvrier ou chef d'équipe n'est pas assigné à ce signalement."
       );
     }
 
@@ -388,9 +392,13 @@ export class StateMachineService {
     }
 
     const actorRole = normalizeRole(input.actorRole);
-    if (actorRole !== UserRole.ADMIN) {
+    if (
+      actorRole !== UserRole.ADMIN &&
+      actorRole !== UserRole.ADMIN_SAAS &&
+      actorRole !== UserRole.ADMIN_MUNICIPALITE
+    ) {
       throw new WorkflowForbiddenError(
-        'Seul un administrateur peut rouvrir un signalement.'
+        'Seul un administrateur (SaaS ou Municipalité) peut rouvrir un signalement.'
       );
     }
 

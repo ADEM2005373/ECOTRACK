@@ -79,7 +79,56 @@ export const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        <p className="text-center text-xs text-slate-500 mt-6">
+        {/* Sélecteur rapide de profil démo (5 rôles officiels) */}
+        <div className="mt-6 pt-5 border-t border-slate-800">
+          <p className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wider text-center">
+            Comptes démo préconfigurés (5 Rôles)
+          </p>
+          <div className="grid grid-cols-2 gap-1.5 text-[11px]">
+            <button
+              type="button"
+              onClick={() => { setEmail('admin@ecotrack.tn'); setPassword('Admin2026!'); }}
+              className="text-left px-2.5 py-1.5 rounded-lg bg-slate-950/80 border border-slate-800 hover:border-purple-500/50 hover:bg-purple-950/20 transition text-slate-300"
+            >
+              <span className="font-bold text-purple-400 block">👑 Admin SaaS</span>
+              <span className="text-[10px] text-slate-500">Supervision Globale</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setEmail('mairie.tunis@ecotrack.tn'); setPassword('Mairie2026!'); }}
+              className="text-left px-2.5 py-1.5 rounded-lg bg-slate-950/80 border border-slate-800 hover:border-blue-500/50 hover:bg-blue-950/20 transition text-slate-300"
+            >
+              <span className="font-bold text-blue-400 block">🏛️ Admin Mairie</span>
+              <span className="text-[10px] text-slate-500">Mairie de Tunis</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setEmail('agent.tunis@ecotrack.tn'); setPassword('Agent2026!'); }}
+              className="text-left px-2.5 py-1.5 rounded-lg bg-slate-950/80 border border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-950/20 transition text-slate-300"
+            >
+              <span className="font-bold text-emerald-400 block">📋 Agent Mairie</span>
+              <span className="text-[10px] text-slate-500">Qualification & Alertes</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setEmail('chef.ouvrier@ecotrack.tn'); setPassword('Ouvrier2026!'); }}
+              className="text-left px-2.5 py-1.5 rounded-lg bg-slate-950/80 border border-slate-800 hover:border-amber-500/50 hover:bg-amber-950/20 transition text-slate-300"
+            >
+              <span className="font-bold text-amber-400 block">👷 Chef Ouvrier</span>
+              <span className="text-[10px] text-slate-500">Terrain & Preuve Photo</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setEmail('citoyen@ecotrack.tn'); setPassword('Citoyen2026!'); }}
+              className="col-span-2 text-left px-2.5 py-1.5 rounded-lg bg-slate-950/80 border border-slate-800 hover:border-teal-500/50 hover:bg-teal-950/20 transition text-slate-300"
+            >
+              <span className="font-bold text-teal-400 block">📱 Citoyen (Mobile / Web)</span>
+              <span className="text-[10px] text-slate-500">Signalements & Réclamations</span>
+            </button>
+          </div>
+        </div>
+
+        <p className="text-center text-xs text-slate-500 mt-5">
           Nouveau citoyen ou agent ?{' '}
           <Link to="/register" className="text-emerald-400 hover:text-emerald-300 font-semibold transition">
             Créer un compte

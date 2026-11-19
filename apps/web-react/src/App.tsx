@@ -163,10 +163,13 @@ export default function App() {
           </Link>
           <div className="h-6 w-px bg-slate-800 mx-1"></div>
           {authState.isAuthenticated ? (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400 hidden sm:block">
-                {authState.user?.fullName}
-              </span>
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col items-end text-xs hidden sm:flex">
+                <span className="font-semibold text-white">{authState.user?.fullName}</span>
+                <span className="text-[10px] text-emerald-400 font-mono">
+                  {authState.user?.role} {authState.user?.municipality ? `• ${authState.user.municipality}` : ''}
+                </span>
+              </div>
               <Button
                 variant="outline"
                 size="sm"

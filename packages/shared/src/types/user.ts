@@ -4,10 +4,16 @@
  */
 
 export enum UserRole {
-  CITOYEN = 'CITOYEN',
+  ADMIN_SAAS = 'ADMIN_SAAS',                 // Admin SaaS (Admin Global multi-tenant)
+  ADMIN_MUNICIPALITE = 'ADMIN_MUNICIPALITE', // Admin Municipalité ou Mairie
+  AGENT_MAIRIE = 'AGENT_MAIRIE',             // Agent Mairie (gère réclamations, alertes, types, qualification)
+  CHEF_OUVRIER = 'CHEF_OUVRIER',             // Chef Ouvrier Mobile (envoie ouvriers sur site & capture photo après travaux)
+  CITOYEN = 'CITOYEN',                       // Citoyen (création réclamations & suivi)
+
+  // Aliases de compatibilité ascendante
+  ADMIN = 'ADMIN',
   AGENT = 'AGENT',
-  OUVRIER = 'OUVRIER',
-  ADMIN = 'ADMIN'
+  OUVRIER = 'OUVRIER'
 }
 
 export interface IUser {
@@ -16,6 +22,7 @@ export interface IUser {
   fullName: string;
   phoneNumber?: string;
   role: UserRole;
+  municipality?: string; // Mairie ou collectivité de rattachement
   isActive: boolean;
   lastLogin?: Date;
   createdAt: Date;
@@ -34,6 +41,7 @@ export interface CreateUserDto {
   fullName: string;
   phoneNumber?: string;
   role?: UserRole;
+  municipality?: string;
 }
 
 export interface AuthTokens {

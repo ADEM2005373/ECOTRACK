@@ -37,6 +37,10 @@ export const UserSchema = new Schema<IUserDocument>(
       type: String,
       trim: true
     },
+    municipality: {
+      type: String,
+      trim: true
+    },
     role: {
       type: String,
       enum: Object.values(UserRole),
