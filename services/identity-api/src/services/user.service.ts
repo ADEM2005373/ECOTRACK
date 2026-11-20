@@ -54,6 +54,46 @@ export class UserService {
         phoneNumber: '+216 71 000 000',
         role: UserRole.ADMIN_SAAS,
         municipality: 'Supervision Centrale'
+      },
+      {
+        email: 'adel@zarzouna.tn',
+        password: 'Agent2026!',
+        fullName: 'ADEL BEN ADEL',
+        phoneNumber: '+216 72 500 100',
+        role: UserRole.AGENT_MAIRIE,
+        municipality: 'Mairie de Zarzouna'
+      },
+      {
+        email: 'chef.voirie@zarzouna.tn',
+        password: 'Chef2026!',
+        fullName: 'Mohamed Ali Khemiri',
+        phoneNumber: '+216 72 500 201',
+        role: UserRole.CHEF_OUVRIER,
+        municipality: 'Mairie de Zarzouna'
+      },
+      {
+        email: 'chef.poidslourd@zarzouna.tn',
+        password: 'Chef2026!',
+        fullName: 'Tarek Jouini',
+        phoneNumber: '+216 72 500 202',
+        role: UserRole.CHEF_OUVRIER,
+        municipality: 'Mairie de Zarzouna'
+      },
+      {
+        email: 'ouvrier.voirie@zarzouna.tn',
+        password: 'Ouvrier2026!',
+        fullName: 'Ahmed Trabelsi',
+        phoneNumber: '+216 72 500 203',
+        role: UserRole.OUVRIER,
+        municipality: 'Mairie de Zarzouna'
+      },
+      {
+        email: 'ouvrier.espacesverts@zarzouna.tn',
+        password: 'Ouvrier2026!',
+        fullName: 'Sami Gharbi',
+        phoneNumber: '+216 72 500 204',
+        role: UserRole.OUVRIER,
+        municipality: 'Mairie de Zarzouna'
       }
     ];
 

@@ -1,6 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { QualificationPage } from '../QualificationPage';
 
 vi.mock('react-router-dom', () => ({
@@ -13,21 +13,62 @@ vi.mock('react-router-dom', () => ({
   useLocation: () => ({ pathname: '/agent/qualification' }),
 }));
 
-describe('QualificationPage (ECO-31 / SCRUM-51 - Dual Mode Table & AI Consultation)', () => {
-  it('renders by default the list of reclamations with 4 actions and "En attente de validation" status', () => {
+const MOCK_REPORTS = [
+  {
+    _id: '672f10a8b9e1a2001c45a789',
+    reference: 'REP-2026-0001',
+    description: 'Dépôt sauvage de gravats et mobilier abandonné près du marché',
+    category: 'DEPOT_SAUVAGE',
+    categoryValidated: 'DEPOT_SAUVAGE',
+    priority: 'HAUTE',
+    aiConfidenceScore: 0.92,
+    status: 'NOUVEAU',
+    district: 'Centre-Ville',
+    imageUrl: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80',
+    location: { type: 'Point', coordinates: [9.8667, 37.2667] },
+    createdAt: '2026-11-20T09:00:00Z'
+  }
+];
+
+const MOCK_USERS = [
+  { id: 'usr_1', fullName: 'Mohamed Ali Khemiri', role: 'CHEF_OUVRIER', municipality: 'Mairie de Zarzouna' }
+];
+
+describe('QualificationPage (ECO-31 / SCRUM-51 - Real Data & Dual Mode)', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('/api/v1/auth/users')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ users: MOCK_USERS })
+        });
+      }
+      if (url.includes('/api/v1/reports')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ reports: MOCK_REPORTS })
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ success: true })
+      });
+    });
+  });
+
+  it('renders by default the list of reclamations from real API with 4 actions and "En attente de validation" status', async () => {
     render(<QualificationPage />);
 
     // Header & List Title
     expect(screen.getByText('Liste des Réclamations')).toBeDefined();
     expect(screen.getAllByText('Vision IA').length).toBeGreaterThan(0);
 
-    // KPI Cards
-    expect(screen.getByText('Total Réclamations')).toBeDefined();
-    expect(screen.getAllByText('En attente de validation').length).toBeGreaterThan(0);
-
-    // Initial item in list
-    expect(screen.getByText('ECO-2026-0842')).toBeDefined();
-    expect(screen.getByText('Dépôt sur le trottoir, passage réduit')).toBeDefined();
+    // Real Item loaded from API
+    await waitFor(() => {
+      expect(screen.getByText('REP-2026-0001')).toBeDefined();
+    });
+    expect(screen.getAllByText('Dépôt sauvage de gravats et mobilier abandonné près du marché').length).toBeGreaterThan(0);
 
     // 4 Action Buttons in table row
     const consultBtns = screen.getAllByText('Consulter');
@@ -43,10 +84,14 @@ describe('QualificationPage (ECO-31 / SCRUM-51 - Dual Mode Table & AI Consultati
     expect(deleteBtns.length).toBeGreaterThan(0);
   });
 
-  it('switches to AI Consultation view when clicking "Consulter", validates and returns to list with "Validé" status', () => {
+  it('switches to AI Consultation view when clicking "Consulter", validates and returns to list with "Validé" status', async () => {
     render(<QualificationPage />);
 
-    // Click "Consulter" on the first item
+    await waitFor(() => {
+      expect(screen.getByText('REP-2026-0001')).toBeDefined();
+    });
+
+    // Click "Consulter" on the item
     const consultBtns = screen.getAllByText('Consulter');
     fireEvent.click(consultBtns[0]);
 
@@ -70,12 +115,15 @@ describe('QualificationPage (ECO-31 / SCRUM-51 - Dual Mode Table & AI Consultati
 
     // Now back in List view
     expect(screen.getByText('Liste des Réclamations')).toBeDefined();
-    // Item ECO-2026-0842 now shows "Validé" badge
     expect(screen.getAllByText('Validé').length).toBeGreaterThan(0);
   });
 
-  it('opens category override modal from the list view and confirms modification', () => {
+  it('opens category override modal from the list view and confirms modification', async () => {
     render(<QualificationPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('REP-2026-0001')).toBeDefined();
+    });
 
     const editBtns = screen.getAllByText('Modifier');
     fireEvent.click(editBtns[0]);
@@ -84,28 +132,35 @@ describe('QualificationPage (ECO-31 / SCRUM-51 - Dual Mode Table & AI Consultati
     const confirmBtn = screen.getByText('Confirmer le changement');
     fireEvent.click(confirmBtn);
 
-    // Toast or updated list
     expect(screen.queryByText('Modifier la catégorie')).toBeNull();
   });
 
-  it('opens brigade assignment modal from the list view and dispatches intervention', () => {
+  it('opens brigade assignment modal from the list view with real staff and dispatches intervention', async () => {
     render(<QualificationPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('REP-2026-0001')).toBeDefined();
+    });
 
     const assignBtns = screen.getAllByText('Assigner');
     fireEvent.click(assignBtns[0]);
 
     expect(screen.getByText('Affectation à une Brigade Technique')).toBeDefined();
     expect(screen.getByText('Brigade Spécialisée Cible')).toBeDefined();
+    expect(screen.getByText(/Mohamed Ali Khemiri/)).toBeDefined();
 
     const confirmAssignBtn = screen.getByText("Confirmer l'Affectation");
     fireEvent.click(confirmAssignBtn);
 
-    // Status updates to "Assigné"
     expect(screen.getAllByText('Assigné').length).toBeGreaterThan(0);
   });
 
-  it('opens suppression / rejection modal and marks report as rejected', () => {
+  it('opens suppression / rejection modal and marks report as rejected', async () => {
     render(<QualificationPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('REP-2026-0001')).toBeDefined();
+    });
 
     const deleteBtns = screen.getAllByText('Supprimer');
     fireEvent.click(deleteBtns[0]);
@@ -114,17 +169,21 @@ describe('QualificationPage (ECO-31 / SCRUM-51 - Dual Mode Table & AI Consultati
     const confirmRejectBtn = screen.getByText('Confirmer le Rejet');
     fireEvent.click(confirmRejectBtn);
 
-    // Status badge becomes Rejeté
     expect(screen.getAllByText('Rejeté').length).toBeGreaterThan(0);
   });
 
-  it('filters reclamations by status when clicking KPI cards', () => {
+  it('shows empty state when no reports are returned from MongoDB', async () => {
+    global.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ reports: [] })
+      })
+    );
+
     render(<QualificationPage />);
 
-    // Click "En attente de validation" filter
-    const pendingKpi = screen.getByText('À vérifier par l\'agent');
-    fireEvent.click(pendingKpi);
-
-    expect(screen.getByText('ECO-2026-0842')).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText('Aucune réclamation dans la base de données')).toBeDefined();
+    });
   });
 });

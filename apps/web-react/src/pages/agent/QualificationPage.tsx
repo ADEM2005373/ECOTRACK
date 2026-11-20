@@ -83,96 +83,6 @@ export interface QueueItem {
   isOverridden?: boolean;
 }
 
-const INITIAL_QUEUE: QueueItem[] = [
-  {
-    report: {
-      id: '672f10a8b9e1a2001c45a789',
-      reference: 'ECO-2026-0842',
-      title: 'Dépôt sur le trottoir, passage réduit',
-      description:
-        '« Des sacs, des cartons et une chaise ont été déposés contre le mur. Le passage est difficile pour les poussettes. »',
-      photoUrl: 'https://images.unsplash.com/photo-1605600659873-d808a13e4d2a?auto=format&fit=crop&w=800&q=80',
-      photoDate: '19/11/2026, 09:40',
-      location: {
-        address: '18 Avenue Habib Bourguiba · Zarzouna Centre',
-        coordinates: [37.2667, 9.8667],
-        district: 'Centre-Ville',
-      },
-      source: 'Application citoyenne',
-      duplicatesText: 'Aucun doublon détecté',
-      hasDuplicate: false,
-      receivedAt: '19 novembre 2026 à 09:42',
-      status: 'NOUVEAU',
-    },
-    aiSuggestion: {
-      categoryCode: 'DEPOT_SAUVAGE',
-      categoryLabel: 'Dépôt sauvage',
-      confidenceScore: 92,
-      severity: 'Élevée',
-      justification:
-        'Sacs et objets encombrants identifiés sur l’espace public. Risque d’obstruction du cheminement piéton.',
-    },
-  },
-  {
-    report: {
-      id: '672f10a8b9e1a2001c45a790',
-      reference: 'ECO-2026-0843',
-      title: 'Matelas et sommier abandonnés',
-      description:
-        '« Un vieux matelas deux places et un sommier posés à côté des bacs de recyclage depuis hier soir. »',
-      photoUrl: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=800&q=80',
-      photoDate: '19/11/2026, 09:48',
-      location: {
-        address: '45 Rue de la République · Zarzouna Sud',
-        coordinates: [37.2680, 9.8710],
-        district: 'Zarzouna Sud',
-      },
-      source: 'Application citoyenne',
-      duplicatesText: 'Aucun doublon détecté',
-      hasDuplicate: false,
-      receivedAt: '19 novembre 2026 à 09:50',
-      status: 'NOUVEAU',
-    },
-    aiSuggestion: {
-      categoryCode: 'ENCOMBRANTS',
-      categoryLabel: 'Objets encombrants',
-      confidenceScore: 74,
-      severity: 'Moyenne',
-      justification:
-        'Mobilier volumineux détecté à proximité de conteneurs de collecte sélective.',
-    },
-  },
-  {
-    report: {
-      id: '672f10a8b9e1a2001c45a791',
-      reference: 'ECO-2026-0844',
-      title: 'Bidons suspects près du canal',
-      description:
-        '« Plusieurs bidons métalliques avec des étiquettes avertissement déversés sur le bas-côté. »',
-      photoUrl: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80',
-      photoDate: '19/11/2026, 10:02',
-      location: {
-        address: 'Route du Port · Zone Portuaire',
-        coordinates: [37.2620, 9.8630],
-        district: 'Zone Portuaire',
-      },
-      source: 'Application citoyenne',
-      duplicatesText: 'Doublon potentiel (#0839)',
-      hasDuplicate: true,
-      receivedAt: '19 novembre 2026 à 10:05',
-      status: 'NOUVEAU',
-    },
-    aiSuggestion: {
-      categoryCode: 'DECHETS_DANGEREUX',
-      categoryLabel: 'Déchets dangereux',
-      confidenceScore: 48,
-      severity: 'Élevée',
-      justification:
-        'Conteneurs industriels ou produits chimiques potentiellement toxiques nécessitant intervention spécialisée.',
-    },
-  },
-];
-
 export const QualificationPage: React.FC = () => {
   const { state: authState } = useAuth();
   const municipality = authState.user?.municipality || 'Mairie de Zarzouna';
@@ -180,11 +90,13 @@ export const QualificationPage: React.FC = () => {
   // Mode d'affichage : 'list' (Liste des réclamations) ou 'consult' (Consultation IA Split-Screen)
   const [viewMode, setViewMode] = useState<'list' | 'consult'>('list');
 
-  const [queue, setQueue] = useState<QueueItem[]>(INITIAL_QUEUE);
+  // File réelle connectée à MongoDB (AUCUNE FAUSSE DONNÉE HARDCODÉE)
+  const [queue, setQueue] = useState<QueueItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [zoomScale, setZoomScale] = useState(100);
   const [isMaximizeOpen, setIsMaximizeOpen] = useState(false);
   const [communalStaff, setCommunalStaff] = useState<Array<{ id: string; fullName: string; role: string }>>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Filtres et recherche pour la vue Liste
   const [searchQuery, setSearchQuery] = useState('');
@@ -222,8 +134,9 @@ export const QualificationPage: React.FC = () => {
     }, 3500);
   };
 
-  // Chargement des données réelles depuis MongoDB
+  // Chargement strict des données réelles depuis MongoDB
   const fetchLiveReports = async () => {
+    setIsLoading(true);
     try {
       const res = await fetch('/api/v1/reports');
       if (res.ok) {
@@ -236,59 +149,59 @@ export const QualificationPage: React.FC = () => {
           ? raw.data
           : [];
 
-        if (list.length > 0) {
-          const liveQueue: QueueItem[] = list.map((r: any, idx: number) => {
-            const rawCat = r.categoryValidated || r.category || 'DEPOT_SAUVAGE';
-            const catLabel = CATEGORY_OPTIONS.find(c => c.value === rawCat)?.label || rawCat;
-            const conf = typeof r.aiConfidenceScore === 'number'
-              ? Math.round(r.aiConfidenceScore > 1 ? r.aiConfidenceScore : r.aiConfidenceScore * 100)
-              : 92;
+        const liveQueue: QueueItem[] = list.map((r: any, idx: number) => {
+          const rawCat = r.categoryValidated || r.category || 'DEPOT_SAUVAGE';
+          const catLabel = CATEGORY_OPTIONS.find(c => c.value === rawCat)?.label || rawCat;
+          const conf = typeof r.aiConfidenceScore === 'number'
+            ? Math.round(r.aiConfidenceScore > 1 ? r.aiConfidenceScore : r.aiConfidenceScore * 100)
+            : 92;
 
-            let status = (r.status || 'NOUVEAU').toUpperCase();
-            if (status === 'SIGNALÉ' || status === 'A_TRAITER' || status === 'PENDING') {
-              status = 'NOUVEAU';
-            }
+          let status = (r.status || 'NOUVEAU').toUpperCase();
+          if (status === 'SIGNALÉ' || status === 'A_TRAITER' || status === 'PENDING' || status === 'A_QUALIFIER') {
+            status = 'NOUVEAU';
+          }
 
-            return {
-              report: {
-                id: String(r.id || r._id || `live_${idx}`),
-                reference: r.reference || `REP-2026-${String(idx + 1).padStart(4, '0')}`,
-                title: r.description || r.title || 'Anomalie signalée sur voie publique',
-                description: r.description || 'Signalement citoyen enregistré',
-                photoUrl: r.imageUrl || r.thumbnailUrl || 'https://images.unsplash.com/photo-1605600659873-d808a13e4d2a?auto=format&fit=crop&w=800&q=80',
-                photoDate: r.createdAt ? new Date(r.createdAt).toLocaleString('fr-FR') : 'Aujourd’hui',
-                location: {
-                  address: `${r.district || 'Centre-Ville'} · ${municipality}`,
-                  coordinates: [r.location?.coordinates?.[1] || 37.2667, r.location?.coordinates?.[0] || 9.8667],
-                  district: r.district || 'Centre-Ville',
-                },
-                source: 'Application citoyenne EcoTrack',
-                duplicatesText: r.isDuplicate ? `Doublon de ${r.duplicateOf}` : 'Aucun doublon détecté',
-                hasDuplicate: !!r.isDuplicate,
-                receivedAt: r.createdAt ? new Date(r.createdAt).toLocaleString('fr-FR') : 'Aujourd’hui',
-                status: status as any,
+          return {
+            report: {
+              id: String(r.id || r._id || `rep_${idx}`),
+              reference: r.reference || `REP-2026-${String(idx + 1).padStart(4, '0')}`,
+              title: r.description || r.title || 'Anomalie signalée sur l’espace public',
+              description: r.description || 'Signalement citoyen enregistré',
+              photoUrl: r.imageUrl || r.thumbnailUrl || 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80',
+              photoDate: r.createdAt ? new Date(r.createdAt).toLocaleString('fr-FR') : 'Aujourd’hui',
+              location: {
+                address: `${r.district || 'Centre-Ville'} · ${municipality}`,
+                coordinates: [r.location?.coordinates?.[1] || 37.2667, r.location?.coordinates?.[0] || 9.8667],
+                district: r.district || 'Centre-Ville',
               },
-              aiSuggestion: {
-                categoryCode: rawCat,
-                categoryLabel: catLabel,
-                confidenceScore: conf,
-                severity: r.priority || 'Élevée',
-                justification: `Détection automatique validée par l'IA Vision pour le périmètre de ${municipality}.`,
-              },
-              assignedBrigade: r.teamId || CATEGORY_BRIGADE_ROUTING[rawCat] || 'Brigade Voirie & Salubrité',
-              assignedWorker: r.assignedWorker
-            };
-          });
+              source: 'Application citoyenne EcoTrack',
+              duplicatesText: r.isDuplicate ? `Doublon de ${r.duplicateOf}` : 'Aucun doublon détecté',
+              hasDuplicate: !!r.isDuplicate,
+              receivedAt: r.createdAt ? new Date(r.createdAt).toLocaleString('fr-FR') : 'Aujourd’hui',
+              status: status as any,
+            },
+            aiSuggestion: {
+              categoryCode: rawCat,
+              categoryLabel: catLabel,
+              confidenceScore: conf,
+              severity: r.priority || 'Élevée',
+              justification: `Détection automatique validée par l'IA Vision pour le périmètre de ${municipality}.`,
+            },
+            assignedBrigade: r.assignedTeamId || CATEGORY_BRIGADE_ROUTING[rawCat] || 'Brigade Voirie & Salubrité',
+            assignedWorker: r.assignedWorkerId
+          };
+        });
 
-          setQueue(liveQueue);
-        }
+        setQueue(liveQueue);
       }
     } catch {
-      // Garder INITIAL_QUEUE
+      // Si l'API est injoignable, queue reste [] (pas de fausses données)
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Chargement des effectifs communaux réels
+  // Chargement des effectifs communaux réels depuis MongoDB
   const fetchStaff = async () => {
     try {
       const res = await fetch('/api/v1/auth/users');
@@ -425,6 +338,7 @@ export const QualificationPage: React.FC = () => {
   const handleOpenOverride = (index: number) => {
     setModalItemIndex(index);
     const item = queue[index];
+    if (!item) return;
     setSelectedCategory(item.aiSuggestion.categoryCode);
     setSelectedSeverity(item.aiSuggestion.severity === 'Moyenne' ? 'MOYENNE' : item.aiSuggestion.severity === 'Faible' ? 'FAIBLE' : 'ELEVEE');
     setIsOverrideModalOpen(true);
@@ -505,12 +419,11 @@ export const QualificationPage: React.FC = () => {
   const handleOpenAssignModal = (index: number) => {
     setModalItemIndex(index);
     const item = queue[index];
+    if (!item) return;
     const code = item.aiSuggestion.categoryCode;
     setTargetBrigade(item.assignedBrigade || CATEGORY_BRIGADE_ROUTING[code] || 'Brigade Voirie & Salubrité');
     if (communalStaff.length > 0 && !targetWorker) {
       setTargetWorker(communalStaff[0].fullName);
-    } else if (!targetWorker) {
-      setTargetWorker('Karim Ben Salem (Chef Brigade)');
     }
     setIsAssignModalOpen(true);
   };
@@ -532,7 +445,7 @@ export const QualificationPage: React.FC = () => {
           reportId: targetItem.report.id,
           transition: 'T2',
           actorRole: authState.user?.role || 'AGENT_MAIRIE',
-          actorId: authState.user?.email || authState.user?.id || 'adel@zarzouna.com',
+          actorId: authState.user?.email || authState.user?.id || 'adel@zarzouna.tn',
           teamId: targetBrigade,
           assigneeId: targetWorker || 'Chef de Brigade',
           priority: targetPriority,
@@ -558,7 +471,7 @@ export const QualificationPage: React.FC = () => {
     );
 
     setIsAssignModalOpen(false);
-    showToast(`Signalement ${targetItem.report.reference} assigné à la ${targetBrigade} (${targetWorker}) !`);
+    showToast(`Signalement ${targetItem.report.reference} assigné à la ${targetBrigade} (${targetWorker || 'Équipe municipale'}) !`);
   };
 
   // Queue navigation in consultation mode
@@ -582,7 +495,6 @@ export const QualificationPage: React.FC = () => {
 
   // Filtrage des réclamations dans la vue Liste
   const filteredQueue = queue.filter((item) => {
-    // Filtre texte
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const matchRef = item.report.reference.toLowerCase().includes(q);
@@ -593,7 +505,6 @@ export const QualificationPage: React.FC = () => {
       if (!matchRef && !matchTitle && !matchDesc && !matchAddr && !matchCat) return false;
     }
 
-    // Filtre statut
     if (statusFilter === 'EN_ATTENTE') {
       if (item.report.status !== 'NOUVEAU') return false;
     } else if (statusFilter === 'VALIDE') {
@@ -604,7 +515,6 @@ export const QualificationPage: React.FC = () => {
       if (item.report.status !== 'REJETE') return false;
     }
 
-    // Filtre catégorie
     if (categoryFilter !== 'ALL') {
       if (item.aiSuggestion.categoryCode !== categoryFilter) return false;
     }
@@ -612,7 +522,7 @@ export const QualificationPage: React.FC = () => {
     return true;
   });
 
-  // KPIs
+  // KPIs calculés sur les données réelles
   const totalCount = queue.length;
   const pendingCount = queue.filter((i) => i.report.status === 'NOUVEAU').length;
   const validatedCount = queue.filter((i) => i.report.status === 'VALIDE').length;
@@ -722,7 +632,7 @@ export const QualificationPage: React.FC = () => {
                   </span>
                 </h1>
                 <p className="text-xs sm:text-sm text-[#64748b] mt-1">
-                  Examinez les signalements analysés par l’IA Vision, validez leur conformité, modifiez leurs paramètres ou assignez-les directement aux brigades municipales.
+                  Examinez les signalements citoyens réels de la {municipality}, validez leur qualification IA, corrigez leurs paramètres ou assignez-les aux brigades municipales.
                 </p>
               </div>
 
@@ -731,17 +641,17 @@ export const QualificationPage: React.FC = () => {
                   type="button"
                   onClick={() => {
                     void fetchLiveReports();
-                    showToast('Données réelles des réclamations actualisées');
+                    showToast('Données réelles MongoDB actualisées');
                   }}
                   className="px-3.5 py-2 rounded-xl bg-white border border-[#cbd5e1] hover:bg-slate-50 text-[#334155] text-xs font-semibold shadow-sm transition flex items-center gap-2"
                 >
-                  <RefreshCw className="size-3.5 text-[#64748b]" />
+                  <RefreshCw className={`size-3.5 text-[#64748b] ${isLoading ? 'animate-spin' : ''}`} />
                   <span>Actualiser</span>
                 </button>
               </div>
             </div>
 
-            {/* 4 Cartes Métriques Opérationnelles */}
+            {/* 4 Boîtes / Cartes Métriques Opérationnelles */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <div
                 onClick={() => setStatusFilter('ALL')}
@@ -792,9 +702,9 @@ export const QualificationPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Barre de Recherche et Filtres */}
+            {/* Box de Recherche et Filtres Sécurisé & Réactif */}
             <div className="p-4 bg-white rounded-xl border border-[#e2e8f0] shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
-              {/* Recherche libre */}
+              {/* Recherche libre avec bouton effacer */}
               <div className="relative w-full md:w-80">
                 <Search className="w-4 h-4 text-[#94a3b8] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
@@ -802,8 +712,17 @@ export const QualificationPage: React.FC = () => {
                   placeholder="Rechercher par référence, lieu, description..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-[#f8fafc] border border-[#e2e8f0] rounded-lg text-xs text-[#0f172a] focus:ring-2 focus:ring-[#059669] focus:bg-white transition"
+                  className="w-full pl-9 pr-8 py-2 bg-[#f8fafc] border border-[#e2e8f0] rounded-lg text-xs text-[#0f172a] focus:ring-2 focus:ring-[#059669] focus:bg-white transition"
                 />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
 
               {/* Filtres Rapides Statut & Catégorie */}
@@ -873,9 +792,13 @@ export const QualificationPage: React.FC = () => {
                       <tr>
                         <td colSpan={6} className="py-12 text-center text-[#64748b]">
                           <Inbox className="size-8 mx-auto text-[#cbd5e1] mb-2" />
-                          <p className="font-semibold text-sm text-[#0f172a]">Aucune réclamation trouvée</p>
+                          <p className="font-semibold text-sm text-[#0f172a]">
+                            {queue.length === 0 ? 'Aucune réclamation dans la base de données' : 'Aucune réclamation trouvée pour ces filtres'}
+                          </p>
                           <p className="text-xs text-[#94a3b8] mt-1">
-                            Aucune réclamation ne correspond à vos filtres actuels.
+                            {queue.length === 0
+                              ? 'Toutes les réclamations citoyennes ont été traitées ou aucun signalement n’est en attente dans MongoDB.'
+                              : 'Veuillez modifier votre terme de recherche ou réinitialiser les filtres.'}
                           </p>
                         </td>
                       </tr>
@@ -1045,7 +968,7 @@ export const QualificationPage: React.FC = () => {
                     {renderStatusBadge(report.status)}
                   </div>
                   <p className="text-xs text-[#64748b]">
-                    Boîte de réception / <span className="font-mono font-medium text-[#1e3a8a]">{report.reference}</span> · Reçu le {report.receivedAt}
+                    Dossier / <span className="font-mono font-medium text-[#1e3a8a]">{report.reference}</span> · Reçu le {report.receivedAt}
                   </p>
                 </div>
               </div>
@@ -1493,11 +1416,7 @@ export const QualificationPage: React.FC = () => {
                     </option>
                   ))
                 ) : (
-                  <>
-                    <option value="Karim Ben Salem (Chef Brigade)">Karim Ben Salem (Chef Brigade Voirie)</option>
-                    <option value="Tarek Jouini (Chef Salubrité)">Tarek Jouini (Chef Salubrité)</option>
-                    <option value="Équipe Technique d'Intervention">Équipe Technique d'Intervention</option>
-                  </>
+                  <option value="">Aucun agent communal disponible dans la base</option>
                 )}
               </select>
             </div>
