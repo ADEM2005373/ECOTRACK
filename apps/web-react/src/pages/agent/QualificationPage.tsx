@@ -536,11 +536,11 @@ export const QualificationPage: React.FC = () => {
   });
   const todayCapitalized = todayFormatted.charAt(0).toUpperCase() + todayFormatted.slice(1);
 
-  // Rendu de l'étiquette de statut selon l'état réel
+  // Rendu de l'étiquette de statut selon l'état réel (avec whitespace-nowrap anti-déformation)
   const renderStatusBadge = (status: string) => {
     if (status === 'VALIDE') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-[#059669] border border-emerald-200">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-[#059669] border border-emerald-200 whitespace-nowrap shadow-sm">
           <CheckCircle2 className="w-3.5 h-3.5" />
           Validé
         </span>
@@ -548,7 +548,7 @@ export const QualificationPage: React.FC = () => {
     }
     if (status === 'ASSIGNE') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap shadow-sm">
           <UserCheck className="w-3.5 h-3.5" />
           Assigné
         </span>
@@ -556,14 +556,14 @@ export const QualificationPage: React.FC = () => {
     }
     if (status === 'REJETE') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 whitespace-nowrap shadow-sm">
           <XCircle className="w-3.5 h-3.5" />
           Rejeté
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap shadow-sm">
         <Hourglass className="w-3.5 h-3.5" />
         En attente de validation
       </span>
@@ -779,25 +779,27 @@ export const QualificationPage: React.FC = () => {
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="bg-[#f8fafc] border-b border-[#e2e8f0] text-[#64748b] uppercase tracking-wider font-semibold text-[11px]">
-                      <th className="py-3 px-4">Réclamation & Photo</th>
-                      <th className="py-3 px-4">Description & Lieu</th>
-                      <th className="py-3 px-4">Vision IA</th>
-                      <th className="py-3 px-4">Statut</th>
-                      <th className="py-3 px-4">Brigade</th>
-                      <th className="py-3 px-4 text-center">Actions</th>
+                      <th className="py-3 px-4 min-w-[150px] whitespace-nowrap">Réclamation & Photo</th>
+                      <th className="py-3 px-4 min-w-[220px]">Description & Lieu</th>
+                      <th className="py-3 px-4 min-w-[130px] whitespace-nowrap">Vision IA</th>
+                      <th className="py-3 px-4 min-w-[170px] whitespace-nowrap">Statut</th>
+                      <th className="py-3 px-4 min-w-[170px] whitespace-nowrap">Brigade</th>
+                      <th className="py-3 px-4 text-center min-w-[320px] whitespace-nowrap">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#e2e8f0]">
                     {filteredQueue.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="py-12 text-center text-[#64748b]">
-                          <Inbox className="size-8 mx-auto text-[#cbd5e1] mb-2" />
-                          <p className="font-semibold text-sm text-[#0f172a]">
+                        <td colSpan={6} className="py-16 text-center text-[#64748b]">
+                          <div className="size-14 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto mb-3 text-[#94a3b8]">
+                            <Inbox className="size-7" />
+                          </div>
+                          <p className="font-bold text-sm text-[#0f172a]">
                             {queue.length === 0 ? 'Aucune réclamation dans la base de données' : 'Aucune réclamation trouvée pour ces filtres'}
                           </p>
-                          <p className="text-xs text-[#94a3b8] mt-1">
+                          <p className="text-xs text-[#94a3b8] mt-1 max-w-md mx-auto leading-relaxed">
                             {queue.length === 0
-                              ? 'Toutes les réclamations citoyennes ont été traitées ou aucun signalement n’est en attente dans MongoDB.'
+                              ? 'La base MongoDB est actuellement vide (0 fausse donnée). Dès qu’un citoyen enregistre un signalement, il apparaîtra ici en direct.'
                               : 'Veuillez modifier votre terme de recherche ou réinitialiser les filtres.'}
                           </p>
                         </td>
@@ -812,7 +814,7 @@ export const QualificationPage: React.FC = () => {
                             className="hover:bg-slate-50 transition-colors group"
                           >
                             {/* Photo & Réf */}
-                            <td className="py-3.5 px-4">
+                            <td className="py-3.5 px-4 whitespace-nowrap">
                               <div className="flex items-center gap-3">
                                 <img
                                   src={item.report.photoUrl}
@@ -820,11 +822,11 @@ export const QualificationPage: React.FC = () => {
                                   className="size-12 rounded-lg object-cover border border-[#e2e8f0] shrink-0"
                                 />
                                 <div>
-                                  <span className="font-mono font-bold text-[#1e3a8a] text-xs block">
+                                  <span className="font-mono font-bold text-[#1e3a8a] text-xs block whitespace-nowrap">
                                     {item.report.reference}
                                   </span>
-                                  <span className="text-[11px] text-[#94a3b8] flex items-center gap-1 mt-0.5">
-                                    <Calendar className="size-3" />
+                                  <span className="text-[11px] text-[#94a3b8] flex items-center gap-1 mt-0.5 whitespace-nowrap">
+                                    <Calendar className="size-3 shrink-0" />
                                     {item.report.photoDate}
                                   </span>
                                 </div>
@@ -846,43 +848,43 @@ export const QualificationPage: React.FC = () => {
                             </td>
 
                             {/* Vision IA */}
-                            <td className="py-3.5 px-4">
-                              <span className="font-semibold text-[#0f172a] block">
+                            <td className="py-3.5 px-4 whitespace-nowrap">
+                              <span className="font-semibold text-[#0f172a] block whitespace-nowrap">
                                 {item.aiSuggestion.categoryLabel}
                               </span>
                               <div
-                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border mt-1 ${conf.bgColor} ${conf.textColor}`}
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border mt-1 whitespace-nowrap ${conf.bgColor} ${conf.textColor}`}
                               >
-                                <Sparkles className="size-3" />
+                                <Sparkles className="size-3 shrink-0" />
                                 <span>{item.aiSuggestion.confidenceScore}%</span>
                               </div>
                             </td>
 
-                            {/* Statut */}
-                            <td className="py-3.5 px-4">
+                            {/* Statut (Box anti-déformation) */}
+                            <td className="py-3.5 px-4 whitespace-nowrap">
                               {renderStatusBadge(item.report.status)}
                             </td>
 
                             {/* Brigade */}
-                            <td className="py-3.5 px-4">
-                              <span className="text-xs text-[#334155] font-medium block">
+                            <td className="py-3.5 px-4 whitespace-nowrap">
+                              <span className="text-xs text-[#334155] font-medium block whitespace-nowrap">
                                 {item.assignedBrigade || CATEGORY_BRIGADE_ROUTING[item.aiSuggestion.categoryCode] || 'Brigade Voirie'}
                               </span>
                               {item.assignedWorker ? (
-                                <span className="text-[11px] text-[#059669] flex items-center gap-1 mt-0.5 font-medium">
-                                  <UserCheck className="size-3" />
+                                <span className="text-[11px] text-[#059669] flex items-center gap-1 mt-0.5 font-medium whitespace-nowrap">
+                                  <UserCheck className="size-3 shrink-0" />
                                   {item.assignedWorker}
                                 </span>
                               ) : (
-                                <span className="text-[10px] text-[#94a3b8] italic block mt-0.5">
+                                <span className="text-[10px] text-[#94a3b8] italic block mt-0.5 whitespace-nowrap">
                                   Non assignée
                                 </span>
                               )}
                             </td>
 
                             {/* 4 Actions : Consulter, Modifier, Assigner, Supprimer */}
-                            <td className="py-3.5 px-4 text-center">
-                              <div className="flex items-center justify-center gap-1.5">
+                            <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                              <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
                                 {/* 1. Consulter */}
                                 <button
                                   type="button"

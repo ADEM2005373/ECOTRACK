@@ -23,7 +23,6 @@ app.use('/reports', reportRouter);
 
 export async function startServer() {
   await connectMongo();
-  await reportService.seedInitialReportsIfEmpty();
   return app.listen(PORT, () => {
     console.log(`[REPORT-API] Running on port ${PORT}`);
   });

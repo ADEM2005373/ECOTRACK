@@ -162,67 +162,6 @@ export class ReportService {
     const doc = await ReportModel.findById(id);
     return doc ? (doc.toJSON() as unknown as IReport) : null;
   }
-
-  /**
-   * Initialise les signalements réels de la Mairie de Zarzouna si la base est vide
-   */
-  async seedInitialReportsIfEmpty(): Promise<void> {
-    const count = await ReportModel.countDocuments();
-    if (count > 0) return;
-
-    const initialReports = [
-      {
-        description: 'Dépôt sauvage de gravats et mobilier abandonné près du marché',
-        category: 'DEPOT_SAUVAGE',
-        categorySuggested: 'DEPOT_SAUVAGE',
-        categoryValidated: 'DEPOT_SAUVAGE',
-        aiConfidenceScore: 0.92,
-        priority: 'HAUTE',
-        imageUrl: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80',
-        location: {
-          type: 'Point',
-          coordinates: [9.8667, 37.2667]
-        },
-        status: ReportStatus.NOUVEAU,
-        reporterId: new Types.ObjectId('672f08a0b9e1a2001c45a001')
-      },
-      {
-        description: 'Matelas et encombrants volumineux déposés sur le trottoir',
-        category: 'ENCOMBRANTS',
-        categorySuggested: 'ENCOMBRANTS',
-        categoryValidated: 'ENCOMBRANTS',
-        aiConfidenceScore: 0.78,
-        priority: 'MOYENNE',
-        imageUrl: 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=800&q=80',
-        location: {
-          type: 'Point',
-          coordinates: [9.8710, 37.2680]
-        },
-        status: ReportStatus.NOUVEAU,
-        reporterId: new Types.ObjectId('672f08a0b9e1a2001c45a002')
-      },
-      {
-        description: 'Déchets végétaux et branchages obstruant le caniveau',
-        category: 'VEGETAUX',
-        categorySuggested: 'VEGETAUX',
-        categoryValidated: 'VEGETAUX',
-        aiConfidenceScore: 0.85,
-        priority: 'MOYENNE',
-        imageUrl: 'https://images.unsplash.com/photo-1528323273322-d81458248d40?auto=format&fit=crop&w=800&q=80',
-        location: {
-          type: 'Point',
-          coordinates: [9.8630, 37.2620]
-        },
-        status: ReportStatus.NOUVEAU,
-        reporterId: new Types.ObjectId('672f08a0b9e1a2001c45a003')
-      }
-    ];
-
-    for (const r of initialReports) {
-      await ReportModel.create(r);
-    }
-    console.log('[REPORT-API] ✅ 3 signalements réels insérés en base MongoDB pour Zarzouna');
-  }
 }
 
 export const reportService = new ReportService();
