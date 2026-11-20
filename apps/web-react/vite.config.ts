@@ -25,8 +25,24 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       strictPort: true,
       host: '0.0.0.0',
-      // Forward /api to Nginx gateway (http://localhost:8080)
+      // Forward API routes to microservices directly with fallback to gateway
       proxy: {
+        '/api/v1/auth': {
+          target: 'http://localhost:3001',
+          changeOrigin: true,
+        },
+        '/api/v1/reports': {
+          target: 'http://localhost:3002',
+          changeOrigin: true,
+        },
+        '/api/v1/interventions': {
+          target: 'http://localhost:3003',
+          changeOrigin: true,
+        },
+        '/api/v1/audit': {
+          target: 'http://localhost:3004',
+          changeOrigin: true,
+        },
         '/api': {
           target: proxyTarget,
           changeOrigin: true,
