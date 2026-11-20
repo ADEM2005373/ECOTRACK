@@ -69,7 +69,7 @@ services:
     restart: unless-stopped
     ports:
       - "5672:5672"    # AMQP
-      - "15672:15672"  # Management Web UI
+      - "${RABBITMQ_MGMT_PORT:-16672}:15672"  # Management Web UI (16672 évite le conflit de ports réservés Windows Hyper-V/WinNAT)
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-ecotrack_admin}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-EcoTrackRabbit2026!}
