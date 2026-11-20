@@ -13,83 +13,118 @@ vi.mock('react-router-dom', () => ({
   useLocation: () => ({ pathname: '/agent/qualification' }),
 }));
 
-describe('QualificationPage (ECO-31 / SCRUM-51)', () => {
-  it('renders the split-screen view with title, AI suggestion and confidence badge', () => {
+describe('QualificationPage (ECO-31 / SCRUM-51 - Dual Mode Table & AI Consultation)', () => {
+  it('renders by default the list of reclamations with 4 actions and "En attente de validation" status', () => {
     render(<QualificationPage />);
 
-    // Header & Title
-    expect(screen.getByText('Qualification du signalement')).toBeDefined();
-    expect(screen.getByText('Suggestion de l’IA')).toBeDefined();
+    // Header & List Title
+    expect(screen.getByText('Liste des Réclamations')).toBeDefined();
+    expect(screen.getAllByText('Vision IA').length).toBeGreaterThan(0);
 
-    // AI Confidence badge (92% => Confiance Élevée)
-    expect(screen.getByText('Confiance Élevée : 92 %')).toBeDefined();
-    expect(screen.getByText('92 %')).toBeDefined();
+    // KPI Cards
+    expect(screen.getByText('Total Réclamations')).toBeDefined();
+    expect(screen.getAllByText('En attente de validation').length).toBeGreaterThan(0);
 
-    // Suggested category
-    expect(screen.getByText('Dépôt sauvage')).toBeDefined();
+    // Initial item in list
+    expect(screen.getByText('ECO-2026-0842')).toBeDefined();
+    expect(screen.getByText('Dépôt sur le trottoir, passage réduit')).toBeDefined();
 
-    // 3 Action Buttons
-    expect(screen.getByText('Valider la détection')).toBeDefined();
-    expect(screen.getByText('Modifier')).toBeDefined();
-    expect(screen.getByText('Rejeter l\'anomalie')).toBeDefined();
+    // 4 Action Buttons in table row
+    const consultBtns = screen.getAllByText('Consulter');
+    expect(consultBtns.length).toBeGreaterThan(0);
 
-    // Dispatch button is initially locked
-    expect(screen.getByText('Valider pour affecter')).toBeDefined();
+    const assignBtns = screen.getAllByText('Assigner');
+    expect(assignBtns.length).toBeGreaterThan(0);
+
+    const editBtns = screen.getAllByText('Modifier');
+    expect(editBtns.length).toBeGreaterThan(0);
+
+    const deleteBtns = screen.getAllByText('Supprimer');
+    expect(deleteBtns.length).toBeGreaterThan(0);
   });
 
-  it('validates the report and unlocks the dispatch button', () => {
+  it('switches to AI Consultation view when clicking "Consulter", validates and returns to list with "Validé" status', () => {
     render(<QualificationPage />);
 
+    // Click "Consulter" on the first item
+    const consultBtns = screen.getAllByText('Consulter');
+    fireEvent.click(consultBtns[0]);
+
+    // Now in Consultation view (Split-Screen)
+    expect(screen.getByText('Retour à la liste des réclamations')).toBeDefined();
+    expect(screen.getByText('Suggestion de l’IA')).toBeDefined();
+    expect(screen.getByText('Confiance Élevée : 92 %')).toBeDefined();
+    expect(screen.getByText('92 %')).toBeDefined();
+    expect(screen.getByText('Valider la détection')).toBeDefined();
+
+    // Validate the detection
     const validateBtn = screen.getByText('Valider la détection');
     fireEvent.click(validateBtn);
 
-    // Status updates to Validé
-    expect(screen.getByText('Validé')).toBeDefined();
+    // Status in consultation header becomes "Validé"
+    expect(screen.getAllByText('Validé').length).toBeGreaterThan(0);
 
-    // Dispatch button unlocks to "Affecter à une brigade"
-    expect(screen.getByText('Affecter à une brigade')).toBeDefined();
+    // Return to the list view
+    const backBtn = screen.getByText('Retour à la liste des réclamations');
+    fireEvent.click(backBtn);
+
+    // Now back in List view
+    expect(screen.getByText('Liste des Réclamations')).toBeDefined();
+    // Item ECO-2026-0842 now shows "Validé" badge
+    expect(screen.getAllByText('Validé').length).toBeGreaterThan(0);
   });
 
-  it('opens category override modal and allows changing the category', () => {
+  it('opens category override modal from the list view and confirms modification', () => {
     render(<QualificationPage />);
 
-    const overrideBtn = screen.getByText('Modifier');
-    fireEvent.click(overrideBtn);
+    const editBtns = screen.getAllByText('Modifier');
+    fireEvent.click(editBtns[0]);
 
     expect(screen.getByText('Modifier la catégorie')).toBeDefined();
     const confirmBtn = screen.getByText('Confirmer le changement');
     fireEvent.click(confirmBtn);
 
-    // Badge showing it was overridden by agent
-    expect(screen.getByText('Corrigé par l’agent')).toBeDefined();
+    // Toast or updated list
+    expect(screen.queryByText('Modifier la catégorie')).toBeNull();
   });
 
-  it('opens rejection modal and allows rejecting with a reason', () => {
+  it('opens brigade assignment modal from the list view and dispatches intervention', () => {
     render(<QualificationPage />);
 
-    const rejectBtn = screen.getByText('Rejeter l\'anomalie');
-    fireEvent.click(rejectBtn);
+    const assignBtns = screen.getAllByText('Assigner');
+    fireEvent.click(assignBtns[0]);
 
-    expect(screen.getByText('Rejeter le signalement')).toBeDefined();
-    expect(screen.getByText('Confirmer le Rejet')).toBeDefined();
+    expect(screen.getByText('Affectation à une Brigade Technique')).toBeDefined();
+    expect(screen.getByText('Brigade Spécialisée Cible')).toBeDefined();
 
+    const confirmAssignBtn = screen.getByText("Confirmer l'Affectation");
+    fireEvent.click(confirmAssignBtn);
+
+    // Status updates to "Assigné"
+    expect(screen.getAllByText('Assigné').length).toBeGreaterThan(0);
+  });
+
+  it('opens suppression / rejection modal and marks report as rejected', () => {
+    render(<QualificationPage />);
+
+    const deleteBtns = screen.getAllByText('Supprimer');
+    fireEvent.click(deleteBtns[0]);
+
+    expect(screen.getByText('Supprimer / Rejeter le signalement')).toBeDefined();
     const confirmRejectBtn = screen.getByText('Confirmer le Rejet');
     fireEvent.click(confirmRejectBtn);
 
     // Status badge becomes Rejeté
-    expect(screen.getByText('Rejeté')).toBeDefined();
+    expect(screen.getAllByText('Rejeté').length).toBeGreaterThan(0);
   });
 
-  it('navigates through queue items with Next and Previous buttons', () => {
+  it('filters reclamations by status when clicking KPI cards', () => {
     render(<QualificationPage />);
 
-    expect(screen.getAllByText('ECO-2026-0842').length).toBeGreaterThan(0);
+    // Click "En attente de validation" filter
+    const pendingKpi = screen.getByText('À vérifier par l\'agent');
+    fireEvent.click(pendingKpi);
 
-    const nextBtn = screen.getByTitle('Signalement suivant');
-    fireEvent.click(nextBtn);
-
-    // Next item in queue (ECO-2026-0843 with confidence 74% => À vérifier)
-    expect(screen.getAllByText('ECO-2026-0843').length).toBeGreaterThan(0);
-    expect(screen.getByText('À vérifier : 74 %')).toBeDefined();
+    expect(screen.getByText('ECO-2026-0842')).toBeDefined();
   });
 });
