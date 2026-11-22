@@ -14,7 +14,7 @@ type Props = TextInputProps & {
 };
 
 /** Champ de saisie avec libellé, aide, erreur et bordure adaptative. */
-export const TextField = forwardRef<TextInput, Props>(function TextField(
+export const TextField = forwardRef<any, Props>(function TextField(
   { label, error, hint, valid = false, accessory, editable = true, onFocus, onBlur, ...inputProps },
   ref,
 ) {

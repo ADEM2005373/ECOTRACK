@@ -47,7 +47,7 @@ export type ApiResult<T> = ApiSuccess<T> | ApiError;
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function apiUrl(path: string): string {
-  const base = env.apiUrl || 'http://192.168.43.76:8080';
+  const base = env.apiUrl || 'http://192.168.43.76:8090';
   return `${base.replace(/\/+$/, '')}${path}`;
 }
 

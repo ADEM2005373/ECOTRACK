@@ -4,7 +4,7 @@
  */
 
 export const env = {
-  apiUrl: process.env.EXPO_PUBLIC_API_URL || 'http://192.168.43.76:8080',
+  apiUrl: process.env.EXPO_PUBLIC_API_URL || 'http://192.168.43.76:8090',
 } as const;
 
 if (__DEV__ && !env.apiUrl) {

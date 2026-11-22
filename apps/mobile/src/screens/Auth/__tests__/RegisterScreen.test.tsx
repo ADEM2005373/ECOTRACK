@@ -1,6 +1,5 @@
 import React from 'react';
-import '@testing-library/react-native/extend-expect';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import RegisterScreen from '../RegisterScreen';
 import { apiErrorStrings, registerStrings as t, validationStrings as msg } from '../../../constants/strings';
 import { useAuthStore } from '../../../store/authStore';
@@ -19,11 +18,11 @@ jest.mock('../../../config/env', () => ({ env: { apiUrl: 'http://api.test' } }))
 
 const fetchMock = jest.fn<Promise<Response>, Parameters<typeof fetch>>();
 
-function fillValidForm() {
-  fireEvent.changeText(screen.getByLabelText(t.fields.fullName.label), 'Karim Ben Salah');
-  fireEvent.changeText(screen.getByLabelText(t.fields.email.label), 'Karim@Example.com');
-  fireEvent.changeText(screen.getByLabelText(t.fields.password.label), 'Password123!');
-  fireEvent.changeText(screen.getByLabelText(t.fields.phoneNumber.label), '20 123 456');
+async function fillValidForm() {
+  await fireEvent.changeText(await screen.findByLabelText(t.fields.fullName.label), 'Karim Ben Salah');
+  await fireEvent.changeText(screen.getByLabelText(t.fields.email.label), 'Karim@Example.com');
+  await fireEvent.changeText(screen.getByLabelText(t.fields.password.label), 'Password123!');
+  await fireEvent.changeText(screen.getByLabelText(t.fields.phoneNumber.label), '20 123 456');
 }
 
 beforeEach(() => {
@@ -34,24 +33,30 @@ beforeEach(() => {
   useAuthStore.getState().reset();
 });
 
+afterEach(() => {
+  cleanup();
+});
+
 describe('RegisterScreen', () => {
-  it('renders the 4 fields with the right keyboards and a masked password', () => {
-    render(<RegisterScreen />);
-    expect(screen.getByLabelText(t.fields.email.label)).toHaveProp('keyboardType', 'email-address');
+  it('renders the 4 fields with the right keyboards and a masked password', async () => {
+    await render(<RegisterScreen />);
+    expect(await screen.findByLabelText(t.fields.email.label)).toHaveProp('keyboardType', 'email-address');
     expect(screen.getByLabelText(t.fields.phoneNumber.label)).toHaveProp('keyboardType', 'phone-pad');
     expect(screen.getByLabelText(t.fields.password.label)).toHaveProp('secureTextEntry', true);
     expect(screen.getByLabelText(t.fields.fullName.label)).toBeOnTheScreen();
   });
 
-  it('toggles password visibility', () => {
-    render(<RegisterScreen />);
-    fireEvent.press(screen.getByRole('button', { name: t.showPassword }));
-    expect(screen.getByLabelText(t.fields.password.label)).toHaveProp('secureTextEntry', false);
+  it('toggles password visibility', async () => {
+    await render(<RegisterScreen />);
+    await fireEvent.press(screen.getByRole('button', { name: t.showPassword }));
+    await waitFor(() => {
+      expect(screen.getByLabelText(t.fields.password.label)).toHaveProp('secureTextEntry', false);
+    });
   });
 
   it('shows required errors and a summary above the button without calling the API', async () => {
-    render(<RegisterScreen />);
-    fireEvent.press(screen.getByRole('button', { name: t.submit }));
+    await render(<RegisterScreen />);
+    await fireEvent.press(screen.getByRole('button', { name: t.submit }));
 
     expect(await screen.findByText(msg.fullNameRequired)).toBeOnTheScreen();
     expect(screen.getByText(msg.emailRequired)).toBeOnTheScreen();
@@ -63,9 +68,9 @@ describe('RegisterScreen', () => {
 
   it('sends the normalized payload, shows "Compte créé !" and redirects to login', async () => {
     fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ message: 'ok', user: null }), { status: 201 }));
-    render(<RegisterScreen />);
-    fillValidForm();
-    fireEvent.press(screen.getByRole('button', { name: t.submit }));
+    await render(<RegisterScreen />);
+    await fillValidForm();
+    await fireEvent.press(screen.getByRole('button', { name: t.submit }));
 
     expect(await screen.findByText(t.success)).toBeOnTheScreen();
     expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toEqual({
@@ -79,9 +84,9 @@ describe('RegisterScreen', () => {
 
   it('shows the ticket message when the email is already used (409)', async () => {
     fetchMock.mockResolvedValueOnce(new Response('', { status: 409 }));
-    render(<RegisterScreen />);
-    fillValidForm();
-    fireEvent.press(screen.getByRole('button', { name: t.submit }));
+    await render(<RegisterScreen />);
+    await fillValidForm();
+    await fireEvent.press(screen.getByRole('button', { name: t.submit }));
 
     expect(await screen.findAllByText(apiErrorStrings.emailAlreadyUsed)).toHaveLength(2);
     expect(mockReplace).not.toHaveBeenCalled();
@@ -89,16 +94,16 @@ describe('RegisterScreen', () => {
 
   it('shows a network error when the server is unreachable', async () => {
     fetchMock.mockRejectedValueOnce(new TypeError('Network request failed'));
-    render(<RegisterScreen />);
-    fillValidForm();
-    fireEvent.press(screen.getByRole('button', { name: t.submit }));
+    await render(<RegisterScreen />);
+    await fillValidForm();
+    await fireEvent.press(screen.getByRole('button', { name: t.submit }));
 
     expect(await screen.findByText(apiErrorStrings.offline)).toBeOnTheScreen();
   });
 
-  it('navigates to login from the link', () => {
-    render(<RegisterScreen />);
-    fireEvent.press(screen.getByRole('link', { name: t.loginLink }));
+  it('navigates to login from the link', async () => {
+    await render(<RegisterScreen />);
+    await fireEvent.press(await screen.findByText(t.loginLink));
     expect(mockPush).toHaveBeenCalledWith('/login');
   });
 });

@@ -8,7 +8,7 @@ type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
 const tabIcon =
   (name: IconName) =>
-  ({ color, size }: { color: string; size: number }) => <Ionicons name={name} size={size} color={color} />;
+  ({ color, size }: { color: any; size: number }) => <Ionicons name={name} size={size} color={color} />;
 
 export default function TabsLayout() {
   const user = useAuthStore((state) => state.user);

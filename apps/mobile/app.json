@@ -35,7 +35,8 @@
         {
           "locationAlwaysAndWhenInUsePermission": "EcoTrack utilise votre position pour trier les interventions proches."
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true
