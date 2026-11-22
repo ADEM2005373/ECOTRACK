@@ -20,7 +20,8 @@ import {
   ZoomOut,
   Plus,
   RefreshCw,
-  Send
+  Send,
+  Trash2
 } from 'lucide-react';
 
 export interface ReportItem {
@@ -133,6 +134,10 @@ export const AgentMairieDashboard: React.FC = () => {
   // Modale de détection & marquage de doublon
   const [duplicateTarget, setDuplicateTarget] = useState<ReportItem | null>(null);
   const [masterReference, setMasterReference] = useState('');
+
+  // Modale de confirmation de suppression définitive
+  const [deleteTarget, setDeleteTarget] = useState<ReportItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Helpers pour les en-têtes d'authentification et traçabilité d'audit
   const getAuthHeaders = () => {
@@ -379,6 +384,32 @@ export const AgentMairieDashboard: React.FC = () => {
       showToast(`Signalement marqué comme doublon`);
       setDuplicateTarget(null);
       setMasterReference('');
+    }
+  };
+
+  // Suppression définitive d'un signalement dans MongoDB
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      const headers = getAuthHeaders();
+      await fetch(`/api/v1/reports/${deleteTarget.id}`, {
+        method: 'DELETE',
+        headers
+      });
+
+      // Retrait immédiat de l'anomalie de l'affichage local
+      setReports(prev => prev.filter(r => r.id !== deleteTarget.id));
+      showToast(`Signalement ${deleteTarget.reference} supprimé définitivement avec succès.`);
+      setDeleteTarget(null);
+      if (viewTarget?.id === deleteTarget.id) setViewTarget(null);
+    } catch {
+      setReports(prev => prev.filter(r => r.id !== deleteTarget.id));
+      showToast(`Signalement ${deleteTarget.reference} supprimé.`);
+      setDeleteTarget(null);
+      if (viewTarget?.id === deleteTarget.id) setViewTarget(null);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -770,6 +801,16 @@ export const AgentMairieDashboard: React.FC = () => {
                               Rejeter
                             </button>
                           )}
+
+                          {/* Supprimer définitivement */}
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget(incident)}
+                            className="p-2 rounded-[6px] bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition shadow-sm"
+                            title="Supprimer définitivement ce signalement"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -1053,6 +1094,15 @@ export const AgentMairieDashboard: React.FC = () => {
                       <span>Rejeter (T5)</span>
                     </button>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(viewTarget)}
+                    className="w-full flex items-center justify-center gap-1.5 border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold py-2 rounded-[8px] text-xs transition shadow-sm mt-2"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                    <span>Supprimer définitivement ce signalement</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1102,6 +1152,55 @@ export const AgentMairieDashboard: React.FC = () => {
                 className="px-4 py-2 rounded-[8px] text-xs font-semibold bg-[#1e3a8a] hover:bg-[#1e40af] disabled:opacity-50 text-white shadow-sm"
               >
                 Confirmer le Doublon
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 10. MODALE DE SUPPRESSION DÉFINITIVE ────────────────────────────────── */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="bg-white border border-[#e2e8f0] rounded-[14px] p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center gap-2.5 text-[#dc2626] border-b border-[#e2e8f0] pb-3">
+              <div className="p-2 rounded-full bg-rose-100 text-rose-600">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-[#0f172a]">Supprimer le signalement</h3>
+                <p className="text-xs text-[#64748b]">Dossier : <strong className="font-mono text-[#dc2626]">{deleteTarget.reference}</strong></p>
+              </div>
+            </div>
+
+            <p className="text-xs text-[#475569] leading-relaxed">
+              Êtes-vous sûr de vouloir supprimer définitivement ce signalement ? Cette action est irréversible et supprimera le dossier de la base de données.
+            </p>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs space-y-1">
+              <div className="text-[#0f172a] font-semibold">{deleteTarget.title}</div>
+              <div className="text-[#64748b] flex items-center gap-1">
+                <MapPin className="w-3 h-3 text-emerald-600" />
+                <span>{deleteTarget.district}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#e2e8f0]">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="px-4 py-2 rounded-[8px] text-xs font-semibold text-[#475569] hover:bg-[#f1f5f9]"
+                disabled={isDeleting}
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 rounded-[8px] text-xs font-semibold bg-[#dc2626] hover:bg-[#b91c1c] text-white shadow-sm flex items-center gap-1.5 transition"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{isDeleting ? 'Suppression...' : 'Confirmer la suppression'}</span>
               </button>
             </div>
           </div>

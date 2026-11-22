@@ -130,6 +130,34 @@ export class ReportController {
       });
     }
   }
+
+  /**
+   * DELETE /reports/:id
+   * Suppression définitive d'un signalement dans MongoDB
+   */
+  async deleteReport(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+      const success = await reportService.deleteReport(id);
+
+      if (!success) {
+        return res.status(404).json({
+          error: 'NOT_FOUND',
+          message: `Le signalement avec l'identifiant ${id} est introuvable ou déjà supprimé.`
+        });
+      }
+
+      return res.status(200).json({
+        message: 'Signalement supprimé avec succès',
+        id
+      });
+    } catch (err: any) {
+      return res.status(500).json({
+        error: 'INTERNAL_SERVER_ERROR',
+        message: err.message || 'Erreur lors de la suppression du signalement.'
+      });
+    }
+  }
 }
 
 export const reportController = new ReportController();

@@ -162,6 +162,17 @@ export class ReportService {
     const doc = await ReportModel.findById(id);
     return doc ? (doc.toJSON() as unknown as IReport) : null;
   }
+
+  /**
+   * Supprime un signalement par son identifiant unique MongoDB
+   */
+  async deleteReport(id: string): Promise<boolean> {
+    if (!mongoose.isValidObjectId(id)) {
+      return false;
+    }
+    const result = await ReportModel.findByIdAndDelete(id);
+    return !!result;
+  }
 }
 
 export const reportService = new ReportService();
