@@ -10,6 +10,7 @@ async function seedLiveReports() {
   const reporterId = citizen?._id || new Types.ObjectId();
 
   const reports = [
+    // 1. Mission ASSIGNÉE (À traiter) -> Bouton "Démarrer l'intervention (T3)" disponible
     {
       _id: new Types.ObjectId('6b02f1001111222233334401'),
       reporterId,
@@ -48,6 +49,8 @@ async function seedLiveReports() {
       createdAt: new Date(Date.now() - 3600000 * 4),
       updatedAt: new Date(Date.now() - 3600000 * 2),
     },
+
+    // 2. Mission EN COURS (En intervention) -> Bouton "Démarrer" MASQUÉ, Formulaire "Clôture & Preuve T4" AFFICHÉ
     {
       _id: new Types.ObjectId('6b02f1001111222233334402'),
       reporterId,
@@ -79,8 +82,36 @@ async function seedLiveReports() {
       createdAt: new Date(Date.now() - 3600000 * 6),
       updatedAt: new Date(Date.now() - 3600000),
     },
+
+    // 3. Mission TERMINÉE (Résolue) -> Clôturée avec photo après travaux certifiée
     {
       _id: new Types.ObjectId('6b02f1001111222233334403'),
+      reporterId,
+      category: 'GRAFFITI',
+      categoryValidated: 'GRAFFITI',
+      description: 'Tags et graffitis dégradant le mur de l\'école primaire de Zarzouna.',
+      imageUrl: 'https://images.unsplash.com/photo-1584467735871-8e85353a8413?auto=format&fit=crop&w=800&q=80',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1584467735871-8e85353a8413?auto=format&fit=crop&w=200&q=80',
+      completionPhotoUrl: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80',
+      resolutionNotes: 'Nettoyage haute pression et couche de peinture protectrice appliqués.',
+      location: {
+        type: 'Point',
+        coordinates: [9.8700, 37.2650],
+      },
+      status: ReportStatus.RESOLU,
+      priority: 'MOYENNE',
+      assignedTeamId: 'Brigade Voirie & Salubrité',
+      assignedWorkerId: 'chef.voirie@zarzouna.tn',
+      district: 'Quartier Scolaire, Zarzouna',
+      startedAt: new Date(Date.now() - 3600000 * 8),
+      resolvedAt: new Date(Date.now() - 3600000 * 2),
+      createdAt: new Date(Date.now() - 3600000 * 12),
+      updatedAt: new Date(Date.now() - 3600000 * 2),
+    },
+
+    // 4. Dossier NOUVEAU -> Pour modération bureautique Mairie
+    {
+      _id: new Types.ObjectId('6b02f1001111222233334404'),
       reporterId,
       category: 'DECHETS_DANGEREUX',
       categorySuggested: 'DECHETS_DANGEREUX',

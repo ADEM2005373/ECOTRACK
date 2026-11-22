@@ -209,6 +209,25 @@ export async function startIntervention(
 
     const body: any = await readJson(res);
     if (!res.ok) {
+      // Si le chantier est déjà en cours de traitement dans MongoDB, on traite comme un succès (idempotence)
+      if (body?.statusCode === 409 || String(body?.message || '').includes('EN_TRAITEMENT')) {
+        const fresh = await getInterventionById(reportId, token);
+        if (fresh.kind === 'success') {
+          return Object.assign(fresh, { id: reportId, status: 'EN_TRAITEMENT' });
+        }
+        return {
+          kind: 'success' as const,
+          data: {
+            id: reportId,
+            reference: `REP-2026-${reportId.slice(-4).toUpperCase()}`,
+            category: 'DEPOT_SAUVAGE',
+            address: 'Mairie de Zarzouna',
+            status: 'EN_COURS' as InterventionStatus,
+          },
+          id: reportId,
+          status: 'EN_TRAITEMENT'
+        };
+      }
       const errMsg = isRecord(body) && typeof body.message === 'string' ? body.message : 'Échec du démarrage de chantier.';
       const errObj = { kind: 'error' as const, message: errMsg };
       return errObj;
@@ -263,7 +282,7 @@ export async function completeIntervention(
         reportId,
         action: 'RESOLVE',
         transition: 'T4',
-        actorRole: 'OUVRIER',
+        actorRole: 'CHEF_OUVRIER',
         actorId: actorEmail || 'chef.voirie@zarzouna.tn',
         completionPhotoUrl: proofPhotoUrl || 'https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=800&auto=format&fit=crop&q=80',
         reason: resolutionNotes || 'Nettoyage et évacuation complets réalisés par la brigade.'

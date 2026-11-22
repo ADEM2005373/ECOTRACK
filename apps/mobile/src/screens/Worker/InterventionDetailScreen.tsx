@@ -70,11 +70,12 @@ export default function InterventionDetailScreen() {
     setActionLoading(false);
 
     if (res.kind === 'success') {
-      setIntervention(res.data);
+      setIntervention((prev) => prev ? { ...prev, status: 'EN_COURS' } : res.data);
       Alert.alert(
         'Chantier Démarré (T3)',
-        'Le statut est passé à "En intervention". Le tableau de bord municipal a été notifié en direct.'
+        'Le statut est passé à "En intervention". Vous pouvez maintenant effectuer les travaux et soumettre la photo de fin.'
       );
+      void loadIntervention();
     } else {
       Alert.alert('Erreur', res.message);
     }
@@ -96,12 +97,13 @@ export default function InterventionDetailScreen() {
     setActionLoading(false);
 
     if (res.kind === 'success') {
-      setIntervention(res.data);
+      setIntervention((prev) => prev ? { ...prev, status: 'TERMINEE', resolutionPhotoUri: finalPhoto, resolutionNotes } : res.data);
       Alert.alert(
         'Mission Clôturée avec Succès (T4)',
         'La photo de preuve et les notes ont été transmises. Le signalement est désormais validé Résolu sur le tableau de bord municipal.',
         [{ text: 'Retour aux missions', onPress: () => router.back() }]
       );
+      void loadIntervention();
     } else {
       Alert.alert('Erreur', res.message);
     }
@@ -183,9 +185,15 @@ export default function InterventionDetailScreen() {
     );
   }
 
-  const isAssigned = intervention.status === 'EN_ATTENTE';
-  const isInProgress = intervention.status === 'EN_COURS';
-  const isDone = intervention.status === 'TERMINEE';
+  const rawStatus = String(intervention.status || '').toUpperCase();
+  const isDone = rawStatus === 'TERMINEE' || rawStatus === 'RESOLU' || rawStatus === 'RESOLVED';
+  const isInProgress = !isDone && (
+    rawStatus === 'EN_COURS' ||
+    rawStatus === 'EN_TRAITEMENT' ||
+    rawStatus === 'IN_PROGRESS' ||
+    rawStatus === 'TRAITEMENT'
+  );
+  const isAssigned = !isDone && !isInProgress;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>

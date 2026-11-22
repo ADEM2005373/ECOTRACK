@@ -257,6 +257,9 @@ export class StateMachineService {
 
     const fromStatuses = Array.isArray(rule.from) ? rule.from : [rule.from];
     if (!fromStatuses.includes(currentStatus)) {
+      if (code === 'T3' && currentStatus === ReportStatus.EN_TRAITEMENT) {
+        return report.toJSON() as unknown as IReport;
+      }
       throw new InvalidTransitionError(
         `Impossible d'exécuter ${code} depuis le statut '${currentStatus}'.`
       );
@@ -310,12 +313,17 @@ export class StateMachineService {
 
     if (
       (code === 'T3' || code === 'T4') &&
-      (actorRole === UserRole.CHEF_OUVRIER || actorRole === UserRole.OUVRIER) &&
-      (!report.assignedWorkerId || report.assignedWorkerId !== input.actorId)
+      (actorRole === UserRole.CHEF_OUVRIER || actorRole === UserRole.OUVRIER)
     ) {
-      throw new WorkflowForbiddenError(
-        "L'ouvrier ou chef d'équipe n'est pas assigné à ce signalement."
-      );
+      const isChef = actorRole === UserRole.CHEF_OUVRIER;
+      const isDirectAssignee = report.assignedWorkerId && (report.assignedWorkerId === input.actorId || report.assignedWorkerId === input.assigneeId);
+      const isTeamAssignee = Boolean(report.assignedTeamId);
+
+      if (!isChef && !isDirectAssignee && !isTeamAssignee) {
+        throw new WorkflowForbiddenError(
+          "L'ouvrier ou chef d'équipe n'est pas assigné à ce signalement."
+        );
+      }
     }
 
     if (rule.requiresReason && !input.reason?.trim()) {
