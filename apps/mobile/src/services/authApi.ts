@@ -26,6 +26,7 @@ export type LoggedInUser = {
   email: string;
   fullName: string;
   role: string;
+  municipality?: string;
 };
 
 export type LoginPayload = {
@@ -131,7 +132,7 @@ function toLoggedInUser(body: unknown): LoggedInUser | null {
     user?: unknown;
   };
   if (!isRecord(user)) return null;
-  const { id, email, fullName, role } = user;
+  const { id, email, fullName, role, municipality } = user as Record<string, unknown>;
   if (
     typeof id !== 'string' ||
     typeof email !== 'string' ||
@@ -139,7 +140,13 @@ function toLoggedInUser(body: unknown): LoggedInUser | null {
     typeof role !== 'string'
   )
     return null;
-  return { id, email, fullName, role };
+  return {
+    id,
+    email,
+    fullName,
+    role,
+    municipality: typeof municipality === 'string' ? municipality : 'Mairie de Zarzouna',
+  };
 }
 
 export async function loginUser(

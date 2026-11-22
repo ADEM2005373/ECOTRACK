@@ -90,47 +90,39 @@ export default function LoginScreen() {
 
         {/* 1-Click Role Presets */}
         <View style={styles.presetsContainer}>
-          <Text style={styles.presetsTitle}>Comptes Démo (5 Rôles en 1 Clic)</Text>
+          <Text style={styles.presetsTitle}>Comptes Réels MongoDB (1 Clic)</Text>
           
           <View style={styles.presetGrid}>
             <TouchableOpacity
               style={styles.presetButton}
-              onPress={() => handleSelectRole('citoyen@ecotrack.tn', 'Citoyen2026!')}
+              onPress={() => handleSelectRole('chef.voirie@zarzouna.tn', 'Chef2026!')}
             >
-              <Text style={styles.presetRole}>📱 Citoyen</Text>
-              <Text style={styles.presetDesc}>Déclarer & Suivre</Text>
+              <Text style={styles.presetRole}>👷 Chef Voirie</Text>
+              <Text style={styles.presetDesc}>Missions Zarzouna</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.presetButton}
-              onPress={() => handleSelectRole('chef.ouvrier@ecotrack.tn', 'Ouvrier2026!')}
+              onPress={() => handleSelectRole('chef.poidslourd@zarzouna.tn', 'Chef2026!')}
             >
-              <Text style={styles.presetRole}>👷 Chef Ouvrier</Text>
-              <Text style={styles.presetDesc}>Feuille de Route</Text>
+              <Text style={styles.presetRole}>🚛 Chef Poids Lourd</Text>
+              <Text style={styles.presetDesc}>Missions Zarzouna</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.presetButton}
-              onPress={() => handleSelectRole('agent.tunis@ecotrack.tn', 'Agent2026!')}
+              onPress={() => handleSelectRole('adel@zarzouna.tn', 'Agent2026!')}
             >
               <Text style={styles.presetRole}>📋 Agent Mairie</Text>
-              <Text style={styles.presetDesc}>Tri & Modération</Text>
+              <Text style={styles.presetDesc}>Tri & Dispatching</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.presetButton}
-              onPress={() => handleSelectRole('mairie.tunis@ecotrack.tn', 'Mairie2026!')}
-            >
-              <Text style={styles.presetRole}>🏛️ Admin Mairie</Text>
-              <Text style={styles.presetDesc}>KPIs Municipaux</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.presetButton, styles.fullWidthPreset]}
               onPress={() => handleSelectRole('admin@ecotrack.tn', 'Admin2026!')}
             >
-              <Text style={styles.presetRole}>👑 Admin SaaS Global</Text>
-              <Text style={styles.presetDesc}>Supervision Métropolitaine</Text>
+              <Text style={styles.presetRole}>👑 Admin SaaS</Text>
+              <Text style={styles.presetDesc}>Supervision Globale</Text>
             </TouchableOpacity>
           </View>
         </View>

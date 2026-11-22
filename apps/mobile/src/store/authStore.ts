@@ -73,6 +73,7 @@ export type AuthUser = {
   email: string;
   phoneNumber: string | null;
   role: string | null;
+  municipality?: string | null;
 };
 
 type AuthState = {
@@ -147,6 +148,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
             email: user.email,
             phoneNumber: null,
             role: user.role,
+            municipality: user.municipality ?? 'Mairie de Zarzouna',
           };
           set({
             status: 'success',
@@ -185,6 +187,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
           email: user.email,
           phoneNumber: null,
           role: user.role,
+          municipality: (user as any).municipality ?? 'Mairie de Zarzouna',
         },
         status: 'success',
       });
