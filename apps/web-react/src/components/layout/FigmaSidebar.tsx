@@ -17,8 +17,7 @@ import {
   AlertTriangle,
   Building2,
   Server,
-  HelpCircle,
-  Repeat
+  HelpCircle
 } from 'lucide-react';
 
 interface FigmaSidebarProps {
@@ -44,19 +43,6 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const [showRoleModal, setShowRoleModal] = useState(false);
-  const [dbUsers, setDbUsers] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (showRoleModal) {
-      fetch('/api/v1/auth/users')
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data.users)) setDbUsers(data.users);
-        })
-        .catch(() => {});
-    }
-  }, [showRoleModal]);
 
   const getRoleConfig = () => {
     switch (role) {
@@ -182,19 +168,6 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
           </p>
         </div>
 
-        {/* Bouton Testeur Rapide de Rôles */}
-        <button
-          onClick={() => setShowRoleModal(true)}
-          className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#059669]/20 hover:bg-[#059669]/30 border border-[#059669]/40 text-[#6ee7b7] text-[11px] font-medium transition cursor-pointer"
-          title="Changer de compte pour tester tous les rôles"
-        >
-          <span className="flex items-center gap-1.5 truncate">
-            <Repeat className="w-3.5 h-3.5" />
-            <span>Tester les 5 Rôles</span>
-          </span>
-          <span className="text-[10px] font-bold bg-[#059669] text-white px-1.5 py-0.2 rounded">5/5</span>
-        </button>
-
         {/* Figma: Section Navigation */}
         <div className="flex flex-col gap-[6px]">
           <p className="text-[#aec5cb] text-[10px] font-semibold tracking-[1.2px] uppercase px-[4px]">
@@ -274,111 +247,6 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
           </button>
         </div>
       </div>
-
-      {/* Modal Changement Rapide de Rôle pour Démonstration */}
-      {showRoleModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white border border-[#e2e8f0] rounded-xl p-5 max-w-md w-full shadow-2xl space-y-3 text-[#0f172a]">
-            <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-2.5">
-              <div className="flex items-center gap-2">
-                <Repeat className="w-5 h-5 text-[#059669]" />
-                <h3 className="text-sm font-bold text-[#0f172a]">
-                  Tester un autre compte (5 Rôles)
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowRoleModal(false)}
-                className="text-[#94a3b8] hover:text-[#0f172a] font-bold"
-              >
-                ✕
-              </button>
-            </div>
-
-            <p className="text-xs text-[#475569]">
-              Comptes réels enregistrés dans la base MongoDB (seul Admin SaaS conservé par défaut) :
-            </p>
-
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {dbUsers.length > 0 ? (
-                dbUsers.map((u: any) => (
-                  <button
-                    key={u.id || u._id}
-                    onClick={() => {
-                      loginSuccess({
-                        id: u.id || u._id,
-                        email: u.email,
-                        fullName: u.fullName,
-                        role: u.role,
-                        municipality: u.municipality || 'Collectivité'
-                      }, 'jwt_access_token_real');
-                      fetch('/api/v1/auth/audit-event', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          actorId: u.id || u._id || u.email,
-                          actorRole: u.role,
-                          action: 'USER_LOGIN',
-                          entityId: u.id || u._id || u.email,
-                          reason: `Connexion (sélecteur) de ${u.fullName} (${u.role}) - Collectivité: ${u.municipality || 'SaaS'}`,
-                          after: { email: u.email, role: u.role, municipality: u.municipality }
-                        })
-                      }).catch(() => {});
-                      setShowRoleModal(false);
-                      navigate('/');
-                    }}
-                    className={`w-full text-left p-2.5 rounded-lg border transition flex items-center justify-between ${
-                      user?.email === u.email
-                        ? 'bg-emerald-50 border-[#059669] text-[#065f46]'
-                        : 'bg-slate-50 border-[#e2e8f0] hover:bg-slate-100 text-[#0f172a]'
-                    }`}
-                  >
-                    <div>
-                      <span className="font-bold text-xs block">{u.fullName} ({u.role})</span>
-                      <span className="text-[11px] text-[#64748b]">{u.email} · {u.municipality || 'SaaS Global'}</span>
-                    </div>
-                    {user?.email === u.email && (
-                      <span className="text-[10px] font-bold bg-[#059669] text-white px-2 py-0.5 rounded">Connecté</span>
-                    )}
-                  </button>
-                ))
-              ) : (
-                <div className="p-3 bg-slate-50 rounded-lg text-xs text-[#64748b] text-center">
-                  Chargement des comptes...
-                </div>
-              )}
-            </div>
-
-            {dbUsers.length === 1 && (
-              <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-lg text-xs text-[#065f46] space-y-1">
-                <p className="font-bold">✨ Base épurée sans fausses données</p>
-                <p className="text-[11px] text-[#047857]">
-                  En tant qu'Admin SaaS, vous pouvez créer de nouvelles municipalités, agents et équipes depuis l'onglet <strong>Supervision des Mairies</strong>. Ils apparaîtront automatiquement ici.
-                </p>
-              </div>
-            )}
-
-            <div className="pt-2 flex justify-between items-center">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowRoleModal(false);
-                  navigate('/?tab=municipalities');
-                }}
-                className="text-xs font-semibold text-[#059669] hover:underline"
-              >
-                + Ajouter une Municipalité
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowRoleModal(false)}
-                className="px-3 py-1.5 text-xs text-[#475569] hover:bg-slate-100 rounded-lg"
-              >
-                Fermer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </aside>
   );
 };
