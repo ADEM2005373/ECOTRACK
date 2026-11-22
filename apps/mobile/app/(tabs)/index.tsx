@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { Alert, StyleSheet, Text, View, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,12 @@ import { useAuthStore } from '../../src/store/authStore';
 export default function HomeScreen() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
+
+  React.useEffect(() => {
+    if (user?.role === 'CHEF_OUVRIER' || user?.role === 'OUVRIER') {
+      router.replace('/(tabs)/roadmap');
+    }
+  }, [user?.role]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -25,7 +31,11 @@ export default function HomeScreen() {
               </View>
             </View>
 
-            <TouchableOpacity style={styles.notificationBtn} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.notificationBtn}
+              activeOpacity={0.7}
+              onPress={() => Alert.alert('Centre de Notifications', 'Aucune nouvelle notification municipale non lue.')}
+            >
               <Ionicons name="notifications-outline" size={20} color="#0f172a" />
               <View style={styles.notificationDot} />
             </TouchableOpacity>
@@ -132,7 +142,12 @@ export default function HomeScreen() {
               image: 'https://images.unsplash.com/photo-1528323273322-d81458248d40?w=300&auto=format&fit=crop&q=60'
             }
           ].map((item) => (
-            <View key={item.id} style={styles.reportCard}>
+            <TouchableOpacity
+              key={item.id}
+              style={styles.reportCard}
+              activeOpacity={0.8}
+              onPress={() => router.push('/(tabs)/mes-signalements')}
+            >
               <Image source={{ uri: item.image }} style={styles.reportImage} />
               <View style={styles.reportContent}>
                 <View style={styles.reportTopRow}>
@@ -147,7 +162,7 @@ export default function HomeScreen() {
                   <Text style={styles.locationText} numberOfLines={1}>{item.location}</Text>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       </ScrollView>

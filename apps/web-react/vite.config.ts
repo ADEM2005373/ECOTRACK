@@ -14,9 +14,9 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: [
-        { find: /^react$/, replacement: path.resolve(__dirname, 'node_modules/react') },
-        { find: /^react-dom$/, replacement: path.resolve(__dirname, 'node_modules/react-dom') },
-        { find: /^react-router-dom$/, replacement: path.resolve(__dirname, 'node_modules/react-router-dom') },
+        { find: 'react', replacement: path.resolve(__dirname, 'node_modules/react') },
+        { find: 'react-dom', replacement: path.resolve(__dirname, 'node_modules/react-dom') },
+        { find: 'react-router-dom', replacement: path.resolve(__dirname, 'node_modules/react-router-dom') },
         { find: '@', replacement: path.resolve(__dirname, './src') },
       ],
       dedupe: ['react', 'react-dom', 'react-router', 'react-router-dom'],

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -26,7 +27,7 @@ type LoginValues = z.infer<typeof loginSchema>;
 
 export default function LoginScreen() {
   const router = useRouter();
-  const login = useAuthStore((state) => state.login);
+  const { login, logout } = useAuthStore();
   const [globalError, setGlobalError] = useState<string | null>(null);
 
   const { control, handleSubmit, setValue, formState: { isSubmitting } } = useForm<LoginValues>({
@@ -42,7 +43,25 @@ export default function LoginScreen() {
     const result = await login(values);
     
     if (result.kind === 'success') {
-      router.replace('/(tabs)');
+      const userRole = result.user.role;
+
+      // Séparation stricte : Les profils Admin / Agent de Mairie sont réservés à la console Web sur PC
+      if (userRole === 'ADMIN_SAAS' || userRole === 'ADMIN_MUNICIPALITE' || userRole === 'AGENT_MAIRIE') {
+        await logout();
+        Alert.alert(
+          'Accès Réservé au Web',
+          `Le profil "${result.user.fullName}" (${userRole.replace('_', ' ')}) est un compte bureautique / supervision.\n\nCe rôle dispose de sa console complète sur ordinateur Web (http://localhost:3000).\n\nL'application mobile est exclusivement réservée aux équipes de terrain (Chef Ouvrier) et aux Citoyens.`,
+          [{ text: 'Compris' }]
+        );
+        return;
+      }
+
+      // Redirection adaptée selon le rôle mobile
+      if (userRole === 'CHEF_OUVRIER' || userRole === 'OUVRIER') {
+        router.replace('/(tabs)/roadmap');
+      } else {
+        router.replace('/(tabs)');
+      }
     } else {
       setGlobalError('Identifiants invalides ou service injoignable');
     }
@@ -64,7 +83,7 @@ export default function LoginScreen() {
           <Text style={styles.brandTitle}>ECOTRACK</Text>
           <Text style={styles.brandSubtitle}>PORTAIL SMART CITY MOBILE</Text>
           <Text style={styles.brandDescription}>
-            Gestion des anomalies urbaines, modération municipale et missions de terrain
+            Application mobile dédiée aux équipes de terrain (Chef Ouvrier) et aux Citoyens
           </Text>
         </View>
 
@@ -88,9 +107,9 @@ export default function LoginScreen() {
           <PrimaryButton label="Se connecter" onPress={onSubmit} loading={isSubmitting} />
         </View>
 
-        {/* 1-Click Role Presets */}
+        {/* 1-Click Role Presets (Strictement Mobile : Chefs & Citoyens) */}
         <View style={styles.presetsContainer}>
-          <Text style={styles.presetsTitle}>Comptes Réels MongoDB (1 Clic)</Text>
+          <Text style={styles.presetsTitle}>Comptes Mobiles Dédiés (1 Clic)</Text>
           
           <View style={styles.presetGrid}>
             <TouchableOpacity
@@ -98,7 +117,7 @@ export default function LoginScreen() {
               onPress={() => handleSelectRole('chef.voirie@zarzouna.tn', 'Chef2026!')}
             >
               <Text style={styles.presetRole}>👷 Chef Voirie</Text>
-              <Text style={styles.presetDesc}>Missions Zarzouna</Text>
+              <Text style={styles.presetDesc}>Mohamed Ali Khemiri</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -106,24 +125,30 @@ export default function LoginScreen() {
               onPress={() => handleSelectRole('chef.poidslourd@zarzouna.tn', 'Chef2026!')}
             >
               <Text style={styles.presetRole}>🚛 Chef Poids Lourd</Text>
-              <Text style={styles.presetDesc}>Missions Zarzouna</Text>
+              <Text style={styles.presetDesc}>Tarek Jouini</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.presetButton}
-              onPress={() => handleSelectRole('adel@zarzouna.tn', 'Agent2026!')}
+              onPress={() => handleSelectRole('citoyen@zarzouna.tn', 'Citoyen2026!')}
             >
-              <Text style={styles.presetRole}>📋 Agent Mairie</Text>
-              <Text style={styles.presetDesc}>Tri & Dispatching</Text>
+              <Text style={styles.presetRole}>👤 Citoyen Zarzouna</Text>
+              <Text style={styles.presetDesc}>Signalements Quartier</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.presetButton}
-              onPress={() => handleSelectRole('admin@ecotrack.tn', 'Admin2026!')}
+              onPress={() => handleSelectRole('citoyen@ecotrack.tn', 'Citoyen2026!')}
             >
-              <Text style={styles.presetRole}>👑 Admin SaaS</Text>
-              <Text style={styles.presetDesc}>Supervision Globale</Text>
+              <Text style={styles.presetRole}>👤 Citoyen Test</Text>
+              <Text style={styles.presetDesc}>Compte Démo Citoyen</Text>
             </TouchableOpacity>
+          </View>
+
+          <View style={styles.webNoteBox}>
+            <Text style={styles.webNoteText}>
+              💻 <Text style={{ fontWeight: 'bold' }}>Rôles Web uniquement :</Text> Les consoles Administrateur SaaS, Directeur Mairie et Agent de Modération s'ouvrent sur navigateur PC (http://localhost:3000).
+            </Text>
           </View>
         </View>
 
@@ -184,11 +209,22 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
   },
-  fullWidthPreset: {
-    width: '100%',
-  },
   presetRole: { fontSize: 12, fontWeight: 'bold', color: '#0f172a' },
   presetDesc: { fontSize: 10, color: '#64748b', marginTop: 2 },
+  webNoteBox: {
+    marginTop: 14,
+    backgroundColor: '#f1f5f9',
+    borderRadius: 8,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  webNoteText: {
+    fontSize: 11,
+    color: '#475569',
+    lineHeight: 16,
+    textAlign: 'center',
+  },
   registerLink: { marginTop: spacing.xl, alignItems: 'center' },
   registerText: { fontSize: 12, color: '#64748b' },
   registerBold: { color: '#059669', fontWeight: 'bold' },

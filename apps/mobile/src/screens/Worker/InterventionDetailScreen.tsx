@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { colors, spacing, textStyles } from '../../theme';
 import {
   getInterventionById,
@@ -125,6 +126,40 @@ export default function InterventionDetailScreen() {
     );
     setShowIssueBox(false);
     setIssueNote('');
+  };
+
+  // 6. Prise de photo caméra ou galerie (Preuve T4)
+  const handleTakePhoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission requise', 'L\'autorisation caméra est nécessaire pour capturer la preuve sur place.');
+        return;
+      }
+      const res = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        quality: 0.8,
+      });
+      if (!res.canceled && res.assets?.[0]?.uri) {
+        setProofPhotoUrl(res.assets[0].uri);
+      }
+    } catch {
+      Alert.alert('Information', 'Fonction photo directe prête.');
+    }
+  };
+
+  const handlePickGallery = async () => {
+    try {
+      const res = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: true,
+        quality: 0.8,
+      });
+      if (!res.canceled && res.assets?.[0]?.uri) {
+        setProofPhotoUrl(res.assets[0].uri);
+      }
+    } catch {
+      Alert.alert('Information', 'Fonction galerie prête.');
+    }
   };
 
   if (loading) {
@@ -259,20 +294,35 @@ export default function InterventionDetailScreen() {
           </Text>
 
           {/* Saisie ou choix de la photo de preuve */}
-          <Text style={styles.inputLabel}>URL de la photo de fin de travaux :</Text>
+          <Text style={styles.inputLabel}>Preuve visuelle de fin de travaux :</Text>
+          
+          <View style={styles.photoActionsRow}>
+            <TouchableOpacity style={styles.photoActionBtn} onPress={handleTakePhoto}>
+              <Ionicons name="camera" size={16} color="#059669" />
+              <Text style={styles.photoActionBtnText}>Appareil Photo</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.photoActionBtn} onPress={handlePickGallery}>
+              <Ionicons name="images" size={16} color="#2563eb" />
+              <Text style={styles.photoActionBtnText}>Galerie</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.photoActionBtn}
+              onPress={() => setProofPhotoUrl('https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=800&auto=format&fit=crop&q=80')}
+            >
+              <Ionicons name="sparkles" size={16} color="#d97706" />
+              <Text style={styles.photoActionBtnText}>Photo Démo</Text>
+            </TouchableOpacity>
+          </View>
+
           <View style={styles.photoUploadBox}>
             <TextInput
-              placeholder="https://... photo du chantier nettoyé"
+              placeholder="Ou collez une URL de photo..."
               value={proofPhotoUrl}
               onChangeText={setProofPhotoUrl}
               style={styles.input}
             />
-            <TouchableOpacity
-              style={styles.quickPhotoBtn}
-              onPress={() => setProofPhotoUrl('https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=800&auto=format&fit=crop&q=80')}
-            >
-              <Text style={styles.quickPhotoText}>Photo Démo</Text>
-            </TouchableOpacity>
           </View>
 
           {proofPhotoUrl ? (
@@ -459,6 +509,29 @@ const styles = StyleSheet.create({
   },
   btnRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   primaryText: { fontSize: 13, fontWeight: 'bold', color: '#ffffff' },
+  photoActionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 4,
+  },
+  photoActionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#f1f5f9',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+  },
+  photoActionBtnText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#0f172a',
+  },
   photoUploadBox: { flexDirection: 'row', gap: 8 },
   input: {
     flex: 1,

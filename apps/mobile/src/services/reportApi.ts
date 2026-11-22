@@ -27,7 +27,7 @@ export async function submitReport({
   photoUri,
   token,
 }: SubmitReportParams): Promise<SubmitReportResult> {
-  const baseUrl = (env.apiUrl || 'http://localhost:8080').replace(/\/+$/, '');
+  const baseUrl = (env.apiUrl || 'http://192.168.43.76:8090').replace(/\/+$/, '');
 
   const formData = new FormData();
   formData.append('category', category);

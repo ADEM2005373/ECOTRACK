@@ -31,7 +31,12 @@ export default function RootLayout() {
     if (!isAuthenticated && !inAuthRoute) {
       router.replace('/login');
     } else if (isAuthenticated && inAuthRoute) {
-      router.replace('/(tabs)');
+      const role = useAuthStore.getState().user?.role;
+      if (role === 'CHEF_OUVRIER' || role === 'OUVRIER') {
+        router.replace('/(tabs)/roadmap');
+      } else {
+        router.replace('/(tabs)');
+      }
     }
   }, [isAuthenticated, segments]);
 
