@@ -6,7 +6,7 @@ import { reportService } from './services/report.service';
 const app = express();
 app.use(express.json());
 
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.REPORT_PORT || 3002;
 
 // Healthcheck pour l'API Gateway Nginx et Docker
 app.get('/health', (_req: Request, res: Response) => {

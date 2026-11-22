@@ -5,7 +5,7 @@ import { auditRouter } from './routes/audit.routes';
 const app = express();
 app.use(express.json());
 
-const PORT = process.env.PORT || 3004;
+const PORT = process.env.AUDIT_PORT || 3004;
 
 // Healthcheck
 app.get('/health', (_req: Request, res: Response) => {

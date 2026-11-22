@@ -5,7 +5,7 @@ import { workflowRouter } from './routes/workflow.routes';
 const app = express();
 app.use(express.json());
 
-const PORT = process.env.PORT || 3003;
+const PORT = process.env.WORKFLOW_PORT || 3003;
 
 app.get('/health', (_req: Request, res: Response) => {
   res.json({

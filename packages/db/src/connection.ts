@@ -1,14 +1,20 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export interface DatabaseConfig {
-  uri: string;
+  uri?: string;
   dbName?: string;
   maxPoolSize?: number;
   serverSelectionTimeoutMS?: number;
 }
 
+const DEFAULT_AUTH_URI = 'mongodb://ecotrack_admin:EcoTrackMongo2026!@localhost:27017/ecotrack_db?authSource=admin';
+const DEFAULT_NO_AUTH_URI = 'mongodb://localhost:27017/ecotrack_db';
+
 export async function connectMongo(config?: DatabaseConfig): Promise<typeof mongoose> {
-  const uri = config?.uri || process.env.MONGODB_URI || 'mongodb://localhost:27017/ecotrack_db';
+  const primaryUri = config?.uri || process.env.MONGODB_URI || DEFAULT_AUTH_URI;
   const dbName = config?.dbName || process.env.MONGO_INITDB_DATABASE || 'ecotrack_db';
 
   if (mongoose.connection.readyState === 1) {
@@ -16,21 +22,19 @@ export async function connectMongo(config?: DatabaseConfig): Promise<typeof mong
   }
 
   try {
-    return await mongoose.connect(uri, {
+    return await mongoose.connect(primaryUri, {
       dbName,
       maxPoolSize: config?.maxPoolSize || 10,
       serverSelectionTimeoutMS: config?.serverSelectionTimeoutMS || 5000
     });
   } catch (err: any) {
-    if (err.message && (err.message.includes('Authentication failed') || err.message.includes('authSource'))) {
-      console.warn('[DB] Auth failed with primary URI, falling back to local MongoDB without credentials...');
-      return await mongoose.connect('mongodb://localhost:27017/ecotrack_db', {
-        dbName,
-        maxPoolSize: config?.maxPoolSize || 10,
-        serverSelectionTimeoutMS: config?.serverSelectionTimeoutMS || 5000
-      });
-    }
-    throw err;
+    console.warn(`[DB] Connection with primary URI failed: ${err.message}. Trying fallback...`);
+    const fallbackUri = primaryUri.includes('@') ? DEFAULT_NO_AUTH_URI : DEFAULT_AUTH_URI;
+    return await mongoose.connect(fallbackUri, {
+      dbName,
+      maxPoolSize: config?.maxPoolSize || 10,
+      serverSelectionTimeoutMS: config?.serverSelectionTimeoutMS || 5000
+    });
   }
 }
 

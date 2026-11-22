@@ -7,7 +7,7 @@ import { authRouter } from './routes/auth.routes';
 const app = express();
 app.use(express.json());
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.IDENTITY_PORT || 3001;
 
 // Healthcheck
 app.get('/health', (_req: Request, res: Response) => {
