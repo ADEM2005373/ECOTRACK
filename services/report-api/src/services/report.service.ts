@@ -30,6 +30,7 @@ export interface CreateReportDto {
   thumbnailUrl?: string;
   categorySuggested?: string;
   aiConfidenceScore?: number;
+  aiJustification?: string;
   municipality?: string;
   district?: string;
 }
@@ -77,6 +78,44 @@ export class ReportService {
     // 4. Catégorie
     const category = dto.category || 'DEPOT_SAUVAGE';
 
+    // 4b. Analyse IA Vision réelle de la photo (si non déjà fournie)
+    let aiConfidenceScore = dto.aiConfidenceScore;
+    let categorySuggested = dto.categorySuggested;
+    let aiJustification = dto.aiJustification;
+
+    if (typeof aiConfidenceScore !== 'number' && imageUrl) {
+      const visionBase = (process.env.AI_VISION_URL || 'http://127.0.0.1:8000').replace(/\/$/, '');
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 8000);
+        const visionRes = await fetch(`${visionBase}/api/v1/vision/analyze`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageUrl, claimedCategory: category }),
+          signal: controller.signal
+        });
+        clearTimeout(timer);
+        if (visionRes.ok) {
+          const data = (await visionRes.json()) as {
+            confidence?: number;
+            suggestedCategory?: string;
+            justification?: string;
+          };
+          if (typeof data.confidence === 'number') {
+            aiConfidenceScore = data.confidence;
+          }
+          if (typeof data.suggestedCategory === 'string' && data.suggestedCategory.trim()) {
+            categorySuggested = data.suggestedCategory;
+          }
+          if (typeof data.justification === 'string' && data.justification.trim()) {
+            aiJustification = data.justification;
+          }
+        }
+      } catch {
+        // Ne jamais inventer un faux score de confiance si le service IA Vision est indisponible
+      }
+    }
+
     // 5. Création et sauvegarde avec le modèle Mongoose officiel
     const reportDoc = new ReportModel({
       reporterId: reporterObjectId,
@@ -84,8 +123,9 @@ export class ReportService {
       description: dto.description || '',
       imageUrl,
       thumbnailUrl: dto.thumbnailUrl,
-      categorySuggested: dto.categorySuggested,
-      aiConfidenceScore: dto.aiConfidenceScore,
+      categorySuggested,
+      aiConfidenceScore,
+      ...(aiJustification ? { aiJustification } : {}),
       ...(dto.municipality ? { municipality: dto.municipality } : {}),
       ...(dto.district ? { district: dto.district } : {}),
       location: {

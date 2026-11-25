@@ -220,7 +220,7 @@ export const AgentMairieDashboard: React.FC = () => {
             category: item.categoryValidated || item.category || 'DEPOT_SAUVAGE',
             district: item.district || item.quartier || 'Centre-Ville',
             status: item.status || 'NOUVEAU',
-            confidence: typeof item.aiConfidenceScore === 'number' ? item.aiConfidenceScore : 0.94,
+            confidence: typeof item.aiConfidenceScore === 'number' ? item.aiConfidenceScore : 0,
             timeAgo,
             worker: item.assignedWorkerId,
             assignedTeam: item.assignedTeamId,

@@ -1,3 +1,5 @@
+import base64
+import urllib.request
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
@@ -6,6 +8,7 @@ from services.vision_model import (
     CATEGORY_LABELS,
     InvalidImageError,
     ModelNotConfiguredError,
+    analyze_photo_bytes,
     predict,
 )
 
@@ -72,3 +75,33 @@ async def classify_incident_photo(file: UploadFile = File(...)) -> dict[str, obj
         "model": "mobilenet_v3_small",
         "is_confident": confidence >= 0.65,
     }
+
+
+class AnalyzePhotoRequest(BaseModel):
+    imageUrl: str
+    claimedCategory: str | None = None
+
+
+def _decode_image_url(image_url: str) -> bytes:
+    raw = image_url.strip()
+    if raw.startswith("data:image/") and ";base64," in raw:
+        b64_part = raw.split(";base64,", 1)[1]
+        return base64.b64decode(b64_part)
+    if raw.startswith(("http://", "https://")):
+        req = urllib.request.Request(raw, headers={"User-Agent": "EcoTrack-AI-Vision/1.0"})
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            return resp.read(MAX_IMAGE_BYTES + 1)
+    raise InvalidImageError("Unsupported imageUrl format (expected data:image base64 or http/https URL).")
+
+
+@router.post("/api/v1/vision/analyze")
+async def analyze_photo_endpoint(payload: AnalyzePhotoRequest) -> dict[str, object]:
+    try:
+        image_bytes = await run_in_threadpool(_decode_image_url, payload.imageUrl)
+        if not image_bytes or len(image_bytes) > MAX_IMAGE_BYTES:
+            raise InvalidImageError("Image is empty or exceeds 10 MB.")
+        return await run_in_threadpool(analyze_photo_bytes, image_bytes, payload.claimedCategory)
+    except InvalidImageError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Vision analysis failed: {exc}") from exc

@@ -150,11 +150,12 @@ export const QualificationPage: React.FC = () => {
           : [];
 
         const liveQueue: QueueItem[] = list.map((r: any, idx: number) => {
-          const rawCat = r.categoryValidated || r.category || 'DEPOT_SAUVAGE';
+          const rawCat = r.categorySuggested || r.categoryValidated || r.category || 'DEPOT_SAUVAGE';
           const catLabel = CATEGORY_OPTIONS.find(c => c.value === rawCat)?.label || rawCat;
-          const conf = typeof r.aiConfidenceScore === 'number'
+          const hasAiScore = typeof r.aiConfidenceScore === 'number';
+          const conf = hasAiScore
             ? Math.round(r.aiConfidenceScore > 1 ? r.aiConfidenceScore : r.aiConfidenceScore * 100)
-            : 92;
+            : 0;
 
           let status = (r.status || 'NOUVEAU').toUpperCase();
           if (status === 'SIGNALÉ' || status === 'A_TRAITER' || status === 'PENDING' || status === 'A_QUALIFIER') {
@@ -184,8 +185,10 @@ export const QualificationPage: React.FC = () => {
               categoryCode: rawCat,
               categoryLabel: catLabel,
               confidenceScore: conf,
-              severity: r.priority || 'Élevée',
-              justification: `Détection automatique validée par l'IA Vision pour le périmètre de ${municipality}.`,
+              severity: r.priority || (conf > 0 && conf < 60 ? 'À vérifier' : 'Élevée'),
+              justification: r.aiJustification || (hasAiScore
+                ? `Analyse IA Vision effectuée pour le périmètre de ${municipality}.`
+                : `Aucune analyse IA Vision disponible pour cette photo. Vérification manuelle requise.`),
             },
             assignedBrigade: r.assignedTeamId || CATEGORY_BRIGADE_ROUTING[rawCat] || 'Brigade Voirie & Salubrité',
             assignedWorker: r.assignedWorkerId
@@ -264,7 +267,7 @@ export const QualificationPage: React.FC = () => {
     }
   };
 
-  const confidenceBadge = getConfidenceBadge(aiSuggestion?.confidenceScore ?? 92);
+  const confidenceBadge = getConfidenceBadge(aiSuggestion?.confidenceScore ?? 0);
 
   const activeCategory = currentItem?.isOverridden
     ? CATEGORY_OPTIONS.find((c) => c.value === selectedCategory)?.label || selectedCategory
