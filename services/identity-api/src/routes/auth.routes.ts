@@ -322,6 +322,29 @@ router.get('/territory', async (req: Request, res: Response) => {
 });
 
 /**
+ * GET /auth/municipalities
+ * Liste publique des mairies actives pour l'inscription citoyenne
+ */
+router.get('/municipalities', async (_req: Request, res: Response) => {
+  try {
+    const users = await userService.listUsers();
+    const seen = new Set<string>();
+    const municipalities: { name: string; governorate?: string }[] = [];
+    for (const u of users) {
+      if (u.role !== UserRole.ADMIN_MUNICIPALITE) continue;
+      const m = u.municipality?.trim();
+      if (m && !seen.has(m.toLowerCase())) {
+        seen.add(m.toLowerCase());
+        municipalities.push({ name: m, governorate: (u as any).governorate });
+      }
+    }
+    return res.status(200).json({ municipalities });
+  } catch (err: any) {
+    return res.status(500).json({ error: 'INTERNAL_SERVER_ERROR', message: err.message });
+  }
+});
+
+/**
  * DELETE /auth/users/:id
  * Suppression d'un utilisateur
  */

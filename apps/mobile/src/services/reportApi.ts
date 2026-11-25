@@ -35,6 +35,8 @@ export type SubmitReportParams = {
   photoUri?: string | null;
   photoBase64?: string | null;
   reporterId?: string | null;
+  municipality?: string | null;
+  district?: string | null;
   token?: string | null;
 };
 
@@ -183,6 +185,8 @@ export async function submitReport({
   photoUri,
   photoBase64,
   reporterId,
+  municipality,
+  district,
   token,
 }: SubmitReportParams): Promise<SubmitReportResult> {
   const headers: Record<string, string> = {
@@ -211,6 +215,12 @@ export async function submitReport({
   };
   if (reporterId) {
     payload.reporterId = reporterId;
+  }
+  if (municipality) {
+    payload.municipality = municipality;
+  }
+  if (district) {
+    payload.district = district;
   }
 
   try {

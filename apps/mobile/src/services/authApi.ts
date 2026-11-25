@@ -106,6 +106,7 @@ export async function registerUser(
         email: payload.email,
         password: payload.password,
         phoneNumber: payload.phoneNumber,
+        municipality: payload.municipality,
       }),
       signal: controller.signal,
     });

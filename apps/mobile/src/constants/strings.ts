@@ -15,6 +15,10 @@ export const registerStrings = {
       placeholder: '20 123 456',
       hint: '8 chiffres, avec ou sans +216',
     },
+    municipality: {
+      label: 'Mairie / Commune',
+      placeholder: 'ex: Mairie de Zarzouna',
+    },
   },
   showPassword: 'Afficher le mot de passe',
   hidePassword: 'Masquer le mot de passe',
@@ -36,6 +40,7 @@ export const validationStrings = {
   passwordTooShort: 'Le mot de passe doit contenir au moins 8 caractères.',
   phoneRequired: 'Le numéro de téléphone est obligatoire.',
   phoneInvalid: 'Numéro invalide : 8 chiffres, avec ou sans +216.',
+  municipalityRequired: 'Veuillez indiquer votre mairie ou commune.',
 } as const;
 
 export const apiErrorStrings = {

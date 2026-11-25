@@ -10,6 +10,7 @@ const payload = {
   email: 'karim@example.com',
   password: 'Password123!',
   phoneNumber: '+21620123456',
+  municipality: 'Mairie de Zarzouna',
 };
 
 beforeEach(() => {

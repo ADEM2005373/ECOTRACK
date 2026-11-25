@@ -30,6 +30,8 @@ export interface CreateReportDto {
   thumbnailUrl?: string;
   categorySuggested?: string;
   aiConfidenceScore?: number;
+  municipality?: string;
+  district?: string;
 }
 
 export interface QueryReportsDto {
@@ -84,6 +86,8 @@ export class ReportService {
       thumbnailUrl: dto.thumbnailUrl,
       categorySuggested: dto.categorySuggested,
       aiConfidenceScore: dto.aiConfidenceScore,
+      ...(dto.municipality ? { municipality: dto.municipality } : {}),
+      ...(dto.district ? { district: dto.district } : {}),
       location: {
         type: 'Point',
         coordinates

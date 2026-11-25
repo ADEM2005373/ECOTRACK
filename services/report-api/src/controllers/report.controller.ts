@@ -19,7 +19,7 @@ export class ReportController {
    */
   async createReport(req: Request, res: Response): Promise<Response> {
     try {
-      const { description, location, latitude, longitude, imageUrl, photoUrl, reporterId, citizenId, category } = req.body;
+      const { description, location, latitude, longitude, imageUrl, photoUrl, reporterId, citizenId, category, municipality, district } = req.body;
 
       // 1. Validation de la description
       if (!description || typeof description !== 'string' || description.trim().length === 0) {
@@ -57,7 +57,9 @@ export class ReportController {
         latitude: hasLatLng ? Number(latitude) : undefined,
         longitude: hasLatLng ? Number(longitude) : undefined,
         reporterId: reporterId || citizenId,
-        category: category || 'DEPOT_SAUVAGE'
+        category: category || 'DEPOT_SAUVAGE',
+        municipality: municipality ? String(municipality).trim() : undefined,
+        district: district ? String(district).trim() : undefined
       });
 
       return res.status(201).json({

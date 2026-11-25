@@ -6,6 +6,7 @@ const valid: RegisterFormValues = {
   email: 'karim@example.com',
   password: 'Password123!',
   phoneNumber: '+21620123456',
+  municipality: 'Mairie de Zarzouna',
 };
 
 function errorFor(values: Partial<RegisterFormValues>, field: keyof RegisterFormValues) {
@@ -43,6 +44,7 @@ describe('registerSchema', () => {
     ['email', msg.emailRequired],
     ['password', msg.passwordRequired],
     ['phoneNumber', msg.phoneRequired],
+    ['municipality', msg.municipalityRequired],
   ])('requires %s', (field, expected) => {
     expect(errorFor({ [field]: '' }, field)).toBe(expected);
   });

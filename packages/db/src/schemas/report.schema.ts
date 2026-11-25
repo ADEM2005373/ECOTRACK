@@ -8,6 +8,8 @@ import {
 
 export interface IReportDocument extends Omit<IReport, 'id' | 'reporterId'>, Document {
   reporterId: Types.ObjectId;
+  municipality?: string;
+  district?: string;
 }
 
 // Vérifie un couple GeoJSON [longitude, latitude] : exactement 2 nombres finis dans les bornes WGS84
@@ -122,6 +124,14 @@ export const ReportSchema = new Schema<IReportDocument>(
       trim: true
     },
     priority: {
+      type: String,
+      trim: true
+    },
+    municipality: {
+      type: String,
+      trim: true
+    },
+    district: {
       type: String,
       trim: true
     },

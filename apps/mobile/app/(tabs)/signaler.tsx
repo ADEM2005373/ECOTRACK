@@ -7,6 +7,7 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -57,10 +58,12 @@ export default function SignalerScreen() {
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
   const [categoryOpen, setCategoryOpen] = useState(false);
 
-  // Location state
-  const [locationText, setLocationText] = useState('📍 En cours de récupération...');
+  // Location state (strictement GPS de l'appareil)
+  const [locationText, setLocationText] = useState('En attente de localisation GPS...');
+  const [districtName, setDistrictName] = useState<string | null>(null);
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
+  const [gpsStatus, setGpsStatus] = useState<'loading' | 'ready' | 'denied' | 'error'>('loading');
 
   // Submit state
   const [submitting, setSubmitting] = useState(false);
@@ -70,51 +73,50 @@ export default function SignalerScreen() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const token: string | null = (authState as any).token ?? (authState as any).accessToken ?? null;
   const userId: string | null = authState.user?.id ?? null;
+  const userMunicipality: string | null = authState.user?.municipality ?? null;
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
+  const fetchDeviceGps = useCallback(async () => {
+    setGpsStatus('loading');
+    setLocationText('Acquisition de votre position GPS exacte...');
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setLatitude(null);
+        setLongitude(null);
+        setGpsStatus('denied');
+        setLocationText('Permission de localisation refusée. Activez le GPS pour signaler.');
+        return;
+      }
+      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+      const { latitude: lat, longitude: lon } = loc.coords;
+      setLatitude(lat);
+      setLongitude(lon);
+      setGpsStatus('ready');
+
       try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          if (!cancelled) {
-            setLocationText('📍 GPS refusé — Position Zarzouna par défaut prête');
-            setLatitude(37.2667);
-            setLongitude(9.8667);
-          }
-          return;
-        }
-        const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-        if (cancelled) return;
-        const { latitude: lat, longitude: lon } = loc.coords;
-        setLatitude(lat);
-        setLongitude(lon);
-
-        try {
-          const [place] = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lon });
-          if (place && !cancelled) {
-            const parts = [place.street, place.streetNumber, place.city].filter(Boolean);
-            setLocationText(`📍 ${parts.join(', ') || `${lat.toFixed(5)}, ${lon.toFixed(5)}`}`);
-          }
-        } catch {
-          if (!cancelled) setLocationText(`📍 ${lat.toFixed(5)}, ${lon.toFixed(5)}`);
+        const [place] = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lon });
+        if (place) {
+          const parts = [place.street, place.streetNumber, place.district || place.subregion, place.city].filter(Boolean);
+          const addr = parts.join(', ');
+          setDistrictName(addr || place.city || null);
+          setLocationText(addr || `${lat.toFixed(5)}, ${lon.toFixed(5)}`);
+        } else {
+          setLocationText(`${lat.toFixed(5)}, ${lon.toFixed(5)}`);
         }
       } catch {
-        if (!cancelled) {
-          setLocationText('📍 GPS indisponible — Position Zarzouna par défaut prête');
-          setLatitude(37.2667);
-          setLongitude(9.8667);
-        }
+        setLocationText(`${lat.toFixed(5)}, ${lon.toFixed(5)}`);
       }
-    })();
-    return () => { cancelled = true; };
+    } catch {
+      setLatitude(null);
+      setLongitude(null);
+      setGpsStatus('error');
+      setLocationText('GPS indisponible. Vérifiez que la localisation est activée sur votre appareil.');
+    }
   }, []);
 
-  const useZarzounaFallback = useCallback(() => {
-    setLatitude(37.2667);
-    setLongitude(9.8667);
-    setLocationText('📍 Zarzouna Centre, Bizerte (37.2667, 9.8667)');
-  }, []);
+  useEffect(() => {
+    void fetchDeviceGps();
+  }, [fetchDeviceGps]);
 
   const pickPhoto = useCallback(async () => {
     if (!ImagePicker) {
@@ -186,26 +188,30 @@ export default function SignalerScreen() {
       setErrorMsg('La description doit contenir au moins 20 caractères.');
       return;
     }
-    const finalLat = latitude ?? 37.2667;
-    const finalLon = longitude ?? 9.8667;
+    if (latitude === null || longitude === null) {
+      setErrorMsg('La localisation GPS exacte de votre appareil est obligatoire pour envoyer un signalement.');
+      return;
+    }
 
     setSubmitting(true);
     try {
       const result = await submitReport({
         category,
         description: description.trim(),
-        latitude: finalLat,
-        longitude: finalLon,
+        latitude,
+        longitude,
         photoUri,
         photoBase64,
         reporterId: userId,
+        municipality: userMunicipality,
+        district: districtName,
         token,
       });
 
       if (result.kind === 'success') {
         Alert.alert(
           'Signalement enregistré',
-          'Votre signalement a été transmis en direct à la Mairie de Zarzouna.',
+          'Votre signalement a été transmis en direct à la mairie.',
           [
             { text: 'Nouveau signalement', onPress: resetForm, style: 'cancel' },
             {
@@ -223,11 +229,11 @@ export default function SignalerScreen() {
     } finally {
       setSubmitting(false);
     }
-  }, [category, description, latitude, longitude, photoUri, photoBase64, userId, token, resetForm, router]);
+  }, [category, description, latitude, longitude, photoUri, photoBase64, userId, userMunicipality, districtName, token, resetForm, router]);
 
   const selectedCategory = CATEGORIES.find((c) => c.value === category) ?? CATEGORIES[0]!;
   const descTooShort = description.trim().length > 0 && description.trim().length < 20;
-  const canSubmit = !submitting && description.trim().length >= 20;
+  const canSubmit = !submitting && description.trim().length >= 20 && latitude !== null && longitude !== null;
 
   return (
     <KeyboardAvoidingView
@@ -328,18 +334,29 @@ export default function SignalerScreen() {
 
         <View style={styles.card}>
           <View style={styles.locationHeaderRow}>
-            <Text style={styles.fieldLabel}>Localisation</Text>
-            <TouchableOpacity onPress={useZarzounaFallback}>
-              <Text style={styles.fallbackLink}>Utiliser Zarzouna Centre</Text>
+            <Text style={styles.fieldLabel}>Localisation GPS (Obligatoire) *</Text>
+            <TouchableOpacity onPress={() => void fetchDeviceGps()}>
+              <Text style={styles.fallbackLink}>Actualiser GPS</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.locationBox}>
             <Text style={styles.locationText}>{locationText}</Text>
           </View>
-          {latitude !== null && longitude !== null && (
+          {latitude !== null && longitude !== null ? (
             <Text style={styles.coordsText}>
-              {latitude.toFixed(6)}, {longitude.toFixed(6)}
+              Position exacte : {latitude.toFixed(6)}, {longitude.toFixed(6)}
             </Text>
+          ) : (
+            gpsStatus !== 'loading' && (
+              <TouchableOpacity
+                onPress={() => (gpsStatus === 'denied' ? void Linking.openSettings() : void fetchDeviceGps())}
+                style={styles.gpsRetryBtn}
+              >
+                <Text style={styles.gpsRetryText}>
+                  {gpsStatus === 'denied' ? 'Autoriser la localisation dans les paramètres' : 'Activer / Réessayer le GPS'}
+                </Text>
+              </TouchableOpacity>
+            )
           )}
         </View>
 
@@ -495,6 +512,17 @@ const styles = StyleSheet.create({
   },
   locationText: { ...textStyles.body, color: colors.dark.textPrimary },
   coordsText: { ...textStyles.caption, color: colors.dark.textMuted, marginTop: spacing.xs },
+  gpsRetryBtn: {
+    marginTop: spacing.sm,
+    backgroundColor: `${colors.primary}22`,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: radius.sm,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+  },
+  gpsRetryText: { fontSize: 12, fontWeight: '600', color: colors.primary },
   errorBox: {
     backgroundColor: `${colors.danger}18`,
     borderRadius: radius.md,

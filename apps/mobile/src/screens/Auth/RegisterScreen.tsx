@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Controller, useForm } from 'react-hook-form';
@@ -9,6 +9,7 @@ import { FormMessage } from '../../components/FormMessage';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { TextField } from '../../components/TextField';
 import { apiErrorStrings, registerStrings as t } from '../../constants/strings';
+import { env } from '../../config/env';
 import type { RegisterResult } from '../../services/authApi';
 import { useAuthStore } from '../../store/authStore';
 import { colors, spacing, textStyles, touchTarget } from '../../theme';
@@ -37,6 +38,7 @@ export default function RegisterScreen() {
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [succeeded, setSucceeded] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [mairies, setMairies] = useState<string[]>([]);
   const redirectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {
@@ -44,12 +46,36 @@ export default function RegisterScreen() {
     handleSubmit,
     setError,
     setFocus,
+    setValue,
+    watch,
     formState: { errors, isSubmitting, isSubmitted, dirtyFields },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: emptyRegisterForm,
     mode: 'onTouched',
   });
+
+  const selectedMairie = watch('municipality');
+
+  useEffect(() => {
+    const base = env.apiUrl?.replace(/\/+$/, '');
+    if (!base) return;
+    let cancelled = false;
+    fetch(`${base}/api/v1/auth/municipalities`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && Array.isArray(data?.municipalities)) {
+          const names = data.municipalities
+            .map((m: { name?: string }) => m?.name)
+            .filter((n: unknown): n is string => typeof n === 'string' && n.length > 0);
+          setMairies(names);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(
     () => () => {
@@ -205,6 +231,49 @@ export default function RegisterScreen() {
               keyboardType="phone-pad"
               autoComplete="tel"
               textContentType="telephoneNumber"
+              returnKeyType="next"
+              blurOnSubmit={false}
+              onSubmitEditing={() => setFocus('municipality')}
+            />
+          )}
+        />
+
+        {mairies.length > 0 && (
+          <View style={styles.mairieChipsWrap}>
+            <Text style={styles.mairieChipsLabel}>Mairies disponibles :</Text>
+            <View style={styles.mairieChipsRow}>
+              {mairies.map((name) => {
+                const active = selectedMairie?.trim().toLowerCase() === name.toLowerCase();
+                return (
+                  <Pressable
+                    key={name}
+                    onPress={() => setValue('municipality', name, { shouldValidate: true, shouldDirty: true })}
+                    style={[styles.mairieChip, active && styles.mairieChipActive]}
+                    disabled={busy}
+                  >
+                    <Text style={[styles.mairieChipText, active && styles.mairieChipTextActive]}>{name}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        )}
+
+        <Controller
+          control={control}
+          name="municipality"
+          render={({ field }) => (
+            <TextField
+              ref={field.ref}
+              label={t.fields.municipality.label}
+              placeholder={t.fields.municipality.placeholder}
+              value={field.value}
+              onChangeText={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.municipality?.message}
+              valid={isValid('municipality')}
+              editable={!busy}
+              autoCapitalize="words"
               returnKeyType="done"
               onSubmitEditing={submit}
             />
@@ -264,6 +333,39 @@ const styles = StyleSheet.create({
     height: touchTarget.min,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  mairieChipsWrap: {
+    marginBottom: spacing.sm,
+  },
+  mairieChipsLabel: {
+    ...textStyles.caption,
+    color: colors.textMuted,
+    marginBottom: spacing.xs,
+  },
+  mairieChipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  mairieChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+  },
+  mairieChipActive: {
+    backgroundColor: '#ecfdf5',
+    borderColor: '#059669',
+  },
+  mairieChipText: {
+    fontSize: 12,
+    color: '#334155',
+    fontWeight: '600',
+  },
+  mairieChipTextActive: {
+    color: '#047857',
   },
   link: {
     minHeight: touchTarget.min,

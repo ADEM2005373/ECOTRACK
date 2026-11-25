@@ -8,6 +8,7 @@ const payload = {
   email: 'karim@example.com',
   password: 'Password123!',
   phoneNumber: '+21620123456',
+  municipality: 'Mairie de Zarzouna',
 };
 
 const fetchMock = jest.fn<Promise<Response>, Parameters<typeof fetch>>();
@@ -38,6 +39,7 @@ describe('registerUser', () => {
       'email',
       'password',
       'phoneNumber',
+      'municipality',
     ]);
   });
 

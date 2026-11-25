@@ -16,7 +16,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  */
 export async function registerController(req: Request, res: Response): Promise<Response> {
   try {
-    const { email, password, fullName, phoneNumber } = req.body;
+    const { email, password, fullName, phoneNumber, municipality, governorate } = req.body;
 
     // 1. Validation de l'email
     if (!email || typeof email !== 'string' || !EMAIL_REGEX.test(email.trim())) {
@@ -48,6 +48,8 @@ export async function registerController(req: Request, res: Response): Promise<R
       password,
       fullName: fullName.trim(),
       phoneNumber: phoneNumber ? String(phoneNumber).trim() : undefined,
+      municipality: municipality ? String(municipality).trim() : undefined,
+      governorate: governorate ? String(governorate).trim() : undefined,
       role: UserRole.CITOYEN
     });
 

@@ -23,10 +23,17 @@ async function fillValidForm() {
   await fireEvent.changeText(screen.getByLabelText(t.fields.email.label), 'Karim@Example.com');
   await fireEvent.changeText(screen.getByLabelText(t.fields.password.label), 'Password123!');
   await fireEvent.changeText(screen.getByLabelText(t.fields.phoneNumber.label), '20 123 456');
+  await fireEvent.changeText(screen.getByLabelText(t.fields.municipality.label), 'Mairie de Zarzouna');
 }
 
 beforeEach(() => {
   fetchMock.mockReset();
+  fetchMock.mockImplementation(async (input) => {
+    if (String(input).includes('/municipalities')) {
+      return new Response(JSON.stringify({ municipalities: [] }), { status: 200 });
+    }
+    return new Response('', { status: 500 });
+  });
   global.fetch = fetchMock;
   mockReplace.mockReset();
   mockPush.mockReset();
@@ -62,28 +69,41 @@ describe('RegisterScreen', () => {
     expect(screen.getByText(msg.emailRequired)).toBeOnTheScreen();
     expect(screen.getByText(msg.passwordRequired)).toBeOnTheScreen();
     expect(screen.getByText(msg.phoneRequired)).toBeOnTheScreen();
+    expect(screen.getByText(msg.municipalityRequired)).toBeOnTheScreen();
     expect(screen.getByText(t.formHasErrors)).toBeOnTheScreen();
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchMock.mock.calls.some((c) => String(c[0]).includes('/register'))).toBe(false);
   });
 
   it('sends the normalized payload, shows "Compte créé !" and redirects to login', async () => {
-    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ message: 'ok', user: null }), { status: 201 }));
+    fetchMock.mockImplementation(async (input) => {
+      if (String(input).includes('/municipalities')) {
+        return new Response(JSON.stringify({ municipalities: [] }), { status: 200 });
+      }
+      return new Response(JSON.stringify({ message: 'ok', user: null }), { status: 201 });
+    });
     await render(<RegisterScreen />);
     await fillValidForm();
     await fireEvent.press(screen.getByRole('button', { name: t.submit }));
 
     expect(await screen.findByText(t.success)).toBeOnTheScreen();
-    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toEqual({
+    const registerCall = fetchMock.mock.calls.find((c) => String(c[0]).includes('/register'));
+    expect(JSON.parse(String(registerCall?.[1]?.body))).toEqual({
       fullName: 'Karim Ben Salah',
       email: 'karim@example.com',
       password: 'Password123!',
       phoneNumber: '+21620123456',
+      municipality: 'Mairie de Zarzouna',
     });
     await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/login'), { timeout: 3000 });
   });
 
   it('shows the ticket message when the email is already used (409)', async () => {
-    fetchMock.mockResolvedValueOnce(new Response('', { status: 409 }));
+    fetchMock.mockImplementation(async (input) => {
+      if (String(input).includes('/municipalities')) {
+        return new Response(JSON.stringify({ municipalities: [] }), { status: 200 });
+      }
+      return new Response('', { status: 409 });
+    });
     await render(<RegisterScreen />);
     await fillValidForm();
     await fireEvent.press(screen.getByRole('button', { name: t.submit }));
@@ -93,7 +113,12 @@ describe('RegisterScreen', () => {
   });
 
   it('shows a network error when the server is unreachable', async () => {
-    fetchMock.mockRejectedValueOnce(new TypeError('Network request failed'));
+    fetchMock.mockImplementation(async (input) => {
+      if (String(input).includes('/municipalities')) {
+        return new Response(JSON.stringify({ municipalities: [] }), { status: 200 });
+      }
+      throw new TypeError('Network request failed');
+    });
     await render(<RegisterScreen />);
     await fillValidForm();
     await fireEvent.press(screen.getByRole('button', { name: t.submit }));
