@@ -203,15 +203,23 @@ export default function SignalerScreen() {
         photoUri,
         photoBase64,
         reporterId: userId,
-        municipality: userMunicipality,
         district: districtName,
         token,
       });
 
       if (result.kind === 'success') {
+        const alertTitle =
+          result.mairieCovered === false
+            ? 'Merci pour votre signalement'
+            : 'Signalement transmis';
+        const alertMessage =
+          result.message ||
+          (result.mairieCovered === false
+            ? `Merci pour votre signalement ! La mairie de ${result.detectedLocality || 'cette commune'} ne dispose pas encore des services EcoTrack.`
+            : `Votre signalement a été transmis en direct à ${result.municipality || 'la mairie concernée'}.`);
         Alert.alert(
-          'Signalement enregistré',
-          'Votre signalement a été transmis en direct à la mairie.',
+          alertTitle,
+          alertMessage,
           [
             { text: 'Nouveau signalement', onPress: resetForm, style: 'cancel' },
             {
@@ -249,7 +257,7 @@ export default function SignalerScreen() {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Signaler une anomalie</Text>
           <Text style={styles.headerSub}>
-            Contribuez à la propreté de Zarzouna en temps réel
+            Signalez une anomalie selon votre localisation exacte
           </Text>
         </View>
 

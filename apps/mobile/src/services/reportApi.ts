@@ -41,7 +41,14 @@ export type SubmitReportParams = {
 };
 
 export type SubmitReportResult =
-  | { kind: 'success'; reportId: string | null }
+  | {
+      kind: 'success';
+      reportId: string | null;
+      mairieCovered?: boolean;
+      municipality?: string | null;
+      detectedLocality?: string | null;
+      message?: string;
+    }
   | { kind: 'error'; message: string };
 
 export type ReportsFetchResult =
@@ -124,7 +131,9 @@ export function parseCitizenReport(raw: any): CitizenReport | null {
     category: categoryLabel,
     categoryCode,
     description: desc || `${categoryLabel} signalé dans la commune.`,
-    district: raw.district ? `${raw.district}, Zarzouna` : `Zarzouna (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`,
+    district: raw.district
+      ? `${raw.district}${raw.municipality ? `, ${raw.municipality}` : ''}`
+      : `${raw.municipality || 'Commune'} (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`,
     date: formatDateFr(raw.createdAt),
     status,
     statusLabel: label,
@@ -232,14 +241,22 @@ export async function submitReport({
 
     if (response.ok) {
       let reportId: string | null = null;
+      let mairieCovered: boolean | undefined;
+      let municipality: string | null | undefined;
+      let detectedLocality: string | null | undefined;
+      let message: string | undefined;
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const json = (await response.json()) as any;
         reportId = json?.report?.id ?? json?.id ?? json?.reportId ?? null;
+        if (typeof json?.mairieCovered === 'boolean') mairieCovered = json.mairieCovered;
+        if (typeof json?.municipality === 'string') municipality = json.municipality;
+        if (typeof json?.detectedLocality === 'string') detectedLocality = json.detectedLocality;
+        if (typeof json?.message === 'string') message = json.message;
       } catch {
         // body may be empty
       }
-      return { kind: 'success', reportId };
+      return { kind: 'success', reportId, mairieCovered, municipality, detectedLocality, message };
     }
 
     if (response.status === 401) {

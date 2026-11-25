@@ -11,6 +11,8 @@ export interface IReportDocument extends Omit<IReport, 'id' | 'reporterId'>, Doc
   municipality?: string;
   district?: string;
   aiJustification?: string;
+  mairieCovered?: boolean;
+  detectedLocality?: string;
 }
 
 // Vérifie un couple GeoJSON [longitude, latitude] : exactement 2 nombres finis dans les bornes WGS84
@@ -137,6 +139,14 @@ export const ReportSchema = new Schema<IReportDocument>(
       trim: true
     },
     district: {
+      type: String,
+      trim: true
+    },
+    mairieCovered: {
+      type: Boolean,
+      default: true
+    },
+    detectedLocality: {
       type: String,
       trim: true
     },

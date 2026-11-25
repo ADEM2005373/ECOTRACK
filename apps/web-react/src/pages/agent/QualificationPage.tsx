@@ -138,7 +138,8 @@ export const QualificationPage: React.FC = () => {
   const fetchLiveReports = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/v1/reports');
+      const mParam = municipality ? `?municipality=${encodeURIComponent(municipality)}` : '';
+      const res = await fetch(`/api/v1/reports${mParam}`);
       if (res.ok) {
         const raw = await res.json();
         const list: any[] = Array.isArray(raw)

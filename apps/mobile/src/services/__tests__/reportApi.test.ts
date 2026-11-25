@@ -94,7 +94,7 @@ describe('submitReport', () => {
       token: 'tok-abc',
     });
 
-    expect(res).toEqual({ kind: 'success', reportId: 'rep-999' });
+    expect(res).toMatchObject({ kind: 'success', reportId: 'rep-999' });
     const [url, init] = fetchMock.mock.calls[0] ?? [];
     expect(url).toBe(`http://api.test${REPORTS_PATH}`);
     expect(init?.method).toBe('POST');

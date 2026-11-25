@@ -9,9 +9,164 @@
  */
 
 import mongoose, { Types } from 'mongoose';
-import { ReportModel } from '@ecotrack/db';
-import { IReport, ReportStatus } from '@ecotrack/shared';
+import { ReportModel, UserModel } from '@ecotrack/db';
+import { IReport, ReportStatus, UserRole } from '@ecotrack/shared';
 import { eventService } from './event.service';
+
+function normalizePlaceName(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\b(mairie|commune|municipalite|municipalité|delegation|délégation|ville|de|du|d'|l')\b/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+async function resolveMunicipalityByLocation(
+  lat: number,
+  lng: number
+): Promise<{
+  municipality: string;
+  district?: string;
+  mairieCovered: boolean;
+  detectedLocality: string;
+}> {
+  let detectedLocality = '';
+  let detectedDistrict: string | undefined;
+  const candidateNames: string[] = [];
+
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&zoom=14&addressdetails=1`,
+      {
+        headers: { 'User-Agent': 'EcoTrack-Report-Router/1.0', 'Accept-Language': 'fr' },
+        signal: controller.signal
+      }
+    );
+    clearTimeout(timer);
+    if (res.ok) {
+      const data = (await res.json()) as {
+        name?: string;
+        address?: Record<string, string | undefined>;
+      };
+      const addr = data.address || {};
+      const rawLocality =
+        addr.municipality ||
+        addr.city ||
+        addr.town ||
+        addr.village ||
+        addr.suburb ||
+        addr.county ||
+        addr.state ||
+        data.name ||
+        '';
+      detectedLocality = rawLocality.trim();
+      detectedDistrict = (addr.suburb || addr.neighbourhood || addr.quarter || addr.road || '').trim() || undefined;
+
+      for (const field of [
+        addr.municipality,
+        addr.city,
+        addr.town,
+        addr.village,
+        addr.suburb,
+        addr.city_district,
+        addr.county,
+        addr.state_district
+      ]) {
+        if (field && field.trim()) {
+          candidateNames.push(normalizePlaceName(field));
+        }
+      }
+    }
+  } catch {
+    // Nominatim indisponible : on s'appuie uniquement sur les territoires en base
+  }
+
+  const activeMairies = await UserModel.find({
+    role: UserRole.ADMIN_MUNICIPALITE,
+    isActive: { $ne: false }
+  })
+    .select('municipality territory')
+    .lean();
+
+  // 1. Correspondance par nom de localité (Nominatim <-> compte Mairie)
+  for (const m of activeMairies) {
+    const mName = (m as any).municipality as string | undefined;
+    if (!mName) continue;
+    const normMairie = normalizePlaceName(mName);
+    if (!normMairie) continue;
+    if (
+      candidateNames.some(
+        (c) => c && (c === normMairie || c.includes(normMairie) || normMairie.includes(c))
+      )
+    ) {
+      return {
+        municipality: mName,
+        district: detectedDistrict,
+        mairieCovered: true,
+        detectedLocality: detectedLocality || mName
+      };
+    }
+  }
+
+  // 2. Correspondance par bounding box du territoire de la mairie
+  for (const m of activeMairies) {
+    const mName = (m as any).municipality as string | undefined;
+    const bbox = (m as any).territory?.bbox as number[] | undefined;
+    if (!mName || !Array.isArray(bbox) || bbox.length !== 4) continue;
+    const [south, north, west, east] = bbox;
+    if (lat >= south && lat <= north && lng >= west && lng <= east) {
+      return {
+        municipality: mName,
+        district: detectedDistrict,
+        mairieCovered: true,
+        detectedLocality: detectedLocality || mName
+      };
+    }
+  }
+
+  // 3. Correspondance par proximité du centre du territoire (<= 10 km)
+  let closest: { name: string; dist: number } | null = null;
+  for (const m of activeMairies) {
+    const mName = (m as any).municipality as string | undefined;
+    const center = (m as any).territory?.center as number[] | undefined;
+    if (!mName || !Array.isArray(center) || center.length !== 2) continue;
+    const dist = haversineKm(lat, lng, center[0], center[1]);
+    if (dist <= 10 && (!closest || dist < closest.dist)) {
+      closest = { name: mName, dist };
+    }
+  }
+  if (closest) {
+    return {
+      municipality: closest.name,
+      district: detectedDistrict,
+      mairieCovered: true,
+      detectedLocality: detectedLocality || closest.name
+    };
+  }
+
+  // Aucune mairie inscrite sur EcoTrack pour cette localisation
+  const fallbackLocality = detectedLocality || 'cette commune';
+  return {
+    municipality: fallbackLocality,
+    district: detectedDistrict,
+    mairieCovered: false,
+    detectedLocality: fallbackLocality
+  };
+}
 
 export interface CreateReportDto {
   citizenId?: string;
@@ -44,6 +199,7 @@ export interface QueryReportsDto {
   citizenId?: string;
   reporterId?: string;
   category?: string;
+  municipality?: string;
   limit?: number;
 }
 
@@ -116,6 +272,9 @@ export class ReportService {
       }
     }
 
+    // 4c. Routage automatique vers la mairie correspondant à la localisation exacte du signalement
+    const routed = await resolveMunicipalityByLocation(coordinates[1], coordinates[0]);
+
     // 5. Création et sauvegarde avec le modèle Mongoose officiel
     const reportDoc = new ReportModel({
       reporterId: reporterObjectId,
@@ -126,8 +285,10 @@ export class ReportService {
       categorySuggested,
       aiConfidenceScore,
       ...(aiJustification ? { aiJustification } : {}),
-      ...(dto.municipality ? { municipality: dto.municipality } : {}),
-      ...(dto.district ? { district: dto.district } : {}),
+      municipality: routed.municipality,
+      mairieCovered: routed.mairieCovered,
+      detectedLocality: routed.detectedLocality,
+      ...(dto.district || routed.district ? { district: dto.district || routed.district } : {}),
       location: {
         type: 'Point',
         coordinates
@@ -164,6 +325,12 @@ export class ReportService {
     // Filtre par catégorie
     if (query.category) {
       filter.category = query.category;
+    }
+
+    // Filtre par mairie / commune
+    if (query.municipality && query.municipality.trim()) {
+      const escaped = query.municipality.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      filter.municipality = new RegExp(`^${escaped}$`, 'i');
     }
 
     // Requête géospatiale de proximité 2dsphere avec $near et $maxDistance

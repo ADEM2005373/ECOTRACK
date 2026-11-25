@@ -50,7 +50,7 @@ export class ReportController {
       }
 
       // 4. Appel du service de persistance et émission de l'événement 'report.created'
-      const report = await reportService.createReport({
+      const report: any = await reportService.createReport({
         description: description.trim(),
         imageUrl: validImageUrl,
         location: hasCoordinates ? location : undefined,
@@ -62,9 +62,18 @@ export class ReportController {
         district: district ? String(district).trim() : undefined
       });
 
+      const mairieCovered = report?.mairieCovered !== false;
+      const detectedLocality = report?.detectedLocality || report?.municipality || 'cette commune';
+      const targetMunicipality = report?.municipality || detectedLocality;
+
       return res.status(201).json({
-        message: 'Signalement créé avec succès',
+        message: mairieCovered
+          ? `Signalement transmis avec succès à ${targetMunicipality}.`
+          : `Merci pour votre signalement ! La mairie de ${detectedLocality} ne dispose pas encore des services EcoTrack. Votre signalement a bien été enregistré.`,
         eventEmitted: 'report.created',
+        mairieCovered,
+        municipality: targetMunicipality,
+        detectedLocality,
         report
       });
 
@@ -82,7 +91,7 @@ export class ReportController {
    */
   async getReports(req: Request, res: Response): Promise<Response> {
     try {
-      const { lat, lng, near, radius, radiusMeters, status, citizenId, reporterId, category, limit } = req.query;
+      const { lat, lng, near, radius, radiusMeters, status, citizenId, reporterId, category, municipality, limit } = req.query;
 
       const reports = await reportService.findReports({
         lat: lat ? parseFloat(String(lat)) : undefined,
@@ -93,6 +102,7 @@ export class ReportController {
         citizenId: citizenId ? String(citizenId) : undefined,
         reporterId: reporterId ? String(reporterId) : undefined,
         category: category ? String(category) : undefined,
+        municipality: municipality ? String(municipality) : undefined,
         limit: limit ? parseInt(String(limit)) : undefined
       });
 

@@ -189,7 +189,8 @@ export const AgentMairieDashboard: React.FC = () => {
   const fetchReports = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/v1/reports');
+      const mParam = municipality ? `?municipality=${encodeURIComponent(municipality)}` : '';
+      const res = await fetch(`/api/v1/reports${mParam}`);
       if (res.ok) {
         const raw = await res.json();
         const list: any[] = Array.isArray(raw)
