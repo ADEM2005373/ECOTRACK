@@ -148,7 +148,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
             email: user.email,
             phoneNumber: null,
             role: user.role,
-            municipality: user.municipality ?? 'Mairie de Zarzouna',
+            municipality: user.municipality ?? null,
           };
           set({
             status: 'success',
@@ -187,7 +187,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
           email: user.email,
           phoneNumber: null,
           role: user.role,
-          municipality: (user as any).municipality ?? 'Mairie de Zarzouna',
+          municipality: (user as any).municipality ?? null,
         },
         status: 'success',
       });

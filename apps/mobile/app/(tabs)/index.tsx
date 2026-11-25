@@ -79,7 +79,7 @@ export default function HomeScreen() {
               <EcoTrackLogo size={36} />
               <View>
                 <Text style={styles.brandName}>ECOTRACK</Text>
-                <Text style={styles.brandSubtitle}>{user?.municipality?.toUpperCase() || 'MAIRIE DE ZARZOUNA'}</Text>
+                <Text style={styles.brandSubtitle}>{user?.municipality?.toUpperCase() || 'PORTAIL CITOYEN TUNISIE'}</Text>
               </View>
             </View>
 

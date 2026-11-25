@@ -23,7 +23,6 @@ async function fillValidForm() {
   await fireEvent.changeText(screen.getByLabelText(t.fields.email.label), 'Karim@Example.com');
   await fireEvent.changeText(screen.getByLabelText(t.fields.password.label), 'Password123!');
   await fireEvent.changeText(screen.getByLabelText(t.fields.phoneNumber.label), '20 123 456');
-  await fireEvent.changeText(screen.getByLabelText(t.fields.municipality.label), 'Mairie de Zarzouna');
 }
 
 beforeEach(() => {
@@ -69,30 +68,22 @@ describe('RegisterScreen', () => {
     expect(screen.getByText(msg.emailRequired)).toBeOnTheScreen();
     expect(screen.getByText(msg.passwordRequired)).toBeOnTheScreen();
     expect(screen.getByText(msg.phoneRequired)).toBeOnTheScreen();
-    expect(screen.getByText(msg.municipalityRequired)).toBeOnTheScreen();
     expect(screen.getByText(t.formHasErrors)).toBeOnTheScreen();
-    expect(fetchMock.mock.calls.some((c) => String(c[0]).includes('/register'))).toBe(false);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('sends the normalized payload, shows "Compte créé !" and redirects to login', async () => {
-    fetchMock.mockImplementation(async (input) => {
-      if (String(input).includes('/municipalities')) {
-        return new Response(JSON.stringify({ municipalities: [] }), { status: 200 });
-      }
-      return new Response(JSON.stringify({ message: 'ok', user: null }), { status: 201 });
-    });
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ message: 'ok', user: null }), { status: 201 }));
     await render(<RegisterScreen />);
     await fillValidForm();
     await fireEvent.press(screen.getByRole('button', { name: t.submit }));
 
     expect(await screen.findByText(t.success)).toBeOnTheScreen();
-    const registerCall = fetchMock.mock.calls.find((c) => String(c[0]).includes('/register'));
-    expect(JSON.parse(String(registerCall?.[1]?.body))).toEqual({
+    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toEqual({
       fullName: 'Karim Ben Salah',
       email: 'karim@example.com',
       password: 'Password123!',
       phoneNumber: '+21620123456',
-      municipality: 'Mairie de Zarzouna',
     });
     await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/login'), { timeout: 3000 });
   });

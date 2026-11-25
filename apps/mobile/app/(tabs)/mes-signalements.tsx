@@ -95,7 +95,7 @@ export default function MesSignalementsScreen() {
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>Mes Dossiers Citoyens</Text>
             <Text style={styles.headerSubtitle}>
-              Suivi de vos signalements · Mairie de Zarzouna
+              Suivi de vos signalements · EcoTrack Tunisie
             </Text>
           </View>
           <TouchableOpacity style={styles.refreshIconBtn} onPress={() => void onRefresh()}>
@@ -266,7 +266,7 @@ export default function MesSignalementsScreen() {
                   <Text style={styles.timelineTitle}>Historique d'intervention</Text>
                   <View style={styles.timelineStep}>
                     <View style={[styles.stepDot, styles.dotDone]} />
-                    <Text style={styles.stepText}>Signalement reçu et transmis à la Mairie de Zarzouna</Text>
+                    <Text style={styles.stepText}>Signalement reçu et routé selon la localisation</Text>
                   </View>
                   <View style={styles.timelineStep}>
                     <View style={[styles.stepDot, selectedReport.status !== 'NOUVEAU' ? styles.dotDone : styles.dotPending]} />

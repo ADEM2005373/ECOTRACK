@@ -20,7 +20,6 @@ export const registerSchema = z.object({
     .transform((value) => value.replace(/[\s.-]/g, ''))
     .refine((value) => TUNISIAN_PHONE.test(value), msg.phoneInvalid)
     .transform((value) => `+216${value.slice(-8)}`),
-  municipality: z.string().trim().min(1, msg.municipalityRequired),
 });
 
 /** Valeurs saisies dans le formulaire. */
@@ -34,5 +33,4 @@ export const emptyRegisterForm: RegisterFormValues = {
   email: '',
   password: '',
   phoneNumber: '',
-  municipality: '',
 };

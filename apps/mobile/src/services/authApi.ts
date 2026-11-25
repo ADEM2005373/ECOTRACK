@@ -106,7 +106,6 @@ export async function registerUser(
         email: payload.email,
         password: payload.password,
         phoneNumber: payload.phoneNumber,
-        municipality: payload.municipality,
       }),
       signal: controller.signal,
     });
@@ -146,7 +145,7 @@ function toLoggedInUser(body: unknown): LoggedInUser | null {
     email,
     fullName,
     role,
-    municipality: typeof municipality === 'string' ? municipality : 'Mairie de Zarzouna',
+    municipality: typeof municipality === 'string' ? municipality : undefined,
   };
 }
 

@@ -242,8 +242,8 @@ export default function ProfilScreen() {
           <View style={[styles.avatar, isWorker ? styles.workerAvatarBg : styles.citizenAvatarBg]}>
             <Text style={styles.avatarText}>{initials}</Text>
           </View>
-          <Text style={styles.userName}>{user?.fullName || (isWorker ? 'Mohamed Ali Khemiri' : 'Citoyen Zarzouna')}</Text>
-          <Text style={styles.userEmail}>{user?.email || (isWorker ? 'chef.voirie@zarzouna.tn' : 'citoyen@zarzouna.tn')}</Text>
+          <Text style={styles.userName}>{user?.fullName || (isWorker ? 'Mohamed Ali Khemiri' : 'Citoyen EcoTrack')}</Text>
+          <Text style={styles.userEmail}>{user?.email || (isWorker ? 'chef.voirie@zarzouna.tn' : 'citoyen@ecotrack.tn')}</Text>
 
           <View style={[styles.roleBadge, isWorker ? styles.workerBadgeBg : styles.citizenBadgeBg]}>
             <Text style={[styles.roleText, isWorker ? styles.workerBadgeText : styles.citizenBadgeText]}>
@@ -258,7 +258,7 @@ export default function ProfilScreen() {
             <Ionicons name="business" size={20} color="#059669" />
             <View style={styles.infoTexts}>
               <Text style={styles.infoLabel}>Collectivité territoriale</Text>
-              <Text style={styles.infoValue}>{user?.municipality || 'Mairie de Zarzouna'}</Text>
+              <Text style={styles.infoValue}>{isWorker ? (user?.municipality || 'Mairie affectée') : 'Portail Citoyen National (Tunisie)'}</Text>
             </View>
           </View>
 
@@ -299,7 +299,7 @@ export default function ProfilScreen() {
                 <Ionicons name="shield-checkmark" size={20} color="#059669" />
                 <View style={styles.infoTexts}>
                   <Text style={styles.infoLabel}>Statut du compte</Text>
-                  <Text style={styles.infoValue}>Citoyen vérifié de la commune de Zarzouna</Text>
+                  <Text style={styles.infoValue}>Citoyen vérifié EcoTrack (routage GPS automatique)</Text>
                 </View>
               </View>
             </>
@@ -403,7 +403,7 @@ export default function ProfilScreen() {
                   <Ionicons name="call" size={18} color="#b45309" />
                 </View>
                 <View style={styles.menuTexts}>
-                  <Text style={styles.menuLabel}>Contacter la Mairie de Zarzouna</Text>
+                  <Text style={styles.menuLabel}>{isWorker ? 'Contacter la Mairie' : 'Support EcoTrack'}</Text>
                   <Text style={styles.menuSublabel}>Accueil téléphonique (+216 72 500 200)</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
@@ -474,7 +474,7 @@ export default function ProfilScreen() {
                   {isWorker ? 'Consignes de Sécurité & Protocoles EPI' : 'Charte Citoyenne de Salubrité'}
                 </Text>
                 <Text style={styles.menuSublabel}>
-                  {isWorker ? 'Règlementation communale et EPI' : 'Bonnes pratiques pour la ville de Zarzouna'}
+                  {isWorker ? 'Règlementation communale et EPI' : 'Bonnes pratiques Éco-Citoyennes'}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
@@ -488,7 +488,7 @@ export default function ProfilScreen() {
           <Text style={styles.logoutText}>Se déconnecter de l'application</Text>
         </TouchableOpacity>
 
-        <Text style={styles.versionText}>EcoTrack Mobile v1.0.0 • {user?.municipality || 'Mairie de Zarzouna'}</Text>
+        <Text style={styles.versionText}>EcoTrack Mobile v1.0.0 • {isWorker ? (user?.municipality || 'Mairie') : 'Tunisie'}</Text>
       </ScrollView>
     </SafeAreaView>
   );
