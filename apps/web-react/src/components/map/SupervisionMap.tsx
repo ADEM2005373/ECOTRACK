@@ -93,9 +93,45 @@ function SupervisionMapView({ config }: { config: MapConfig }) {
   }
 
   const isGlobalAdmin = currentUser?.role === 'ADMIN_SAAS' || currentUser?.role === 'ADMIN';
-  const scopedTerritory = !isGlobalAdmin && currentUser?.territory?.center?.length === 2
-    ? currentUser.territory
-    : undefined;
+  const [resolvedTerritory, setResolvedTerritory] = useState<MunicipalityTerritory | undefined>(
+    !isGlobalAdmin && currentUser?.territory?.center?.length === 2 ? currentUser.territory : undefined
+  );
+
+  useEffect(() => {
+    if (isGlobalAdmin || !currentUser?.municipality) {
+      setResolvedTerritory(undefined);
+      return;
+    }
+    if (currentUser.territory?.center?.length === 2) {
+      setResolvedTerritory(currentUser.territory);
+      return;
+    }
+
+    let cancelled = false;
+    fetch(`/api/v1/auth/territory?name=${encodeURIComponent(currentUser.municipality)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.territory?.center?.length === 2) {
+          setResolvedTerritory(data.territory);
+          try {
+            const raw = localStorage.getItem('ecotrack_user');
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              localStorage.setItem('ecotrack_user', JSON.stringify({ ...parsed, territory: data.territory }));
+            }
+          } catch {
+            // ignore storage errors
+          }
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isGlobalAdmin, currentUser?.municipality, currentUser?.territory]);
+
+  const scopedTerritory = resolvedTerritory;
 
   const reports = state.status === 'ready' ? state.data.reports : NO_REPORTS;
   const territorialReports = useMemo(
