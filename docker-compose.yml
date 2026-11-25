@@ -50,7 +50,7 @@ services:
     container_name: ecotrack-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:-EcoTrackRedis2026!}"]
     volumes:
       - redis_data:/data
@@ -68,7 +68,7 @@ services:
     container_name: ecotrack-rabbitmq
     restart: unless-stopped
     ports:
-      - "5672:5672"    # AMQP
+      - "127.0.0.1:5672:5672"    # AMQP
       - "${RABBITMQ_MGMT_PORT:-16672}:15672"  # Management Web UI (16672 évite le conflit de ports réservés Windows Hyper-V/WinNAT)
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-ecotrack_admin}
@@ -89,8 +89,8 @@ services:
     container_name: ecotrack-minio-s3
     restart: unless-stopped
     ports:
-      - "9000:9000"  # S3 API
-      - "9001:9001"  # Console Web
+      - "127.0.0.1:9000:9000"  # S3 API
+      - "127.0.0.1:9001:9001"  # Console Web
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-ecotrack_minio}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-EcoTrackMinio2026!}
@@ -127,6 +127,40 @@ services:
         condition: service_healthy
     networks:
       - ecotrack-network
+
+  # 7. HTTPS Tunnel — Option A: Ngrok (static domain)
+  #    Requires: NGROK_AUTHTOKEN and NGROK_STATIC_DOMAIN in .env
+  #    Comment out if using Cloudflare Tunnel (Option B below).
+  tunnel:
+    image: ngrok/ngrok:latest
+    container_name: ecotrack-tunnel
+    restart: unless-stopped
+    command:
+      - "http"
+      - "--url=${NGROK_STATIC_DOMAIN}"
+      - "api-gateway:80"
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    depends_on:
+      - api-gateway
+    networks:
+      - ecotrack-network
+
+  # 7b. HTTPS Tunnel — Option B: Cloudflare Tunnel
+  #    Requires: CLOUDFLARE_TUNNEL_TOKEN in .env
+  #    Uncomment the block below AND comment out the ngrok block above.
+  #
+  # tunnel:
+  #   image: cloudflare/cloudflared:latest
+  #   container_name: ecotrack-tunnel
+  #   restart: unless-stopped
+  #   command: tunnel --no-autoupdate run
+  #   environment:
+  #     TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+  #   depends_on:
+  #     - api-gateway
+  #   networks:
+  #     - ecotrack-network
 
 networks:
   ecotrack-network:

@@ -2,14 +2,14 @@
 // Uses native fetch with Bearer token from localStorage.
 // Falls back to mock data if the API is unavailable so the UI always works.
 
+import { apiUrl, authHeaders as sharedAuthHeaders } from './apiClient';
+
 const API_BASE = '/api/v1';
 const TOKEN_KEY = 'ecotrack_access_token';
 
 function authHeaders(): Record<string, string> {
   const token = localStorage.getItem(TOKEN_KEY);
-  return token
-    ? { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
-    : { 'Content-Type': 'application/json' };
+  return sharedAuthHeaders(token ? { Authorization: `Bearer ${token}` } : {});
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -111,7 +111,7 @@ export type ApiResult<T> =
 /** GET /api/v1/reports/stats */
 export async function getStats(): Promise<ApiResult<ReportStats>> {
   try {
-    const res = await fetch(`${API_BASE}/reports/stats`, {
+    const res = await fetch(apiUrl(`${API_BASE}/reports/stats`), {
       headers: authHeaders(),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -139,7 +139,7 @@ export async function getReports(
     if (filters?.district && filters.district !== 'TOUS') params.set('district', filters.district);
     if (filters?.status && filters.status !== 'TOUS') params.set('status', filters.status);
     const qs = params.toString();
-    const url = `${API_BASE}/reports${qs ? `?${qs}` : ''}`;
+    const url = apiUrl(`${API_BASE}/reports${qs ? `?${qs}` : ''}`);
 
     const res = await fetch(url, { headers: authHeaders() });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -177,7 +177,7 @@ export async function assignReport(
   workerId: string,
 ): Promise<{ kind: 'success' } | { kind: 'error'; message: string }> {
   try {
-    const res = await fetch(`${API_BASE}/reports/${reportId}/assign`, {
+    const res = await fetch(apiUrl(`${API_BASE}/reports/${reportId}/assign`), {
       method: 'PATCH',
       headers: authHeaders(),
       body: JSON.stringify({ workerId }),

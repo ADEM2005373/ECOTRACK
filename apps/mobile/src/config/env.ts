@@ -4,8 +4,20 @@
  */
 
 export const env = {
-  apiUrl: process.env.EXPO_PUBLIC_API_URL || 'http://192.168.43.76:8090',
+  apiUrl: (process.env.EXPO_PUBLIC_API_URL || 'http://192.168.43.76:8090').replace(/\/+$/, ''),
 } as const;
+
+/**
+ * Returns common HTTP headers for all API calls.
+ * Automatically adds `ngrok-skip-browser-warning` when targeting a Ngrok domain.
+ */
+export function baseHeaders(extra: Record<string, string> = {}): Record<string, string> {
+  const headers: Record<string, string> = { ...extra };
+  if (env.apiUrl.includes('ngrok')) {
+    headers['ngrok-skip-browser-warning'] = 'true';
+  }
+  return headers;
+}
 
 if (__DEV__ && !env.apiUrl) {
   console.warn('[env] EXPO_PUBLIC_API_URL non défini : copier apps/mobile/.env.example vers .env');

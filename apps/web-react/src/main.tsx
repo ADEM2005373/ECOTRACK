@@ -1,7 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { installApiFetchInterceptor } from './services/apiClient';
 import { AuthProvider } from './store/authStore';
+
+installApiFetchInterceptor();
 import ProtectedRoute from './components/ProtectedRoute';
 import App from './App';
 import LoginPage from './pages/LoginPage';

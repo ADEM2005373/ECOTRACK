@@ -6,7 +6,7 @@
  *   409 { error: 'EMAIL_ALREADY_EXISTS', message }
  * Aucun jeton n'est renvoyé à l'inscription.
  */
-import { env } from '../config/env';
+import { env, baseHeaders } from '../config/env';
 import type { RegisterPayload } from '../screens/Auth/registerSchema';
 
 export const REGISTER_PATH = '/api/v1/auth/register';
@@ -100,7 +100,7 @@ export async function registerUser(
   try {
     const response = await fetch(`${baseUrl}${REGISTER_PATH}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      headers: baseHeaders({ 'Content-Type': 'application/json', Accept: 'application/json' }),
       body: JSON.stringify({
         fullName: payload.fullName,
         email: payload.email,
@@ -166,7 +166,7 @@ export async function loginUser(
   try {
     const response = await fetch(`${baseUrl}${LOGIN_PATH}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      headers: baseHeaders({ 'Content-Type': 'application/json', Accept: 'application/json' }),
       body: JSON.stringify({ email: payload.email, password: payload.password }),
       signal: controller.signal,
     });

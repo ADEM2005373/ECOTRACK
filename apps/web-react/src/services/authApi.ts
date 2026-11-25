@@ -2,6 +2,8 @@
  * Client HTTP pour l'authentification (services/identity-api, route ECO-14).
  * Contrat : POST /api/v1/auth/login → { accessToken, refreshToken, user }
  */
+import { apiUrl, defaultHeaders } from './apiClient';
+
 export const LOGIN_PATH = '/api/v1/auth/login';
 export const REGISTER_PATH = '/api/v1/auth/register';
 
@@ -40,9 +42,9 @@ export async function loginUser(email: string, password: string): Promise<LoginR
     : null;
 
   try {
-    const response = await fetch(LOGIN_PATH, {
+    const response = await fetch(apiUrl(LOGIN_PATH), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: defaultHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ email, password }),
     });
 
@@ -64,9 +66,9 @@ export async function loginUser(email: string, password: string): Promise<LoginR
 
 export async function registerUser(fullName: string, email: string, password: string, phoneNumber?: string) {
   try {
-    const response = await fetch(REGISTER_PATH, {
+    const response = await fetch(apiUrl(REGISTER_PATH), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: defaultHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ fullName, email, password, phoneNumber }),
     });
 

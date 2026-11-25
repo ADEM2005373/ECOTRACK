@@ -3,7 +3,7 @@
  * Connecté en temps réel à l'API Gateway et MongoDB ecotrack_db.
  * Zéro fausse donnée injectée (0 fake data).
  */
-import { env } from '../config/env';
+import { env, baseHeaders } from '../config/env';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -127,7 +127,7 @@ export async function fetchWorkerRoadmap(
  */
 export async function getMyInterventions(token?: string): Promise<ApiResult<Intervention[]>> {
   try {
-    const headers: Record<string, string> = { Accept: 'application/json' };
+    const headers: Record<string, string> = baseHeaders({ Accept: 'application/json' });
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
     const res = await fetch(apiUrl('/api/v1/reports'), { headers });
@@ -161,7 +161,7 @@ export async function getMyInterventions(token?: string): Promise<ApiResult<Inte
  */
 export async function getInterventionById(id: string, token?: string): Promise<ApiResult<Intervention>> {
   try {
-    const headers: Record<string, string> = { Accept: 'application/json' };
+    const headers: Record<string, string> = baseHeaders({ Accept: 'application/json' });
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
     const res = await fetch(apiUrl(`/api/v1/reports/${id}`), { headers });

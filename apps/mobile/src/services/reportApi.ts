@@ -2,7 +2,7 @@
  * EcoTrack Mobile – Citizen Report API client.
  * Connecté en temps réel à l'API Gateway et MongoDB (ecotrack_db).
  */
-import { env } from '../config/env';
+import { env, baseHeaders } from '../config/env';
 
 export const REPORTS_PATH = '/api/v1/reports';
 
@@ -151,7 +151,7 @@ export async function getMyReports(
   token?: string | null
 ): Promise<ReportsFetchResult> {
   try {
-    const headers: Record<string, string> = { Accept: 'application/json' };
+    const headers: Record<string, string> = baseHeaders({ Accept: 'application/json' });
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
     const query = reporterId ? `?reporterId=${encodeURIComponent(reporterId)}` : '';
