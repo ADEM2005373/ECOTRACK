@@ -74,7 +74,7 @@ export default function InterventionDetailScreen() {
     if (res.kind === 'success') {
       setIntervention((prev) => prev ? { ...prev, status: 'EN_COURS' } : res.data);
       Alert.alert(
-        'Chantier Démarré (T3)',
+        'Chantier Démarré',
         'Le statut est passé à "En intervention". Vous pouvez maintenant effectuer les travaux et soumettre la photo de fin.'
       );
       void loadIntervention();
@@ -101,8 +101,8 @@ export default function InterventionDetailScreen() {
     if (res.kind === 'success') {
       setIntervention((prev) => prev ? { ...prev, status: 'TERMINEE', resolutionPhotoUri: finalPhoto, resolutionNotes } : res.data);
       Alert.alert(
-        'Mission Clôturée avec Succès (T4)',
-        'La photo de preuve et les notes ont été transmises. Le signalement est désormais validé Résolu sur le tableau de bord municipal.',
+        'Mission Clôturée avec Succès',
+        'La photo de preuve et les notes ont été transmises. Le signalement est désormais validé Résolu.',
         [{ text: 'Retour aux missions', onPress: () => router.back() }]
       );
       void loadIntervention();
@@ -224,7 +224,7 @@ export default function InterventionDetailScreen() {
               styles.statusText,
               isDone ? styles.statusDoneText : isInProgress ? styles.statusProgressText : styles.statusWaitingText
             ]}>
-              {isDone ? '✓ Chantier Résolu' : isInProgress ? '⚡ En cours' : '⏱️ Assignée'}
+              {isDone ? 'Chantier Résolu' : isInProgress ? 'En cours' : 'Assignée'}
             </Text>
           </View>
         </View>
@@ -298,7 +298,7 @@ export default function InterventionDetailScreen() {
             ) : (
               <View style={styles.btnRow}>
                 <Ionicons name="play" size={18} color="#ffffff" />
-                <Text style={styles.primaryText}>Démarrer l'intervention (Transition T3)</Text>
+                <Text style={styles.primaryText}>Démarrer l'intervention</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -310,7 +310,7 @@ export default function InterventionDetailScreen() {
         <View style={styles.actionCard}>
           <View style={styles.stepHeader}>
             <View style={[styles.stepNumberBadge, { backgroundColor: '#059669' }]}><Text style={styles.stepNumberText}>2</Text></View>
-            <Text style={styles.actionHeading}>Clôture des travaux & Preuve photo (T4)</Text>
+            <Text style={styles.actionHeading}>Clôture des travaux &amp; Preuve photo</Text>
           </View>
           <Text style={styles.actionDescription}>
             Transmettez la photo du lieu après nettoyage/réparation ainsi que vos remarques d'intervention :
@@ -328,14 +328,6 @@ export default function InterventionDetailScreen() {
             <TouchableOpacity style={styles.photoActionBtn} onPress={handlePickGallery}>
               <Ionicons name="images" size={16} color="#2563eb" />
               <Text style={styles.photoActionBtnText}>Galerie</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.photoActionBtn}
-              onPress={() => setProofPhotoUrl('https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=800&auto=format&fit=crop&q=80')}
-            >
-              <Ionicons name="sparkles" size={16} color="#d97706" />
-              <Text style={styles.photoActionBtnText}>Photo Démo</Text>
             </TouchableOpacity>
           </View>
 
@@ -373,7 +365,7 @@ export default function InterventionDetailScreen() {
             ) : (
               <View style={styles.btnRow}>
                 <Ionicons name="checkmark-done" size={20} color="#ffffff" />
-                <Text style={styles.primaryText}>Valider & Clôturer la mission (T4)</Text>
+                <Text style={styles.primaryText}>Valider &amp; Clôturer la mission</Text>
               </View>
             )}
           </TouchableOpacity>

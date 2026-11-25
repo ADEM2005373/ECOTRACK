@@ -88,8 +88,8 @@ export default function ProfilScreen() {
 
     if (res.kind === 'success') {
       Alert.alert(
-        'Synchronisation MongoDB Réussie',
-        `Connecté à la base ecotrack_db de la Mairie de Zarzouna.\n\n${res.data.length} mission(s) active(s) répertoriée(s) pour votre brigade technique.`
+        'Missions actualisées',
+        `${res.data.length} mission(s) active(s) répertoriée(s) pour votre brigade.`
       );
     } else {
       Alert.alert('Erreur de synchronisation', res.message || 'Impossible de joindre le serveur.');
@@ -156,16 +156,16 @@ export default function ProfilScreen() {
 
       if (res.ok) {
         Alert.alert(
-          'Passerelle API Opérationnelle ✅',
-          `URL: ${baseUrl}\nStatut: 200 OK (Nginx Gateway)\nLatence: ${duration} ms\nMicroservices: Identity, Reports, Workflow, Audit connectés.`
+          'Connexion opérationnelle',
+          `Le service EcoTrack est disponible (latence : ${duration} ms).`
         );
       } else {
         Alert.alert('Réponse anormale', `Code retour HTTP: ${res.status}`);
       }
     } catch {
       Alert.alert(
-        'Erreur de liaison réseau ❌',
-        `Impossible d'atteindre ${env.apiUrl}.\nVérifiez que votre smartphone est bien connecté sur le même réseau Wi-Fi que l'ordinateur.`
+        'Erreur de liaison réseau',
+        'Impossible de joindre le serveur EcoTrack. Vérifiez votre connexion Internet.'
       );
     } finally {
       setPingLoading(false);
@@ -215,8 +215,8 @@ export default function ProfilScreen() {
   const handleSafetyGuidelines = () => {
     if (isWorker) {
       Alert.alert(
-        'Consignes de Sécurité & EPI (Zarzouna)',
-        '1. Port obligatoire du gilet haute visibilité classe 2.\n2. Chaussures de sécurité et gants anti-coupure.\n3. Balisage cônes de signalisation pour intervention sur voie circulante.\n4. Photo avant et après obligatoire pour validation bureaucrate.'
+        'Consignes de Sécurité & EPI',
+        '1. Port obligatoire du gilet haute visibilité classe 2.\n2. Chaussures de sécurité et gants anti-coupure.\n3. Balisage par cônes de signalisation sur voie circulante.\n4. Photo avant et après obligatoire pour validation municipale.'
       );
     } else {
       Alert.alert(
@@ -247,7 +247,7 @@ export default function ProfilScreen() {
 
           <View style={[styles.roleBadge, isWorker ? styles.workerBadgeBg : styles.citizenBadgeBg]}>
             <Text style={[styles.roleText, isWorker ? styles.workerBadgeText : styles.citizenBadgeText]}>
-              {isWorker ? '👷 CHEF D\'ÉQUIPE OPÉRATIONNEL' : '👤 CITOYEN ENGAGÉ'}
+              {isWorker ? 'CHEF D\'ÉQUIPE OPÉRATIONNEL' : 'CITOYEN'}
             </Text>
           </View>
         </View>
@@ -334,8 +334,8 @@ export default function ProfilScreen() {
                   )}
                 </View>
                 <View style={styles.menuTexts}>
-                  <Text style={styles.menuLabel}>Synchroniser avec MongoDB</Text>
-                  <Text style={styles.menuSublabel}>Mettre à jour les données en direct</Text>
+                  <Text style={styles.menuLabel}>Actualiser mes missions</Text>
+                  <Text style={styles.menuSublabel}>Mettre à jour les interventions en direct</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
               </TouchableOpacity>
@@ -439,8 +439,8 @@ export default function ProfilScreen() {
                 )}
               </View>
               <View style={styles.menuTexts}>
-                <Text style={styles.menuLabel}>Tester la liaison API Gateway (Port 8090)</Text>
-                <Text style={styles.menuSublabel}>Vérifier la connexion réseau PC / Mobile</Text>
+                <Text style={styles.menuLabel}>État de la connexion</Text>
+                <Text style={styles.menuSublabel}>Vérifier la disponibilité du service</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
             </TouchableOpacity>
@@ -488,7 +488,7 @@ export default function ProfilScreen() {
           <Text style={styles.logoutText}>Se déconnecter de l'application</Text>
         </TouchableOpacity>
 
-        <Text style={styles.versionText}>EcoTrack Smart City Mobile v1.0.0 • SDK 58 • Zarzouna</Text>
+        <Text style={styles.versionText}>EcoTrack Mobile v1.0.0 • {user?.municipality || 'Mairie de Zarzouna'}</Text>
       </ScrollView>
     </SafeAreaView>
   );

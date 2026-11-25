@@ -30,7 +30,7 @@ export default function LoginScreen() {
   const { login, logout } = useAuthStore();
   const [globalError, setGlobalError] = useState<string | null>(null);
 
-  const { control, handleSubmit, setValue, formState: { isSubmitting } } = useForm<LoginValues>({
+  const { control, handleSubmit, formState: { isSubmitting } } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
@@ -45,12 +45,11 @@ export default function LoginScreen() {
     if (result.kind === 'success') {
       const userRole = result.user.role;
 
-      // Séparation stricte : Les profils Admin / Agent de Mairie sont réservés à la console Web sur PC
       if (userRole === 'ADMIN_SAAS' || userRole === 'ADMIN_MUNICIPALITE' || userRole === 'AGENT_MAIRIE') {
         await logout();
         Alert.alert(
           'Accès Réservé au Web',
-          `Le profil "${result.user.fullName}" (${userRole.replace('_', ' ')}) est un compte bureautique / supervision.\n\nCe rôle dispose de sa console complète sur ordinateur Web (http://localhost:3000).\n\nL'application mobile est exclusivement réservée aux équipes de terrain (Chef Ouvrier) et aux Citoyens.`,
+          `Le profil "${result.user.fullName}" est un compte de supervision accessible uniquement depuis la console Web EcoTrack.\n\nL'application mobile est dédiée aux équipes de terrain et aux citoyens.`,
           [{ text: 'Compris' }]
         );
         return;
@@ -67,23 +66,17 @@ export default function LoginScreen() {
     }
   });
 
-  const handleSelectRole = (email: string, pass: string) => {
-    setValue('email', email, { shouldValidate: true });
-    setValue('password', pass, { shouldValidate: true });
-  };
-
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Figma Brand Header */}
         <View style={styles.brandHeader}>
           <View style={styles.emblem}>
-            <Text style={styles.emblemText}>🌱</Text>
+            <Text style={styles.emblemText}>E</Text>
           </View>
           <Text style={styles.brandTitle}>ECOTRACK</Text>
           <Text style={styles.brandSubtitle}>PORTAIL SMART CITY MOBILE</Text>
           <Text style={styles.brandDescription}>
-            Application mobile dédiée aux équipes de terrain (Chef Ouvrier) et aux Citoyens
+            Gestion des anomalies urbaines et interventions de terrain
           </Text>
         </View>
 
@@ -105,51 +98,6 @@ export default function LoginScreen() {
         
         <View style={styles.buttonContainer}>
           <PrimaryButton label="Se connecter" onPress={onSubmit} loading={isSubmitting} />
-        </View>
-
-        {/* 1-Click Role Presets (Strictement Mobile : Chefs & Citoyens) */}
-        <View style={styles.presetsContainer}>
-          <Text style={styles.presetsTitle}>Comptes Mobiles Dédiés (1 Clic)</Text>
-          
-          <View style={styles.presetGrid}>
-            <TouchableOpacity
-              style={styles.presetButton}
-              onPress={() => handleSelectRole('chef.voirie@zarzouna.tn', 'Chef2026!')}
-            >
-              <Text style={styles.presetRole}>👷 Chef Voirie</Text>
-              <Text style={styles.presetDesc}>Mohamed Ali Khemiri</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.presetButton}
-              onPress={() => handleSelectRole('chef.poidslourd@zarzouna.tn', 'Chef2026!')}
-            >
-              <Text style={styles.presetRole}>🚛 Chef Poids Lourd</Text>
-              <Text style={styles.presetDesc}>Tarek Jouini</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.presetButton}
-              onPress={() => handleSelectRole('citoyen@zarzouna.tn', 'Citoyen2026!')}
-            >
-              <Text style={styles.presetRole}>👤 Citoyen Zarzouna</Text>
-              <Text style={styles.presetDesc}>Signalements Quartier</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.presetButton}
-              onPress={() => handleSelectRole('citoyen@ecotrack.tn', 'Citoyen2026!')}
-            >
-              <Text style={styles.presetRole}>👤 Citoyen Test</Text>
-              <Text style={styles.presetDesc}>Compte Démo Citoyen</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.webNoteBox}>
-            <Text style={styles.webNoteText}>
-              💻 <Text style={{ fontWeight: 'bold' }}>Rôles Web uniquement :</Text> Les consoles Administrateur SaaS, Directeur Mairie et Agent de Modération s'ouvrent sur navigateur PC (http://localhost:3000).
-            </Text>
-          </View>
         </View>
 
         <TouchableOpacity onPress={() => router.push('/register')} style={styles.registerLink}>
@@ -175,7 +123,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.xs,
   },
-  emblemText: { fontSize: 24 },
+  emblemText: { fontSize: 22, fontWeight: 'bold', color: '#ffffff' },
   brandTitle: { ...textStyles.heading, fontSize: 24, color: '#0f172a', fontWeight: 'bold' },
   brandSubtitle: { fontSize: 10, letterSpacing: 2, color: '#059669', fontWeight: 'bold', marginTop: 2 },
   brandDescription: { fontSize: 12, color: '#64748b', textAlign: 'center', marginTop: spacing.xs, paddingHorizontal: spacing.md },

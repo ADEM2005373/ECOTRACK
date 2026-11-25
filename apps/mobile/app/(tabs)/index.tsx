@@ -100,7 +100,7 @@ export default function HomeScreen() {
           </View>
 
           <View style={styles.greetingSection}>
-            <Text style={styles.greetingTitle}>Bonjour, {user?.fullName || 'Citoyen'} 👋</Text>
+            <Text style={styles.greetingTitle}>Bonjour, {user?.fullName || 'Citoyen'}</Text>
             <Text style={styles.greetingSubtitle}>
               Participez à la salubrité de votre quartier en signalant les anomalies urbaines.
             </Text>
@@ -167,7 +167,7 @@ export default function HomeScreen() {
         {loading ? (
           <View style={styles.loadingBox}>
             <ActivityIndicator color="#059669" />
-            <Text style={styles.loadingText}>Synchronisation avec ecotrack_db...</Text>
+            <Text style={styles.loadingText}>Chargement des interventions...</Text>
           </View>
         ) : reports.length === 0 ? (
           <View style={styles.emptyBox}>

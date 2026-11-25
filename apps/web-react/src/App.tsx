@@ -98,7 +98,7 @@ export default function App() {
 
         {/* Footer */}
         <footer className="border-t border-[#e2e8f0] py-4 px-[32px] text-center text-[12px] text-[#64748b] bg-white shrink-0">
-          Plateforme Métropolitaine EcoTrack V2 • Conforme au Design Figma & CDCF V2
+          Plateforme Métropolitaine EcoTrack • Gestion Urbaine &amp; Salubrité
         </footer>
       </div>
     </div>

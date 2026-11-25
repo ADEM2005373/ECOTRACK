@@ -89,30 +89,7 @@ export const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        {/* Compte racine officiel Admin SaaS */}
-        <div className="mt-6 pt-5 border-t border-[#e2e8f0]">
-          <p className="text-[11px] font-semibold text-[#64748b] mb-2 uppercase tracking-wider text-center">
-            Compte Administrateur SaaS Racine
-          </p>
-          <div>
-            <button
-              type="button"
-              onClick={() => { setEmail('admin@ecotrack.tn'); setPassword('Admin2026!'); }}
-              className="w-full text-left p-3 rounded-[8px] bg-emerald-50/60 border border-emerald-200 hover:bg-emerald-100/60 transition text-[#0f172a] flex items-center justify-between"
-            >
-              <div>
-                <span className="font-bold text-emerald-800 text-xs block">👑 Administrateur SaaS Global</span>
-                <span className="text-[11px] text-emerald-600">admin@ecotrack.tn (Superviseur racine)</span>
-              </div>
-              <span className="text-[10px] font-semibold bg-[#059669] text-white px-2 py-0.5 rounded">Remplir</span>
-            </button>
-          </div>
-          <p className="text-[11px] text-[#64748b] mt-2.5 text-center leading-tight">
-            Base épurée : L'administrateur SaaS dispose des droits complets pour créer les nouvelles municipalités et leurs équipes.
-          </p>
-        </div>
-
-        <p className="text-center text-xs text-[#64748b] mt-5">
+        <p className="text-center text-xs text-[#64748b] mt-6">
           Nouveau citoyen ou agent ?{' '}
           <Link to="/register" className="text-[#059669] hover:text-[#047857] font-semibold transition">
             Créer un compte

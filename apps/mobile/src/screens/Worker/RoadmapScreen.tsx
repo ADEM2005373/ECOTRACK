@@ -189,7 +189,7 @@ export default function RoadmapScreen() {
           <View style={{ flex: 1 }}>
             <Text style={styles.workerName}>{user?.fullName || 'Mohamed Ali Khemiri'}</Text>
             <Text style={styles.workerBrigade}>
-              👷 Chef Ouvrier · {user?.municipality || 'Mairie de Zarzouna'}
+              Chef Ouvrier · {user?.municipality || 'Mairie de Zarzouna'}
             </Text>
           </View>
         </View>
@@ -234,7 +234,7 @@ export default function RoadmapScreen() {
       {loading ? (
         <View style={styles.centerLoading}>
           <ActivityIndicator color="#059669" size="large" />
-          <Text style={styles.loadingText}>Synchronisation avec ecotrack_db...</Text>
+          <Text style={styles.loadingText}>Chargement des missions...</Text>
         </View>
       ) : (
         <>
@@ -257,7 +257,7 @@ export default function RoadmapScreen() {
                 {filter === 'ALL' ? 'Aucune intervention assignée' : 'Aucune mission dans cette catégorie'}
               </Text>
               <Text style={styles.emptyText}>
-                Toutes les anomalies enregistrées dans MongoDB pour la Mairie de Zarzouna sont à jour. Dès qu'un agent municipal dispatchera un signalement, il apparaîtra ici en temps réel.
+                Aucune intervention en attente pour votre brigade. Dès qu'un agent municipal affectera un signalement, il apparaîtra ici en temps réel.
               </Text>
               <TouchableOpacity style={styles.refreshBtn} onPress={() => void onRefresh()}>
                 <Ionicons name="refresh" size={16} color="#ffffff" />

@@ -95,7 +95,7 @@ export default function MesSignalementsScreen() {
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>Mes Dossiers Citoyens</Text>
             <Text style={styles.headerSubtitle}>
-              Suivi en direct depuis MongoDB (Mairie de Zarzouna)
+              Suivi de vos signalements · Mairie de Zarzouna
             </Text>
           </View>
           <TouchableOpacity style={styles.refreshIconBtn} onPress={() => void onRefresh()}>

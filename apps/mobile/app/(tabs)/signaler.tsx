@@ -47,8 +47,6 @@ const CATEGORIES: Category[] = [
   { value: 'AUTRE', label: 'Autre', icon: '❓' },
 ];
 
-const DEMO_PHOTO_URL = 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80';
-
 export default function SignalerScreen() {
   const router = useRouter();
 
@@ -166,15 +164,8 @@ export default function SignalerScreen() {
       'Ajouter une photo',
       'Choisissez une source',
       [
-        { text: '📷 Appareil photo', onPress: takePhoto },
-        { text: '🖼️ Galerie', onPress: pickPhoto },
-        {
-          text: '✨ Photo Démo',
-          onPress: () => {
-            setPhotoUri(DEMO_PHOTO_URL);
-            setPhotoBase64(null);
-          },
-        },
+        { text: 'Appareil photo', onPress: takePhoto },
+        { text: 'Galerie', onPress: pickPhoto },
         { text: 'Annuler', style: 'cancel' },
       ],
     );
@@ -213,7 +204,7 @@ export default function SignalerScreen() {
 
       if (result.kind === 'success') {
         Alert.alert(
-          '✅ Signalement enregistré',
+          'Signalement enregistré',
           'Votre signalement a été transmis en direct à la Mairie de Zarzouna.',
           [
             { text: 'Nouveau signalement', onPress: resetForm, style: 'cancel' },
@@ -250,7 +241,6 @@ export default function SignalerScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.headerIcon}>🌿</Text>
           <Text style={styles.headerTitle}>Signaler une anomalie</Text>
           <Text style={styles.headerSub}>
             Contribuez à la propreté de Zarzouna en temps réel
@@ -330,7 +320,7 @@ export default function SignalerScreen() {
           ) : (
             <TouchableOpacity style={styles.photoButton} onPress={handlePhotoPress}>
               <Text style={styles.photoButtonText}>
-                📷 Prendre une photo / Galerie / Démo
+                Prendre une photo ou choisir depuis la galerie
               </Text>
             </TouchableOpacity>
           )}
