@@ -246,3 +246,22 @@ export async function submitReport({
     };
   }
 }
+
+export async function deleteMyReport(
+  reportId: string,
+  token?: string | null
+): Promise<{ kind: 'success' } | { kind: 'error'; message: string }> {
+  const headers: Record<string, string> = { Accept: 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${baseUrl()}${REPORTS_PATH}/${encodeURIComponent(reportId)}`, {
+      method: 'DELETE',
+      headers,
+    });
+    if (res.ok) return { kind: 'success' };
+    return { kind: 'error', message: `Impossible de supprimer le signalement (${res.status}).` };
+  } catch {
+    return { kind: 'error', message: 'Impossible de joindre le serveur.' };
+  }
+}

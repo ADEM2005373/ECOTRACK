@@ -15,7 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, textStyles } from '../../theme';
 import { getMyInterventions, type Intervention, type InterventionStatus } from '../../services/interventionApi';
@@ -135,10 +135,12 @@ export default function RoadmapScreen() {
     }
   }, [accessToken]);
 
-  useEffect(() => {
-    setLoading(true);
-    void load().finally(() => setLoading(false));
-  }, [load]);
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      void load().finally(() => setLoading(false));
+    }, [load])
+  );
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

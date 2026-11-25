@@ -300,5 +300,79 @@ export async function completeIntervention(
   }
 }
 
+export type AuditEventParams = {
+  actorId: string;
+  actorRole: string;
+  action: string;
+  entityType: 'Report' | 'User' | 'Equipment';
+  entityId: string;
+  reason: string;
+  after?: Record<string, unknown>;
+  token?: string;
+};
+
+/**
+ * Enregistre un événement terrain dans le journal d'audit MongoDB (POST /api/v1/audit/log)
+ */
+export async function logWorkerEvent(params: AuditEventParams): Promise<ApiResult<{ logged: boolean }>> {
+  try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
+    if (params.token) headers['Authorization'] = `Bearer ${params.token}`;
+
+    const res = await fetch(apiUrl('/api/v1/audit/log'), {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        actorId: params.actorId,
+        actorRole: params.actorRole,
+        action: params.action,
+        entityType: params.entityType,
+        entityId: params.entityId,
+        reason: params.reason,
+        after: {
+          ...(params.after ?? {}),
+          municipality: 'Mairie de Zarzouna',
+        },
+      }),
+    });
+
+    if (!res.ok) {
+      const body = await readJson(res);
+      return {
+        kind: 'error',
+        message: isRecord(body) && typeof body.error === 'string' ? body.error : `Erreur serveur (${res.status})`,
+      };
+    }
+
+    return { kind: 'success', data: { logged: true } };
+  } catch (err: any) {
+    return { kind: 'error', message: err.message || 'Impossible de joindre le service d\'audit.' };
+  }
+}
+
+/**
+ * Signale un blocage terrain ou besoin de renfort pour une intervention
+ */
+export async function reportFieldIssue(
+  reportId: string,
+  issueNote: string,
+  actorId?: string,
+  token?: string
+): Promise<ApiResult<{ logged: boolean }>> {
+  return logWorkerEvent({
+    actorId: actorId || 'chef.voirie@zarzouna.tn',
+    actorRole: 'CHEF_OUVRIER',
+    action: 'FIELD_ISSUE_REPORTED',
+    entityType: 'Report',
+    entityId: reportId,
+    reason: issueNote,
+    after: { issueNote, status: 'BLOQUE_RENFORT_DEMANDE' },
+    token,
+  });
+}
+
 // Compatibilité legacy
 export const startInterventionById = startIntervention;

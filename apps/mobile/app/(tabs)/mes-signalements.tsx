@@ -1,7 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Image,
+  Linking,
   Modal,
   RefreshControl,
   ScrollView,
@@ -14,7 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../src/store/authStore';
-import { getMyReports, type CitizenReport } from '../../src/services/reportApi';
+import { deleteMyReport, getMyReports, type CitizenReport } from '../../src/services/reportApi';
 
 export default function MesSignalementsScreen() {
   const router = useRouter();
@@ -54,6 +56,30 @@ export default function MesSignalementsScreen() {
     if (filter === 'ALL') return true;
     return r.status === filter;
   });
+
+  const handleDeleteReport = (report: CitizenReport) => {
+    Alert.alert(
+      'Annuler le signalement',
+      `Voulez-vous supprimer définitivement le dossier ${report.reference} ?`,
+      [
+        { text: 'Non', style: 'cancel' },
+        {
+          text: 'Supprimer',
+          style: 'destructive',
+          onPress: async () => {
+            const res = await deleteMyReport(report.id, accessToken);
+            if (res.kind === 'success') {
+              setSelectedReport(null);
+              setReports((prev) => prev.filter((r) => r.id !== report.id));
+              Alert.alert('Supprimé', 'Votre signalement a bien été retiré.');
+            } else {
+              Alert.alert('Erreur', res.message);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const badgeStyleFor = (status: CitizenReport['status']) => {
     if (status === 'RESOLU') return { box: styles.badgeResolved, text: styles.badgeResolvedText };
@@ -276,6 +302,26 @@ export default function MesSignalementsScreen() {
                 </View>
               </ScrollView>
 
+              <View style={styles.modalActionsRow}>
+                <TouchableOpacity
+                  style={styles.gpsModalBtn}
+                  onPress={() => void Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${selectedReport.latitude},${selectedReport.longitude}`)}
+                >
+                  <Ionicons name="navigate" size={16} color="#059669" />
+                  <Text style={styles.gpsModalBtnText}>Voir sur Carte</Text>
+                </TouchableOpacity>
+
+                {selectedReport.status === 'NOUVEAU' && (
+                  <TouchableOpacity
+                    style={styles.deleteModalBtn}
+                    onPress={() => handleDeleteReport(selectedReport)}
+                  >
+                    <Ionicons name="trash-outline" size={16} color="#dc2626" />
+                    <Text style={styles.deleteModalBtnText}>Annuler</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
               <TouchableOpacity
                 style={styles.modalButton}
                 onPress={() => setSelectedReport(null)}
@@ -432,6 +478,37 @@ const styles = StyleSheet.create({
   dotActive: { backgroundColor: '#d97706' },
   dotPending: { backgroundColor: '#cbd5e1' },
   stepText: { fontSize: 11, color: '#475569', flex: 1 },
+  modalActionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 10,
+  },
+  gpsModalBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#ecfdf5',
+    borderWidth: 1,
+    borderColor: '#a7f3d0',
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  gpsModalBtnText: { color: '#059669', fontWeight: 'bold', fontSize: 13 },
+  deleteModalBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#fef2f2',
+    borderWidth: 1,
+    borderColor: '#fecaca',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  deleteModalBtnText: { color: '#dc2626', fontWeight: 'bold', fontSize: 13 },
   modalButton: {
     backgroundColor: '#102c35',
     paddingVertical: 12,

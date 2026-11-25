@@ -3,7 +3,7 @@ import { connectMongo } from '@ecotrack/db';
 import { workflowRouter } from './routes/workflow.routes';
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 const PORT = process.env.WORKFLOW_PORT || 3003;
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Linking,
@@ -13,19 +13,36 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as SecureStore from 'expo-secure-store';
 import { useAuthStore } from '../../src/store/authStore';
-import { getMyInterventions } from '../../src/services/interventionApi';
+import { getMyInterventions, logWorkerEvent } from '../../src/services/interventionApi';
 import { env } from '../../src/config/env';
+
+const PREF_DUTY_KEY = 'ecotrack_pref_on_duty';
+const PREF_SOUND_KEY = 'ecotrack_pref_sound_alerts';
 
 export default function ProfilScreen() {
   const router = useRouter();
   const { user, accessToken, logout } = useAuthStore();
 
-  // États opérationnels du profil
+  // États opérationnels du profil (persistés localement)
   const [isOnDuty, setIsOnDuty] = useState(true);
   const [soundAlerts, setSoundAlerts] = useState(true);
   const [syncLoading, setSyncLoading] = useState(false);
   const [pingLoading, setPingLoading] = useState(false);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const savedDuty = await SecureStore.getItemAsync(PREF_DUTY_KEY);
+        const savedSound = await SecureStore.getItemAsync(PREF_SOUND_KEY);
+        if (savedDuty !== null) setIsOnDuty(savedDuty === 'true');
+        if (savedSound !== null) setSoundAlerts(savedSound === 'true');
+      } catch {
+        /* ignore secure store unavailable in web/test */
+      }
+    })();
+  }, []);
 
   const role = user?.role || 'CITOYEN';
   const isWorker = role === 'CHEF_OUVRIER' || role === 'OUVRIER';
@@ -96,13 +113,28 @@ export default function ProfilScreen() {
     );
   };
 
-  // 6. Signaler panne matériel / véhicule (Chef Ouvrier)
-  const handleReportBreakdown = () => {
-    Alert.alert(
-      'Incident Matériel / Engin',
-      'Votre signalement pour panne de camion benne ou matériel a été envoyé aux ateliers municipaux de Zarzouna. Un technicien a été alerté.',
-      [{ text: 'OK' }]
-    );
+  // 6. Signaler panne matériel / véhicule (Chef Ouvrier -> AuditLog MongoDB)
+  const handleReportBreakdown = async () => {
+    const res = await logWorkerEvent({
+      actorId: user?.email || 'chef.voirie@zarzouna.tn',
+      actorRole: role,
+      action: 'EQUIPMENT_BREAKDOWN_REPORTED',
+      entityType: 'Equipment',
+      entityId: brigadeName,
+      reason: 'Signalement panne camion benne / matériel depuis application mobile.',
+      after: { brigade: brigadeName, status: 'PANNE_SIGNALEE' },
+      token: accessToken || undefined,
+    });
+
+    if (res.kind === 'success') {
+      Alert.alert(
+        'Incident Matériel Enregistré ✅',
+        'Votre signalement de panne a été enregistré dans le journal technique de la Mairie de Zarzouna.',
+        [{ text: 'OK' }]
+      );
+    } else {
+      Alert.alert('Erreur d\'envoi', res.message || 'Impossible de joindre le journal technique.');
+    }
   };
 
   // 7. Guide écocitoyen & déchetteries (Citoyen)
@@ -141,8 +173,13 @@ export default function ProfilScreen() {
   };
 
   // 9. Basculer les alertes sonores
-  const handleToggleSoundAlerts = (value: boolean) => {
+  const handleToggleSoundAlerts = async (value: boolean) => {
     setSoundAlerts(value);
+    try {
+      await SecureStore.setItemAsync(PREF_SOUND_KEY, String(value));
+    } catch {
+      /* ignore */
+    }
     Alert.alert(
       'Préférences Notifications',
       value
@@ -151,6 +188,27 @@ export default function ProfilScreen() {
             : 'Alertes sonores activées pour chaque mise à jour de vos signalements.')
         : 'Mode silencieux activé : seules les notifications visuelles seront affichées.'
     );
+  };
+
+  // 9b. Basculer la disponibilité terrain
+  const handleToggleDuty = async (val: boolean) => {
+    setIsOnDuty(val);
+    try {
+      await SecureStore.setItemAsync(PREF_DUTY_KEY, String(val));
+    } catch {
+      /* ignore */
+    }
+    void logWorkerEvent({
+      actorId: user?.email || 'chef.voirie@zarzouna.tn',
+      actorRole: role,
+      action: 'WORKER_DUTY_CHANGED',
+      entityType: 'User',
+      entityId: user?.id || user?.email || 'chef.voirie@zarzouna.tn',
+      reason: val ? 'Prise de service terrain' : 'Pause / Fin de shift terrain',
+      after: { isOnDuty: val },
+      token: accessToken || undefined,
+    });
+    Alert.alert('Statut de service', val ? 'Vous êtes noté EN SERVICE ACTIF.' : 'Vous êtes noté EN PAUSE.');
   };
 
   // 10. Consignes de sécurité EPI & règlements
@@ -226,10 +284,7 @@ export default function ProfilScreen() {
                 </View>
                 <Switch
                   value={isOnDuty}
-                  onValueChange={(val) => {
-                    setIsOnDuty(val);
-                    Alert.alert('Statut de service', val ? 'Vous êtes noté EN SERVICE ACTIF.' : 'Vous êtes noté EN PAUSE.');
-                  }}
+                  onValueChange={handleToggleDuty}
                   trackColor={{ false: '#cbd5e1', true: '#a7f3d0' }}
                   thumbColor={isOnDuty ? '#059669' : '#f1f5f9'}
                 />

@@ -20,6 +20,7 @@ import {
   getInterventionById,
   startIntervention,
   completeIntervention,
+  reportFieldIssue,
   type Intervention
 } from '../../services/interventionApi';
 import { useAuthStore } from '../../store/authStore';
@@ -38,6 +39,7 @@ export default function InterventionDetailScreen() {
   const [resolutionNotes, setResolutionNotes] = useState<string>('');
   const [showIssueBox, setShowIssueBox] = useState(false);
   const [issueNote, setIssueNote] = useState('');
+  const [issueLoading, setIssueLoading] = useState(false);
 
   // 1. Chargement de l'intervention réelle depuis MongoDB
   const loadIntervention = async () => {
@@ -116,21 +118,30 @@ export default function InterventionDetailScreen() {
     void Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`);
   };
 
-  // 5. Signaler un imprévu / besoin de renfort
-  const handleReportIssue = () => {
+  // 5. Signaler un imprévu / besoin de renfort (persiste dans AuditLog MongoDB)
+  const handleReportIssue = async () => {
     if (!issueNote.trim()) {
       Alert.alert('Précision requise', 'Veuillez saisir la nature du blocage ou besoin de renfort.');
       return;
     }
-    Alert.alert(
-      'Alerte transmise au Pôle Dispatching',
-      `Votre alerte ("${issueNote}") a été envoyée aux agents municipaux de Zarzouna.`
-    );
-    setShowIssueBox(false);
-    setIssueNote('');
+    if (!reportId) return;
+    setIssueLoading(true);
+    const res = await reportFieldIssue(reportId, issueNote.trim(), user?.email, accessToken || undefined);
+    setIssueLoading(false);
+
+    if (res.kind === 'success') {
+      Alert.alert(
+        'Alerte transmise au Pôle Dispatching',
+        `Votre alerte ("${issueNote.trim()}") a été enregistrée dans le journal municipal et transmise aux agents de Zarzouna.`
+      );
+      setShowIssueBox(false);
+      setIssueNote('');
+    } else {
+      Alert.alert('Erreur d\'envoi', res.message);
+    }
   };
 
-  // 6. Prise de photo caméra ou galerie (Preuve T4)
+  // 6. Prise de photo caméra ou galerie (Preuve T4 en base64 pour affichage Web & Mobile)
   const handleTakePhoto = async () => {
     try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -140,10 +151,12 @@ export default function InterventionDetailScreen() {
       }
       const res = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
-        quality: 0.8,
+        quality: 0.5,
+        base64: true,
       });
-      if (!res.canceled && res.assets?.[0]?.uri) {
-        setProofPhotoUrl(res.assets[0].uri);
+      if (!res.canceled && res.assets?.[0]) {
+        const asset = res.assets[0];
+        setProofPhotoUrl(asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : asset.uri);
       }
     } catch {
       Alert.alert('Information', 'Fonction photo directe prête.');
@@ -154,10 +167,12 @@ export default function InterventionDetailScreen() {
     try {
       const res = await ImagePicker.launchImageLibraryAsync({
         allowsEditing: true,
-        quality: 0.8,
+        quality: 0.5,
+        base64: true,
       });
-      if (!res.canceled && res.assets?.[0]?.uri) {
-        setProofPhotoUrl(res.assets[0].uri);
+      if (!res.canceled && res.assets?.[0]) {
+        const asset = res.assets[0];
+        setProofPhotoUrl(asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : asset.uri);
       }
     } catch {
       Alert.alert('Information', 'Fonction galerie prête.');
@@ -417,8 +432,13 @@ export default function InterventionDetailScreen() {
                 <TouchableOpacity
                   style={styles.sendIssueBtn}
                   onPress={handleReportIssue}
+                  disabled={issueLoading}
                 >
-                  <Text style={styles.sendIssueText}>Transmettre l'alerte</Text>
+                  {issueLoading ? (
+                    <ActivityIndicator size="small" color="#ffffff" />
+                  ) : (
+                    <Text style={styles.sendIssueText}>Transmettre l'alerte</Text>
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
