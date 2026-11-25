@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../store/authStore';
+import { EcoTrackLogo } from '../EcoTrackLogo';
 import {
-  Leaf,
   Inbox,
   MapPin,
   Users,
@@ -141,11 +141,9 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
   return (
     <aside className="bg-[#102c35] flex flex-col justify-between h-screen w-[240px] px-[16px] py-[20px] shrink-0 text-white select-none z-30 overflow-y-auto">
       <div className="flex flex-col gap-[18px]">
-        {/* Figma: Logo & Marque ECOTRACK CONSOLE V2 */}
+        {/* Logo & Marque ECOTRACK */}
         <div className="flex items-center gap-[10px] px-[8px]">
-          <div className="bg-[#059669] flex items-center justify-center rounded-[9px] size-[34px] shadow-sm">
-            <Leaf className="size-[20px] text-white" />
-          </div>
+          <EcoTrackLogo size={36} className="rounded-[9px] shadow-sm" />
           <div className="flex flex-col">
             <span className="font-heading font-bold text-[18px] text-white tracking-tight leading-tight">
               ECOTRACK

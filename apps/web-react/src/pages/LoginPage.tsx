@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { loginUser } from '../services/authApi';
 import { useAuth } from '../store/authStore';
-import { Leaf, Lock, Mail } from 'lucide-react';
+import { Lock, Mail } from 'lucide-react';
+import { EcoTrackLogo } from '../components/EcoTrackLogo';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -35,11 +36,9 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col justify-center items-center p-6 antialiased">
       <div className="bg-white border border-[#e2e8f0] p-8 rounded-[16px] w-full max-w-md shadow-xl">
-        {/* Figma Brand Header */}
+        {/* Brand Header */}
         <div className="flex flex-col items-center mb-6 text-center">
-          <div className="w-12 h-12 rounded-[10px] bg-[#059669] flex items-center justify-center text-white shadow-md shadow-emerald-600/20 mb-3">
-            <Leaf className="w-6 h-6" />
-          </div>
+          <EcoTrackLogo size={56} className="rounded-[12px] shadow-md shadow-emerald-600/20 mb-3" />
           <h1 className="text-2xl font-bold text-[#0f172a] font-heading tracking-tight">ECOTRACK</h1>
           <p className="text-[11px] font-semibold tracking-[2px] text-[#059669] uppercase mt-0.5">CONSOLE V2</p>
           <p className="text-xs text-[#64748b] mt-2">Portail métropolitain de salubrité & gestion urbaine</p>

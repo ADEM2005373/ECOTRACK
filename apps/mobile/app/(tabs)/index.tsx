@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../src/store/authStore';
+import { EcoTrackLogo } from '../../src/components/EcoTrackLogo';
 import { getCommunityReports, type CitizenReport } from '../../src/services/reportApi';
 
 export default function HomeScreen() {
@@ -75,9 +76,7 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <View style={styles.brandRow}>
-              <View style={styles.emblem}>
-                <Ionicons name="leaf" size={18} color="#ffffff" />
-              </View>
+              <EcoTrackLogo size={36} />
               <View>
                 <Text style={styles.brandName}>ECOTRACK</Text>
                 <Text style={styles.brandSubtitle}>{user?.municipality?.toUpperCase() || 'MAIRIE DE ZARZOUNA'}</Text>

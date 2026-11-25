@@ -15,6 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { TextField } from '../src/components/TextField';
 import { PrimaryButton } from '../src/components/PrimaryButton';
+import { EcoTrackLogo } from '../src/components/EcoTrackLogo';
 import { useAuthStore } from '../src/store/authStore';
 import { colors, spacing, textStyles } from '../src/theme';
 
@@ -70,9 +71,7 @@ export default function LoginScreen() {
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.brandHeader}>
-          <View style={styles.emblem}>
-            <Text style={styles.emblemText}>E</Text>
-          </View>
+          <EcoTrackLogo size={64} style={{ marginBottom: spacing.xs }} />
           <Text style={styles.brandTitle}>ECOTRACK</Text>
           <Text style={styles.brandSubtitle}>PORTAIL SMART CITY MOBILE</Text>
           <Text style={styles.brandDescription}>
