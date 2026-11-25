@@ -172,9 +172,12 @@ export const QualificationPage: React.FC = () => {
               photoUrl: r.imageUrl || r.thumbnailUrl || 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80',
               photoDate: r.createdAt ? new Date(r.createdAt).toLocaleString('fr-FR') : 'Aujourd’hui',
               location: {
-                address: `${r.district || 'Centre-Ville'} · ${municipality}`,
-                coordinates: [r.location?.coordinates?.[1] || 37.2667, r.location?.coordinates?.[0] || 9.8667],
-                district: r.district || 'Centre-Ville',
+                address: `${r.district || 'Localisation GPS'} · ${r.municipality || r.detectedLocality || 'Commune non spécifiée'}`,
+                coordinates: [
+                  typeof r.location?.coordinates?.[1] === 'number' ? r.location.coordinates[1] : 0,
+                  typeof r.location?.coordinates?.[0] === 'number' ? r.location.coordinates[0] : 0,
+                ],
+                district: r.district || r.detectedLocality || 'Zone GPS',
               },
               source: 'Application citoyenne EcoTrack',
               duplicatesText: r.isDuplicate ? `Doublon de ${r.duplicateOf}` : 'Aucun doublon détecté',

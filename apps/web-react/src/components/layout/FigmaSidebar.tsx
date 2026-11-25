@@ -111,6 +111,7 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
     if (role === 'ADMIN_MUNICIPALITE') {
       return [
         { id: 'overview', label: 'Direction Municipale', icon: <Inbox className="w-4 h-4 text-blue-400" />, path: '/' },
+        { id: 'qualification', label: 'Qualification IA & Affectation', icon: <ShieldCheck className="w-4 h-4 text-purple-400" />, path: '/agent/qualification' },
         { id: 'reports', label: 'Signalements & Suivi', icon: <FileText className="w-4 h-4 text-amber-400" />, path: '/?tab=reports' },
         { id: 'users', label: 'Utilisateurs & Brigades', icon: <Users className="w-4 h-4 text-emerald-400" />, path: '/?tab=users' },
         { id: 'categories', label: 'Catégories & Seuils SLA', icon: <Tags className="w-4 h-4 text-purple-400" />, path: '/?tab=categories' },

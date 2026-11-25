@@ -31,6 +31,9 @@ function safeHttpUrl(value: unknown): string | null {
   if (raw === null) {
     return null;
   }
+  if (raw.startsWith('data:image/')) {
+    return raw;
+  }
   try {
     const url = new URL(raw, window.location.origin);
     return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : null;
@@ -89,6 +92,12 @@ export function parseReport(raw: unknown): ParsedReport {
       photoUrl: safeHttpUrl(item.thumbnailUrl) ?? safeHttpUrl(item.imageUrl) ?? safeHttpUrl(item.photoUrl),
       position,
       createdAt,
+      municipality: nonEmptyString(item.municipality),
+      district: nonEmptyString(item.district),
+      aiConfidenceScore: typeof item.aiConfidenceScore === 'number' ? item.aiConfidenceScore : null,
+      aiJustification: nonEmptyString(item.aiJustification),
+      assignedTeamId: nonEmptyString(item.assignedTeamId),
+      assignedWorkerId: nonEmptyString(item.assignedWorkerId),
     },
   };
 }

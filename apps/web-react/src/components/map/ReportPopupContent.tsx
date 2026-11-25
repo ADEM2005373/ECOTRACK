@@ -7,7 +7,13 @@ import type { MapReport } from './types';
  * Popup of a marker. Everything is rendered as React text (escaped): the
  * description is never injected as HTML. No reporter data exists in MapReport.
  */
-export function ReportPopupContent({ report }: { report: MapReport }) {
+export function ReportPopupContent({
+  report,
+  onSelect,
+}: {
+  report: MapReport;
+  onSelect?: (report: MapReport) => void;
+}) {
   const [photoFailed, setPhotoFailed] = useState(false);
   const label = categoryLabel(report.category);
   const { fill, text, glyph } = STATUS_STYLES[report.status];
@@ -42,6 +48,15 @@ export function ReportPopupContent({ report }: { report: MapReport }) {
         {MAP_STRINGS.popupCreatedAt}{' '}
         <time dateTime={report.createdAt.toISOString()}>{formatReportDate(report.createdAt)}</time>
       </p>
+      {onSelect && (
+        <button
+          type="button"
+          onClick={() => onSelect(report)}
+          className="mt-2 w-full rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 transition"
+        >
+          Consulter · Valider · Affecter
+        </button>
+      )}
     </article>
   );
 }

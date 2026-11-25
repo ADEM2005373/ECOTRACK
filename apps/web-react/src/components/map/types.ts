@@ -34,4 +34,10 @@ export interface MapReport {
   photoUrl: string | null;
   position: LatLng;
   createdAt: Date;
+  municipality?: string | null;
+  district?: string | null;
+  aiConfidenceScore?: number | null;
+  aiJustification?: string | null;
+  assignedTeamId?: string | null;
+  assignedWorkerId?: string | null;
 }

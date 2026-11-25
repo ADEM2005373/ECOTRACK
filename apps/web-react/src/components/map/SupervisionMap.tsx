@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { MapContainer, Marker, Polygon, Popup, Rectangle, TileLayer, useMap } from 'react-leaflet';
-import { AlertTriangle, MapPin, RefreshCw } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, MapPin, RefreshCw, ShieldCheck, UserCheck, X, XCircle } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import './supervisionMap.css';
 import { useAuth, type MunicipalityTerritory } from '../../store/authStore';
@@ -84,15 +84,139 @@ function isInsideTerritory(position: [number, number], territory?: MunicipalityT
 function SupervisionMapView({ config }: { config: MapConfig }) {
   const { state, retry } = useReports(config.apiBaseUrl);
   const [filters, setFilters] = useState<ReportFilters>(NO_FILTERS);
+  const [selectedReport, setSelectedReport] = useState<MapReport | null>(null);
+  const [staffList, setStaffList] = useState<Array<{ id: string; fullName: string; role: string }>>([]);
+  const [selectedCategory, setSelectedCategory] = useState('DEPOT_SAUVAGE');
+  const [selectedBrigade, setSelectedBrigade] = useState('Brigade Voirie & Salubrité');
+  const [selectedWorker, setSelectedWorker] = useState('');
+  const [rejectReason, setRejectReason] = useState('Photo non conforme / Aucun déchet détecté');
+  const [actionBusy, setActionBusy] = useState(false);
+  const [actionFeedback, setActionFeedback] = useState<string | null>(null);
 
   let currentUser: ReturnType<typeof useAuth>['state']['user'] = null;
+  let accessToken: string | null = null;
   try {
-    currentUser = useAuth().state.user;
+    const auth = useAuth();
+    currentUser = auth.state.user;
+    accessToken = auth.state.accessToken;
   } catch {
     // Isolated unit tests without AuthProvider
   }
 
   const isGlobalAdmin = currentUser?.role === 'ADMIN_SAAS' || currentUser?.role === 'ADMIN';
+  const canManageReports =
+    currentUser?.role === 'ADMIN_MUNICIPALITE' ||
+    currentUser?.role === 'AGENT_MAIRIE' ||
+    currentUser?.role === 'AGENT' ||
+    isGlobalAdmin;
+
+  useEffect(() => {
+    if (!canManageReports) return;
+    let cancelled = false;
+    fetch('/api/v1/auth/users')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && Array.isArray(data?.users)) {
+          const targetMairie = currentUser?.municipality?.toLowerCase();
+          const staff = data.users
+            .filter((u: any) => {
+              const isFieldRole = u.role === 'CHEF_OUVRIER' || u.role === 'AGENT_MAIRIE' || u.role === 'OUVRIER';
+              if (!isFieldRole) return false;
+              if (!targetMairie || isGlobalAdmin) return true;
+              return !u.municipality || u.municipality.toLowerCase() === targetMairie;
+            })
+            .map((u: any) => ({
+              id: String(u.id || u._id),
+              fullName: u.fullName || u.email,
+              role: u.role,
+            }));
+          setStaffList(staff);
+          if (staff.length > 0) setSelectedWorker(staff[0].fullName);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [canManageReports, currentUser?.municipality, isGlobalAdmin]);
+
+  const openReportPanel = (report: MapReport) => {
+    setSelectedReport(report);
+    setSelectedCategory(report.category || 'DEPOT_SAUVAGE');
+    setSelectedBrigade(report.assignedTeamId || 'Brigade Voirie & Salubrité');
+    if (report.assignedWorkerId) {
+      setSelectedWorker(report.assignedWorkerId);
+    }
+    setActionFeedback(null);
+  };
+
+  const runTransition = async (transition: 'T1' | 'T2' | 'T_REJECT', extra: Record<string, unknown> = {}) => {
+    if (!selectedReport) return;
+    setActionBusy(true);
+    setActionFeedback(null);
+    try {
+      const token = accessToken || localStorage.getItem('ecotrack_access_token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/v1/interventions/transition', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          reportId: selectedReport.id,
+          transition,
+          actorRole: currentUser?.role || 'ADMIN_MUNICIPALITE',
+          actorId: currentUser?.email || currentUser?.id,
+          ...extra,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        setActionFeedback(err?.message || `Erreur (${res.status})`);
+        return;
+      }
+      setActionFeedback(
+        transition === 'T1'
+          ? 'Signalement validé !'
+          : transition === 'T2'
+          ? 'Signalement affecté à la brigade !'
+          : 'Signalement rejeté.'
+      );
+      retry();
+      setTimeout(() => setSelectedReport(null), 900);
+    } catch {
+      setActionFeedback('Impossible de joindre le serveur.');
+    } finally {
+      setActionBusy(false);
+    }
+  };
+
+  const handleAssignFromMap = async () => {
+    if (!selectedReport) return;
+    if (selectedReport.status === 'NOUVEAU' || selectedReport.status === 'EN_COURS_DE_VALIDATION') {
+      const token = accessToken || localStorage.getItem('ecotrack_access_token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      await fetch('/api/v1/interventions/transition', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          reportId: selectedReport.id,
+          transition: 'T1',
+          actorRole: currentUser?.role || 'ADMIN_MUNICIPALITE',
+          actorId: currentUser?.email || currentUser?.id,
+          categoryValidated: selectedCategory,
+          reviewValidated: true,
+        }),
+      }).catch(() => {});
+    }
+    await runTransition('T2', {
+      teamId: selectedBrigade,
+      assigneeId: selectedWorker || 'Chef de Brigade',
+      categoryValidated: selectedCategory,
+      reviewValidated: true,
+    });
+  };
   const [resolvedTerritory, setResolvedTerritory] = useState<MunicipalityTerritory | undefined>(
     !isGlobalAdmin && currentUser?.territory?.center?.length === 2 ? currentUser.territory : undefined
   );
@@ -203,7 +327,10 @@ function SupervisionMapView({ config }: { config: MapConfig }) {
               title={MAP_STRINGS.markerTitle(categoryLabel(report.category), STATUS_LABELS[report.status])}
             >
               <Popup>
-                <ReportPopupContent report={report} />
+                <ReportPopupContent
+                  report={report}
+                  onSelect={canManageReports ? openReportPanel : undefined}
+                />
               </Popup>
             </Marker>
           ))}
@@ -240,6 +367,169 @@ function SupervisionMapView({ config }: { config: MapConfig }) {
           <MapOverlay>
             <p role="status">{reports.length === 0 ? MAP_STRINGS.emptyNoData : MAP_STRINGS.emptyNoMatch}</p>
           </MapOverlay>
+        )}
+
+        {selectedReport && (
+          <div className="absolute inset-y-0 right-0 z-[1100] w-full max-w-md overflow-y-auto border-l border-slate-200 bg-white p-5 shadow-2xl">
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+                  Inspection Territoriale
+                </span>
+                <h3 className="text-base font-bold text-slate-900">
+                  {categoryLabel(selectedReport.category)}
+                </h3>
+                <p className="text-xs text-slate-500">
+                  {selectedReport.district || 'Zone GPS'} · {selectedReport.municipality || 'Commune'} (
+                  {selectedReport.position[0].toFixed(4)}, {selectedReport.position[1].toFixed(4)})
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedReport(null)}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                aria-label="Fermer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-4 text-xs">
+              {selectedReport.photoUrl && (
+                <img
+                  src={selectedReport.photoUrl}
+                  alt="Photo signalement"
+                  className="h-44 w-full rounded-xl border border-slate-200 object-cover"
+                />
+              )}
+
+              {selectedReport.description && (
+                <div className="rounded-lg bg-slate-50 p-3 text-slate-700">
+                  <p className="font-semibold text-slate-900 mb-1">Description citoyenne</p>
+                  <p>{selectedReport.description}</p>
+                </div>
+              )}
+
+              <div className="rounded-lg border border-slate-200 p-3 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 font-semibold text-slate-800">
+                    <ShieldCheck className="h-4 w-4 text-purple-600" />
+                    Analyse IA Vision
+                  </span>
+                  <span className="font-mono font-bold text-slate-900">
+                    {typeof selectedReport.aiConfidenceScore === 'number'
+                      ? `${Math.round(
+                          selectedReport.aiConfidenceScore > 1
+                            ? selectedReport.aiConfidenceScore
+                            : selectedReport.aiConfidenceScore * 100
+                        )} %`
+                      : 'Non analysé'}
+                  </span>
+                </div>
+                <p className="text-slate-600">
+                  {selectedReport.aiJustification || 'Aucune justification IA enregistrée.'}
+                </p>
+              </div>
+
+              <div className="space-y-2 border-t border-slate-100 pt-3">
+                <label className="block font-semibold text-slate-700">Catégorie validée</label>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900"
+                >
+                  <option value="DEPOT_SAUVAGE">Dépôt sauvage</option>
+                  <option value="ENCOMBRANTS">Encombrants</option>
+                  <option value="DECHETS_DANGEREUX">Déchets dangereux</option>
+                  <option value="VEGETAUX">Déchets verts</option>
+                  <option value="GRAFFITI">Graffiti / Dégradation</option>
+                  <option value="DEBORDEMENT_BAC">Débordement de bac</option>
+                  <option value="AUTRE">Autre anomalie</option>
+                </select>
+              </div>
+
+              <div className="space-y-2 border-t border-slate-100 pt-3">
+                <label className="block font-semibold text-slate-700">Brigade & Agent d’affectation</label>
+                <select
+                  value={selectedBrigade}
+                  onChange={(e) => setSelectedBrigade(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900"
+                >
+                  <option value="Brigade Voirie & Salubrité">Brigade Voirie & Salubrité</option>
+                  <option value="Brigade Ramassage Poids Lourd">Brigade Ramassage Poids Lourd</option>
+                  <option value="Brigade Espaces Verts">Brigade Espaces Verts</option>
+                  <option value="Brigade Intervention Spéciale">Brigade Intervention Spéciale</option>
+                  <option value="Brigade Collecte Express">Brigade Collecte Express</option>
+                </select>
+                <select
+                  value={selectedWorker}
+                  onChange={(e) => setSelectedWorker(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900"
+                >
+                  {staffList.length === 0 ? (
+                    <option value="Chef de Brigade">Chef de Brigade (par défaut)</option>
+                  ) : (
+                    staffList.map((s) => (
+                      <option key={s.id} value={s.fullName}>
+                        {s.fullName} ({s.role})
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+
+              {actionFeedback && (
+                <p className="rounded-lg bg-slate-100 px-3 py-2 font-semibold text-slate-800">
+                  {actionFeedback}
+                </p>
+              )}
+
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <button
+                  type="button"
+                  disabled={actionBusy}
+                  onClick={() =>
+                    void runTransition('T1', {
+                      categoryValidated: selectedCategory,
+                      reviewValidated: true,
+                    })
+                  }
+                  className="flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Valider
+                </button>
+                <button
+                  type="button"
+                  disabled={actionBusy}
+                  onClick={() => void handleAssignFromMap()}
+                  className="flex items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  <UserCheck className="h-4 w-4" />
+                  Valider & Affecter
+                </button>
+              </div>
+
+              <div className="border-t border-slate-100 pt-3 space-y-2">
+                <input
+                  type="text"
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Motif du rejet..."
+                  className="w-full rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-900"
+                />
+                <button
+                  type="button"
+                  disabled={actionBusy}
+                  onClick={() => void runTransition('T_REJECT', { reason: rejectReason })}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-50"
+                >
+                  <XCircle className="h-4 w-4" />
+                  Rejeter le signalement
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </section>
     </div>
