@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth, type AuthUser } from '../../store/authStore';
+import { useAuth } from '../../store/authStore';
 import {
   Leaf,
   Inbox,
@@ -29,14 +29,12 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
   let user: any = null;
   let role = 'ADMIN_SAAS';
   let logout = () => {};
-  let loginSuccess = (_u: AuthUser, _token: string) => {};
 
   try {
     const auth = useAuth();
     user = auth.state?.user;
     role = user?.role || 'ADMIN_SAAS';
     logout = auth.logout;
-    loginSuccess = auth.loginSuccess;
   } catch {
     // Graceful fallback when outside AuthProvider in isolated tests
   }
