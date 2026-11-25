@@ -24,12 +24,19 @@ export const TRANSITIONS: Record<TransitionCode, TransitionRule> = {
     action: 'CLASSIFY',
     from: ReportStatus.NOUVEAU,
     to: ReportStatus.EN_COURS_DE_VALIDATION,
-    allowedRoles: ['SYSTEM']
+    allowedRoles: [
+      'SYSTEM',
+      UserRole.AGENT_MAIRIE,
+      UserRole.AGENT,
+      UserRole.ADMIN_MUNICIPALITE,
+      UserRole.ADMIN_SAAS,
+      UserRole.ADMIN
+    ]
   },
   T2: {
     code: 'T2',
     action: 'ASSIGN',
-    from: ReportStatus.EN_COURS_DE_VALIDATION,
+    from: [ReportStatus.NOUVEAU, ReportStatus.EN_COURS_DE_VALIDATION, ReportStatus.VALIDE],
     to: ReportStatus.ASSIGNE,
     allowedRoles: [UserRole.AGENT_MAIRIE, UserRole.AGENT, UserRole.ADMIN_MUNICIPALITE, UserRole.ADMIN_SAAS, UserRole.ADMIN],
     requiresAssignment: true,
@@ -55,7 +62,7 @@ export const TRANSITIONS: Record<TransitionCode, TransitionRule> = {
   T5: {
     code: 'T5',
     action: 'REJECT',
-    from: [ReportStatus.NOUVEAU, ReportStatus.EN_COURS_DE_VALIDATION],
+    from: [ReportStatus.NOUVEAU, ReportStatus.EN_COURS_DE_VALIDATION, ReportStatus.VALIDE],
     to: ReportStatus.REJETE,
     allowedRoles: [UserRole.AGENT_MAIRIE, UserRole.AGENT, UserRole.ADMIN_MUNICIPALITE, UserRole.ADMIN_SAAS, UserRole.ADMIN],
     requiresReason: true

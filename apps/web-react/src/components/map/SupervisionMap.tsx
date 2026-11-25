@@ -214,11 +214,11 @@ const CATEGORY_DEFAULT_BRIGADE: Record<string, string> = {
 
   const handleAssignFromMap = async () => {
     if (!selectedReport) return;
-    if (selectedReport.status === 'NOUVEAU' || selectedReport.status === 'EN_COURS_DE_VALIDATION') {
+    if (selectedReport.status === 'NOUVEAU') {
       const token = accessToken || localStorage.getItem('ecotrack_access_token');
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
-      await fetch('/api/v1/interventions/transition', {
+      const t1Res = await fetch('/api/v1/interventions/transition', {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -229,11 +229,17 @@ const CATEGORY_DEFAULT_BRIGADE: Record<string, string> = {
           categoryValidated: selectedCategory,
           reviewValidated: true,
         }),
-      }).catch(() => {});
+      }).catch(() => null);
+      if (t1Res && !t1Res.ok) {
+        const err = await t1Res.json().catch(() => null);
+        setActionFeedback(err?.message || `Erreur validation (${t1Res.status})`);
+        return;
+      }
     }
     await runTransition('T2', {
       teamId: selectedBrigade,
       assigneeId: selectedWorker || 'Chef de Brigade',
+      priority: selectedReport.priority || 'Élevée',
       categoryValidated: selectedCategory,
       reviewValidated: true,
     });

@@ -161,6 +161,8 @@ export const QualificationPage: React.FC = () => {
           let status = (r.status || 'NOUVEAU').toUpperCase();
           if (status === 'SIGNALÉ' || status === 'A_TRAITER' || status === 'PENDING' || status === 'A_QUALIFIER') {
             status = 'NOUVEAU';
+          } else if (status === 'EN_COURS_DE_VALIDATION') {
+            status = 'VALIDE';
           }
 
           return {
@@ -313,7 +315,7 @@ export const QualificationPage: React.FC = () => {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      fetch('/api/v1/interventions/transition', {
+      const res = await fetch('/api/v1/interventions/transition', {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -324,7 +326,12 @@ export const QualificationPage: React.FC = () => {
           categoryValidated: code,
           reviewValidated: true
         })
-      }).catch(() => {});
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        showToast(err?.message || `Erreur validation (${res.status})`);
+        return;
+      }
     } catch {
       // Ignorer
     }
@@ -448,7 +455,7 @@ export const QualificationPage: React.FC = () => {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      fetch('/api/v1/interventions/transition', {
+      const res = await fetch('/api/v1/interventions/transition', {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -458,11 +465,16 @@ export const QualificationPage: React.FC = () => {
           actorId: authState.user?.email || authState.user?.id || 'adel@zarzouna.tn',
           teamId: targetBrigade,
           assigneeId: targetWorker || 'Chef de Brigade',
-          priority: targetPriority,
+          priority: targetPriority || 'Élevée',
           reviewValidated: true,
           categoryValidated: targetItem.aiSuggestion.categoryCode
         })
-      }).catch(() => {});
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        showToast(err?.message || `Erreur affectation (${res.status})`);
+        return;
+      }
     } catch {
       // Ignorer
     }
