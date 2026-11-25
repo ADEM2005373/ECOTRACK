@@ -4,7 +4,7 @@ import { reportRouter } from './routes/report.routes';
 import { reportService } from './services/report.service';
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 const PORT = process.env.REPORT_PORT || 3002;
 

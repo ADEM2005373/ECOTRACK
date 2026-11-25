@@ -1,91 +1,85 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
+  ActivityIndicator,
+  Image,
+  Modal,
+  RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
-  View,
-  ScrollView,
-  Image,
   TouchableOpacity,
-  Modal
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-
-interface CitizenReport {
-  id: string;
-  reference: string;
-  title: string;
-  category: string;
-  district: string;
-  date: string;
-  status: 'NOUVEAU' | 'EN_COURS' | 'RESOLU';
-  statusLabel: string;
-  beforePhoto: string;
-  afterPhoto?: string;
-  resolutionNote?: string;
-}
+import { useAuthStore } from '../../src/store/authStore';
+import { getMyReports, type CitizenReport } from '../../src/services/reportApi';
 
 export default function MesSignalementsScreen() {
-  const [filter, setFilter] = useState<'ALL' | 'EN_COURS' | 'RESOLU'>('ALL');
-  const [selectedReport, setSelectedReport] = useState<CitizenReport | null>(null);
+  const router = useRouter();
+  const { user, accessToken } = useAuthStore();
 
-  const [reports] = useState<CitizenReport[]>([
-    {
-      id: 'cit-1',
-      reference: 'REC-2026-0842',
-      title: 'Dépôt sauvage de gravats et débris',
-      category: 'Dépôt sauvage',
-      district: '18 Rue de Marseille, Centre-Ville',
-      date: '19 Nov 2026 · 09:42',
-      status: 'RESOLU',
-      statusLabel: 'Résolu & Nettoyé',
-      beforePhoto: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=500&auto=format&fit=crop&q=60',
-      afterPhoto: 'https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=500&auto=format&fit=crop&q=60',
-      resolutionNote: 'Intervention terminée par la Brigade Voirie. Lieu déblayé et désinfecté.'
-    },
-    {
-      id: 'cit-2',
-      reference: 'REC-2026-0810',
-      title: 'Vieux canapé et cartons volumineux',
-      category: 'Encombrants',
-      district: 'Avenue Habib Bourguiba, Menzah',
-      date: '18 Nov 2026 · 14:15',
-      status: 'EN_COURS',
-      statusLabel: 'En cours d\'intervention',
-      beforePhoto: 'https://images.unsplash.com/photo-1605600659873-d808a13e4d2a?w=500&auto=format&fit=crop&q=60',
-      resolutionNote: 'Camion benne en route vers le lieu du signalement.'
-    },
-    {
-      id: 'cit-3',
-      reference: 'REC-2026-0795',
-      title: 'Pots de peinture usagés',
-      category: 'Déchets dangereux',
-      district: 'Rue d\'Italie, Bab Bhar',
-      date: '17 Nov 2026 · 11:20',
-      status: 'RESOLU',
-      statusLabel: 'Résolu & Sécurisé',
-      beforePhoto: 'https://images.unsplash.com/photo-1528323273322-d81458248d40?w=500&auto=format&fit=crop&q=60',
-      afterPhoto: 'https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=500&auto=format&fit=crop&q=60',
-      resolutionNote: 'Produits chimiques collectés par l\'équipe spéciale et acheminés au centre de traitement.'
+  const [filter, setFilter] = useState<'ALL' | 'NOUVEAU' | 'EN_COURS' | 'RESOLU'>('ALL');
+  const [selectedReport, setSelectedReport] = useState<CitizenReport | null>(null);
+  const [reports, setReports] = useState<CitizenReport[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadReports = useCallback(async () => {
+    setError(null);
+    const res = await getMyReports(user?.id, accessToken);
+    if (res.kind === 'success') {
+      setReports(res.data);
+    } else {
+      setError(res.message);
     }
-  ]);
+  }, [user?.id, accessToken]);
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      void loadReports().finally(() => setLoading(false));
+    }, [loadReports])
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadReports();
+    setRefreshing(false);
+  }, [loadReports]);
 
   const filtered = reports.filter((r) => {
     if (filter === 'ALL') return true;
     return r.status === filter;
   });
 
+  const badgeStyleFor = (status: CitizenReport['status']) => {
+    if (status === 'RESOLU') return { box: styles.badgeResolved, text: styles.badgeResolvedText };
+    if (status === 'REJETE') return { box: styles.badgeRejected, text: styles.badgeRejectedText };
+    if (status === 'NOUVEAU') return { box: styles.badgeNew, text: styles.badgeNewText };
+    return { box: styles.badgeProgress, text: styles.badgeProgressText };
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Mes Dossiers Citoyens</Text>
-        <Text style={styles.headerSubtitle}>
-          Suivez l'état d'avancement de vos signalements transmis à la Mairie de Tunis
-        </Text>
+        <View style={styles.headerRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.headerTitle}>Mes Dossiers Citoyens</Text>
+            <Text style={styles.headerSubtitle}>
+              Suivi en direct depuis MongoDB (Mairie de Zarzouna)
+            </Text>
+          </View>
+          <TouchableOpacity style={styles.refreshIconBtn} onPress={() => void onRefresh()}>
+            <Ionicons name="refresh" size={18} color="#059669" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Filtres de Statut */}
-      <View style={styles.filterRow}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow} style={styles.filterScroll}>
         <TouchableOpacity
           style={[styles.filterChip, filter === 'ALL' && styles.filterChipActive]}
           onPress={() => setFilter('ALL')}
@@ -96,11 +90,20 @@ export default function MesSignalementsScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
+          style={[styles.filterChip, filter === 'NOUVEAU' && styles.filterChipActive]}
+          onPress={() => setFilter('NOUVEAU')}
+        >
+          <Text style={[styles.filterChipText, filter === 'NOUVEAU' && styles.filterChipTextActive]}>
+            Transmis ({reports.filter((r) => r.status === 'NOUVEAU').length})
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={[styles.filterChip, filter === 'EN_COURS' && styles.filterChipActive]}
           onPress={() => setFilter('EN_COURS')}
         >
           <Text style={[styles.filterChipText, filter === 'EN_COURS' && styles.filterChipTextActive]}>
-            En cours ({reports.filter(r => r.status === 'EN_COURS').length})
+            En cours ({reports.filter((r) => r.status === 'EN_COURS').length})
           </Text>
         </TouchableOpacity>
 
@@ -109,51 +112,83 @@ export default function MesSignalementsScreen() {
           onPress={() => setFilter('RESOLU')}
         >
           <Text style={[styles.filterChipText, filter === 'RESOLU' && styles.filterChipTextActive]}>
-            Résolus ({reports.filter(r => r.status === 'RESOLU').length})
+            Résolus ({reports.filter((r) => r.status === 'RESOLU').length})
           </Text>
         </TouchableOpacity>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.listContent} showsVerticalScrollIndicator={false}>
-        {filtered.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            style={styles.card}
-            activeOpacity={0.8}
-            onPress={() => setSelectedReport(item)}
-          >
-            <Image source={{ uri: item.beforePhoto }} style={styles.cardImage} />
-            <View style={styles.cardBody}>
-              <View style={styles.cardTop}>
-                <Text style={styles.referenceText}>{item.reference}</Text>
-                <View style={[
-                  styles.badge,
-                  item.status === 'RESOLU' ? styles.badgeResolved : styles.badgeProgress
-                ]}>
-                  <Text style={[
-                    styles.badgeText,
-                    item.status === 'RESOLU' ? styles.badgeResolvedText : styles.badgeProgressText
-                  ]}>
-                    {item.statusLabel}
-                  </Text>
-                </View>
-              </View>
-
-              <Text style={styles.titleText}>{item.title}</Text>
-              
-              <View style={styles.infoRow}>
-                <Ionicons name="location-outline" size={12} color="#64748b" />
-                <Text style={styles.infoText} numberOfLines={1}>{item.district}</Text>
-              </View>
-
-              <View style={styles.cardFooter}>
-                <Text style={styles.dateText}>{item.date}</Text>
-                <Text style={styles.detailsAction}>Voir détails & preuve →</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
       </ScrollView>
+
+      {loading ? (
+        <View style={styles.centerBox}>
+          <ActivityIndicator size="large" color="#059669" />
+          <Text style={styles.loadingText}>Chargement de vos signalements...</Text>
+        </View>
+      ) : (
+        <ScrollView
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} tintColor="#059669" colors={['#059669']} />
+          }
+        >
+          {error ? (
+            <View style={styles.errorBox}>
+              <Ionicons name="cloud-offline-outline" size={24} color="#dc2626" />
+              <Text style={styles.errorText}>{error}</Text>
+              <TouchableOpacity style={styles.retryBtn} onPress={() => void onRefresh()}>
+                <Text style={styles.retryBtnText}>Réessayer</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+
+          {!error && filtered.length === 0 ? (
+            <View style={styles.emptyBox}>
+              <Ionicons name="document-text-outline" size={40} color="#94a3b8" />
+              <Text style={styles.emptyTitle}>Aucun signalement dans cette catégorie</Text>
+              <Text style={styles.emptyDesc}>
+                Signalez une anomalie dans votre quartier pour suivre son traitement en temps réel par les équipes de la mairie.
+              </Text>
+              <TouchableOpacity style={styles.ctaBtn} onPress={() => router.push('/(tabs)/signaler')}>
+                <Ionicons name="camera" size={16} color="#ffffff" />
+                <Text style={styles.ctaBtnText}>Signaler une anomalie</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            filtered.map((item) => {
+              const bStyle = badgeStyleFor(item.status);
+              return (
+                <TouchableOpacity
+                  key={item.id}
+                  style={styles.card}
+                  activeOpacity={0.8}
+                  onPress={() => setSelectedReport(item)}
+                >
+                  <Image source={{ uri: item.beforePhoto }} style={styles.cardImage} />
+                  <View style={styles.cardBody}>
+                    <View style={styles.cardTop}>
+                      <Text style={styles.referenceText}>{item.reference}</Text>
+                      <View style={[styles.badge, bStyle.box]}>
+                        <Text style={[styles.badgeText, bStyle.text]}>{item.statusLabel}</Text>
+                      </View>
+                    </View>
+
+                    <Text style={styles.titleText} numberOfLines={2}>{item.title}</Text>
+
+                    <View style={styles.infoRow}>
+                      <Ionicons name="location-outline" size={12} color="#64748b" />
+                      <Text style={styles.infoText} numberOfLines={1}>{item.district}</Text>
+                    </View>
+
+                    <View style={styles.cardFooter}>
+                      <Text style={styles.dateText}>{item.date}</Text>
+                      <Text style={styles.detailsAction}>Voir détails →</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            })
+          )}
+        </ScrollView>
+      )}
 
       {/* ================= MODALE DETAIL & PREUVE AVANT / APRES ================= */}
       {selectedReport && (
@@ -161,8 +196,8 @@ export default function MesSignalementsScreen() {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
-                <View>
-                  <Text style={styles.modalRef}>{selectedReport.reference}</Text>
+                <View style={{ flex: 1, paddingRight: 10 }}>
+                  <Text style={styles.modalRef}>{selectedReport.reference} · {selectedReport.category}</Text>
                   <Text style={styles.modalTitle}>{selectedReport.title}</Text>
                 </View>
                 <TouchableOpacity onPress={() => setSelectedReport(null)} style={styles.closeBtn}>
@@ -171,43 +206,73 @@ export default function MesSignalementsScreen() {
               </View>
 
               <ScrollView style={styles.modalScroll}>
+                <Text style={styles.modalDescription}>{selectedReport.description}</Text>
+
                 <View style={styles.photoComparisonSection}>
                   <View style={styles.photoBlock}>
                     <Text style={styles.photoLabel}>Photo Signalement (Avant)</Text>
                     <Image source={{ uri: selectedReport.beforePhoto }} style={styles.comparisonPhoto} />
                   </View>
 
-                  {selectedReport.afterPhoto && (
+                  {selectedReport.afterPhoto ? (
                     <View style={styles.photoBlock}>
                       <Text style={[styles.photoLabel, { color: '#059669' }]}>Preuve de Résolution (Après)</Text>
                       <Image source={{ uri: selectedReport.afterPhoto }} style={styles.comparisonPhoto} />
                     </View>
-                  )}
+                  ) : null}
                 </View>
 
-                {selectedReport.resolutionNote && (
+                {selectedReport.resolutionNote ? (
                   <View style={styles.noteBox}>
                     <Ionicons name="information-circle" size={16} color="#059669" />
                     <Text style={styles.noteText}>{selectedReport.resolutionNote}</Text>
                   </View>
-                )}
+                ) : null}
+
+                {selectedReport.rejectionReason ? (
+                  <View style={[styles.noteBox, { backgroundColor: '#fef2f2', borderColor: '#fecaca' }]}>
+                    <Ionicons name="alert-circle" size={16} color="#dc2626" />
+                    <Text style={[styles.noteText, { color: '#b91c1c' }]}>{selectedReport.rejectionReason}</Text>
+                  </View>
+                ) : null}
 
                 <View style={styles.timeline}>
                   <Text style={styles.timelineTitle}>Historique d'intervention</Text>
                   <View style={styles.timelineStep}>
                     <View style={[styles.stepDot, styles.dotDone]} />
-                    <Text style={styles.stepText}>Signalement reçu et transmis au service voirie</Text>
+                    <Text style={styles.stepText}>Signalement reçu et transmis à la Mairie de Zarzouna</Text>
                   </View>
                   <View style={styles.timelineStep}>
-                    <View style={[styles.stepDot, styles.dotDone]} />
-                    <Text style={styles.stepText}>Qualification IA et attribution de la brigade</Text>
-                  </View>
-                  <View style={styles.timelineStep}>
-                    <View style={[styles.stepDot, selectedReport.status === 'RESOLU' ? styles.dotDone : styles.dotActive]} />
+                    <View style={[styles.stepDot, selectedReport.status !== 'NOUVEAU' ? styles.dotDone : styles.dotPending]} />
                     <Text style={styles.stepText}>
-                      {selectedReport.status === 'RESOLU' ? 'Intervention achevée et photo transmise' : 'Équipe sur place en cours d\'intervention'}
+                      {selectedReport.status === 'REJETE'
+                        ? 'Dossier examiné et non retenu par modération'
+                        : selectedReport.status === 'NOUVEAU'
+                          ? 'En attente de qualification par un agent municipal'
+                          : 'Qualification validée et brigade technique affectée'}
                     </Text>
                   </View>
+                  {selectedReport.status !== 'REJETE' && (
+                    <View style={styles.timelineStep}>
+                      <View
+                        style={[
+                          styles.stepDot,
+                          selectedReport.status === 'RESOLU'
+                            ? styles.dotDone
+                            : selectedReport.status === 'EN_COURS'
+                              ? styles.dotActive
+                              : styles.dotPending,
+                        ]}
+                      />
+                      <Text style={styles.stepText}>
+                        {selectedReport.status === 'RESOLU'
+                          ? 'Intervention achevée et preuve photo certifiée'
+                          : selectedReport.status === 'EN_COURS'
+                            ? 'Équipe sur place en cours d\'intervention'
+                            : 'Intervention planifiée après affectation'}
+                      </Text>
+                    </View>
+                  )}
                 </View>
               </ScrollView>
 
@@ -227,14 +292,23 @@ export default function MesSignalementsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8fafc' },
-  header: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 16 },
+  header: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 12 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#0f172a' },
   headerSubtitle: { fontSize: 12, color: '#64748b', marginTop: 4 },
+  refreshIconBtn: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#ecfdf5',
+    borderWidth: 1,
+    borderColor: '#a7f3d0',
+  },
+  filterScroll: { maxHeight: 44, marginBottom: 12 },
   filterRow: {
     flexDirection: 'row',
     paddingHorizontal: 20,
     gap: 8,
-    marginBottom: 16,
+    alignItems: 'center',
   },
   filterChip: {
     paddingHorizontal: 12,
@@ -250,6 +324,39 @@ const styles = StyleSheet.create({
   },
   filterChipText: { fontSize: 12, fontWeight: '600', color: '#64748b' },
   filterChipTextActive: { color: '#ffffff' },
+  centerBox: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 10 },
+  loadingText: { fontSize: 12, color: '#64748b' },
+  errorBox: {
+    backgroundColor: '#fef2f2',
+    borderWidth: 1,
+    borderColor: '#fecaca',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    gap: 8,
+  },
+  errorText: { fontSize: 12, color: '#b91c1c', textAlign: 'center' },
+  retryBtn: { backgroundColor: '#dc2626', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8 },
+  retryBtnText: { color: '#ffffff', fontSize: 12, fontWeight: 'bold' },
+  emptyBox: {
+    alignItems: 'center',
+    padding: 28,
+    gap: 10,
+    marginTop: 20,
+  },
+  emptyTitle: { fontSize: 15, fontWeight: 'bold', color: '#0f172a', textAlign: 'center' },
+  emptyDesc: { fontSize: 12, color: '#64748b', textAlign: 'center', lineHeight: 18 },
+  ctaBtn: {
+    marginTop: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#059669',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  ctaBtnText: { color: '#ffffff', fontSize: 13, fontWeight: 'bold' },
   listContent: { paddingHorizontal: 20, paddingBottom: 40, gap: 12 },
   card: {
     backgroundColor: '#ffffff',
@@ -262,14 +369,18 @@ const styles = StyleSheet.create({
   },
   cardImage: { width: 80, height: 80, borderRadius: 8, backgroundColor: '#f1f5f9' },
   cardBody: { flex: 1, justifyContent: 'space-between' },
-  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 6 },
   referenceText: { fontSize: 11, fontWeight: 'bold', color: '#1e3a8a' },
   badge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, borderWidth: 1 },
   badgeResolved: { backgroundColor: '#ecfdf5', borderColor: '#059669' },
   badgeProgress: { backgroundColor: '#fffbeb', borderColor: '#d97706' },
+  badgeNew: { backgroundColor: '#eff6ff', borderColor: '#2563eb' },
+  badgeRejected: { backgroundColor: '#fef2f2', borderColor: '#dc2626' },
   badgeText: { fontSize: 10, fontWeight: 'bold' },
   badgeResolvedText: { color: '#059669' },
   badgeProgressText: { color: '#d97706' },
+  badgeNewText: { color: '#2563eb' },
+  badgeRejectedText: { color: '#dc2626' },
   titleText: { fontSize: 13, fontWeight: 'bold', color: '#0f172a', marginVertical: 2 },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   infoText: { fontSize: 11, color: '#64748b', flex: 1 },
@@ -284,9 +395,10 @@ const styles = StyleSheet.create({
     maxHeight: '85%',
     padding: 20,
   },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
   modalRef: { fontSize: 12, fontWeight: 'bold', color: '#1e3a8a' },
   modalTitle: { fontSize: 16, fontWeight: 'bold', color: '#0f172a', marginTop: 2 },
+  modalDescription: { fontSize: 13, color: '#475569', lineHeight: 19, marginBottom: 14 },
   closeBtn: {
     width: 32,
     height: 32,
@@ -318,6 +430,7 @@ const styles = StyleSheet.create({
   stepDot: { width: 8, height: 8, borderRadius: 4 },
   dotDone: { backgroundColor: '#059669' },
   dotActive: { backgroundColor: '#d97706' },
+  dotPending: { backgroundColor: '#cbd5e1' },
   stepText: { fontSize: 11, color: '#475569', flex: 1 },
   modalButton: {
     backgroundColor: '#102c35',

@@ -1,24 +1,77 @@
-import React from 'react';
-import { Alert, StyleSheet, Text, View, TouchableOpacity, ScrollView, Image } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../src/store/authStore';
+import { getCommunityReports, type CitizenReport } from '../../src/services/reportApi';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const user = useAuthStore((state) => state.user);
+  const { user, accessToken } = useAuthStore();
+
+  const [reports, setReports] = useState<CitizenReport[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   React.useEffect(() => {
     if (user?.role === 'CHEF_OUVRIER' || user?.role === 'OUVRIER') {
       router.replace('/(tabs)/roadmap');
     }
-  }, [user?.role]);
+  }, [user?.role, router]);
+
+  const loadReports = useCallback(async () => {
+    const res = await getCommunityReports(accessToken);
+    if (res.kind === 'success') {
+      setReports(res.data);
+    }
+  }, [accessToken]);
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      void loadReports().finally(() => setLoading(false));
+    }, [loadReports])
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadReports();
+    setRefreshing(false);
+  }, [loadReports]);
+
+  const totalCount = reports.length;
+  const resolvedCount = reports.filter((r) => r.status === 'RESOLU').length;
+  const inProgressCount = reports.filter((r) => r.status === 'EN_COURS').length;
+  const resolutionRate = totalCount > 0 ? `${Math.round((resolvedCount / totalCount) * 100)}%` : '0%';
+
+  const statusColors = (status: CitizenReport['status']) => {
+    if (status === 'RESOLU') return { color: '#059669', bg: '#ecfdf5' };
+    if (status === 'REJETE') return { color: '#dc2626', bg: '#fef2f2' };
+    if (status === 'EN_COURS') return { color: '#d97706', bg: '#fffbeb' };
+    return { color: '#2563eb', bg: '#eff6ff' };
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Figma Header Citoyen (MOB_CIT_01_MAP_HOME) */}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} tintColor="#059669" colors={['#059669']} />
+        }
+      >
+        {/* Header Citoyen */}
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <View style={styles.brandRow}>
@@ -27,14 +80,19 @@ export default function HomeScreen() {
               </View>
               <View>
                 <Text style={styles.brandName}>ECOTRACK</Text>
-                <Text style={styles.brandSubtitle}>VILLE DE TUNIS</Text>
+                <Text style={styles.brandSubtitle}>{user?.municipality?.toUpperCase() || 'MAIRIE DE ZARZOUNA'}</Text>
               </View>
             </View>
 
             <TouchableOpacity
               style={styles.notificationBtn}
               activeOpacity={0.7}
-              onPress={() => Alert.alert('Centre de Notifications', 'Aucune nouvelle notification municipale non lue.')}
+              onPress={() =>
+                Alert.alert(
+                  'Centre de Notifications',
+                  `${inProgressCount} intervention(s) en cours et ${resolvedCount} dossier(s) résolu(s) dans votre commune.`
+                )
+              }
             >
               <Ionicons name="notifications-outline" size={20} color="#0f172a" />
               <View style={styles.notificationDot} />
@@ -62,7 +120,7 @@ export default function HomeScreen() {
             <View style={styles.actionTexts}>
               <Text style={styles.actionTitle}>Signaler une anomalie</Text>
               <Text style={styles.actionDesc}>
-                Prenez une photo : l'IA détecte la catégorie et alerte la mairie en temps réel.
+                Prenez une photo et alertez la mairie en temps réel.
               </Text>
             </View>
           </View>
@@ -71,34 +129,34 @@ export default function HomeScreen() {
           </View>
         </TouchableOpacity>
 
-        {/* Chiffres Clés Salubrité de la Ville */}
+        {/* Chiffres Clés Temps Réel depuis MongoDB */}
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <View style={styles.statIconWrapper}>
               <Ionicons name="checkmark-circle" size={16} color="#059669" />
             </View>
-            <Text style={styles.statNumber}>94.2%</Text>
-            <Text style={styles.statLabel}>Signalements résolus</Text>
+            <Text style={styles.statNumber}>{resolutionRate}</Text>
+            <Text style={styles.statLabel}>Taux de résolution</Text>
           </View>
 
           <View style={styles.statCard}>
             <View style={styles.statIconWrapper}>
-              <Ionicons name="time" size={16} color="#2563eb" />
+              <Ionicons name="flash" size={16} color="#d97706" />
             </View>
-            <Text style={styles.statNumber}>24 h</Text>
-            <Text style={styles.statLabel}>Délai moyen SLA</Text>
+            <Text style={styles.statNumber}>{inProgressCount}</Text>
+            <Text style={styles.statLabel}>En intervention</Text>
           </View>
 
           <View style={styles.statCard}>
             <View style={styles.statIconWrapper}>
-              <Ionicons name="people" size={16} color="#7c3aed" />
+              <Ionicons name="document-text" size={16} color="#2563eb" />
             </View>
-            <Text style={styles.statNumber}>18</Text>
-            <Text style={styles.statLabel}>Brigades mobilisées</Text>
+            <Text style={styles.statNumber}>{totalCount}</Text>
+            <Text style={styles.statLabel}>Dossiers commune</Text>
           </View>
         </View>
 
-        {/* Signalements Récents du Quartier */}
+        {/* Signalements Récents du Quartier (MongoDB en direct) */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Interventions dans votre quartier</Text>
           <TouchableOpacity onPress={() => router.push('/(tabs)/mes-signalements')}>
@@ -106,93 +164,61 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.reportsList}>
-          {[
-            {
-              id: '1',
-              title: 'Dépôt sauvage de gravats',
-              location: '18 Rue de Marseille, Centre-Ville',
-              status: 'RESOLU',
-              statusLabel: 'Résolu',
-              statusColor: '#059669',
-              statusBg: '#ecfdf5',
-              time: 'Il y a 2h',
-              image: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=300&auto=format&fit=crop&q=60'
-            },
-            {
-              id: '2',
-              title: 'Encombrants électroménagers',
-              location: 'Avenue Habib Bourguiba, Menzah',
-              status: 'EN_COURS',
-              statusLabel: 'En intervention',
-              statusColor: '#d97706',
-              statusBg: '#fffbeb',
-              time: 'Il y a 4h',
-              image: 'https://images.unsplash.com/photo-1605600659873-d808a13e4d2a?w=300&auto=format&fit=crop&q=60'
-            },
-            {
-              id: '3',
-              title: 'Déchets plastiques et cartons',
-              location: 'Rue de Rome, Bab Bhar',
-              status: 'NOUVEAU',
-              statusLabel: 'Transmis mairie',
-              statusColor: '#2563eb',
-              statusBg: '#eff6ff',
-              time: 'Hier',
-              image: 'https://images.unsplash.com/photo-1528323273322-d81458248d40?w=300&auto=format&fit=crop&q=60'
-            }
-          ].map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.reportCard}
-              activeOpacity={0.8}
-              onPress={() => router.push('/(tabs)/mes-signalements')}
-            >
-              <Image source={{ uri: item.image }} style={styles.reportImage} />
-              <View style={styles.reportContent}>
-                <View style={styles.reportTopRow}>
-                  <Text style={styles.reportTime}>{item.time}</Text>
-                  <View style={[styles.statusBadge, { backgroundColor: item.statusBg, borderColor: item.statusColor }]}>
-                    <Text style={[styles.statusText, { color: item.statusColor }]}>{item.statusLabel}</Text>
+        {loading ? (
+          <View style={styles.loadingBox}>
+            <ActivityIndicator color="#059669" />
+            <Text style={styles.loadingText}>Synchronisation avec ecotrack_db...</Text>
+          </View>
+        ) : reports.length === 0 ? (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyText}>Aucun signalement récent enregistré pour le moment.</Text>
+          </View>
+        ) : (
+          <View style={styles.reportsList}>
+            {reports.slice(0, 5).map((item) => {
+              const sc = statusColors(item.status);
+              return (
+                <TouchableOpacity
+                  key={item.id}
+                  style={styles.reportCard}
+                  activeOpacity={0.8}
+                  onPress={() => router.push('/(tabs)/mes-signalements')}
+                >
+                  <Image source={{ uri: item.beforePhoto }} style={styles.reportImage} />
+                  <View style={styles.reportContent}>
+                    <View style={styles.reportTopRow}>
+                      <Text style={styles.reportTime}>{item.reference}</Text>
+                      <View style={[styles.statusBadge, { backgroundColor: sc.bg, borderColor: sc.color }]}>
+                        <Text style={[styles.statusText, { color: sc.color }]}>{item.statusLabel}</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.reportTitle} numberOfLines={1}>{item.title}</Text>
+                    <View style={styles.locationRow}>
+                      <Ionicons name="location-outline" size={12} color="#64748b" />
+                      <Text style={styles.locationText} numberOfLines={1}>{item.district}</Text>
+                    </View>
                   </View>
-                </View>
-                <Text style={styles.reportTitle} numberOfLines={1}>{item.title}</Text>
-                <View style={styles.locationRow}>
-                  <Ionicons name="location-outline" size={12} color="#64748b" />
-                  <Text style={styles.locationText} numberOfLines={1}>{item.location}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  header: {
-    marginBottom: 20,
-  },
+  container: { flex: 1, backgroundColor: '#f8fafc' },
+  scrollContent: { padding: 20, paddingBottom: 40 },
+  header: { marginBottom: 20 },
   headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
   },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   emblem: {
     width: 34,
     height: 34,
@@ -201,18 +227,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  brandName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#0f172a',
-    letterSpacing: -0.3,
-  },
-  brandSubtitle: {
-    fontSize: 9,
-    fontWeight: 'bold',
-    color: '#059669',
-    letterSpacing: 1.5,
-  },
+  brandName: { fontSize: 16, fontWeight: 'bold', color: '#0f172a', letterSpacing: -0.3 },
+  brandSubtitle: { fontSize: 9, fontWeight: 'bold', color: '#059669', letterSpacing: 1.5 },
   notificationBtn: {
     width: 40,
     height: 40,
@@ -233,20 +249,9 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
   },
-  greetingSection: {
-    marginTop: 4,
-  },
-  greetingTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#0f172a',
-  },
-  greetingSubtitle: {
-    fontSize: 13,
-    color: '#64748b',
-    marginTop: 4,
-    lineHeight: 18,
-  },
+  greetingSection: { marginTop: 4 },
+  greetingTitle: { fontSize: 22, fontWeight: 'bold', color: '#0f172a' },
+  greetingSubtitle: { fontSize: 13, color: '#64748b', marginTop: 4, lineHeight: 18 },
   actionBanner: {
     backgroundColor: '#ffffff',
     borderWidth: 1,
@@ -263,12 +268,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
-  actionBannerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
-  },
+  actionBannerContent: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
   actionIconCircle: {
     width: 44,
     height: 44,
@@ -277,20 +277,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  actionTexts: {
-    flex: 1,
-  },
-  actionTitle: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#0f172a',
-  },
-  actionDesc: {
-    fontSize: 11,
-    color: '#64748b',
-    marginTop: 2,
-    lineHeight: 15,
-  },
+  actionTexts: { flex: 1 },
+  actionTitle: { fontSize: 15, fontWeight: 'bold', color: '#0f172a' },
+  actionDesc: { fontSize: 11, color: '#64748b', marginTop: 2, lineHeight: 15 },
   actionArrow: {
     width: 32,
     height: 32,
@@ -300,11 +289,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginLeft: 8,
   },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 24,
-  },
+  statsRow: { flexDirection: 'row', gap: 10, marginBottom: 24 },
   statCard: {
     flex: 1,
     backgroundColor: '#ffffff',
@@ -314,38 +299,29 @@ const styles = StyleSheet.create({
     padding: 12,
     alignItems: 'flex-start',
   },
-  statIconWrapper: {
-    marginBottom: 6,
-  },
-  statNumber: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#0f172a',
-  },
-  statLabel: {
-    fontSize: 10,
-    color: '#64748b',
-    marginTop: 2,
-  },
+  statIconWrapper: { marginBottom: 6 },
+  statNumber: { fontSize: 18, fontWeight: 'bold', color: '#0f172a' },
+  statLabel: { fontSize: 10, color: '#64748b', marginTop: 2 },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
   },
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#0f172a',
+  sectionTitle: { fontSize: 15, fontWeight: 'bold', color: '#0f172a' },
+  sectionLink: { fontSize: 12, fontWeight: 'bold', color: '#059669' },
+  loadingBox: { padding: 24, alignItems: 'center', gap: 8 },
+  loadingText: { fontSize: 12, color: '#64748b' },
+  emptyBox: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    alignItems: 'center',
   },
-  sectionLink: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#059669',
-  },
-  reportsList: {
-    gap: 12,
-  },
+  emptyText: { fontSize: 12, color: '#64748b' },
+  reportsList: { gap: 12 },
   reportCard: {
     backgroundColor: '#ffffff',
     borderWidth: 1,
@@ -355,49 +331,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
-  reportImage: {
-    width: 64,
-    height: 64,
-    borderRadius: 8,
-    backgroundColor: '#f1f5f9',
-  },
-  reportContent: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  reportTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  reportTime: {
-    fontSize: 10,
-    color: '#94a3b8',
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-    borderWidth: 1,
-  },
-  statusText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  reportTitle: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    color: '#0f172a',
-    marginBottom: 2,
-  },
-  locationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  locationText: {
-    fontSize: 11,
-    color: '#64748b',
-  },
+  reportImage: { width: 64, height: 64, borderRadius: 8, backgroundColor: '#f1f5f9' },
+  reportContent: { flex: 1, justifyContent: 'center' },
+  reportTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+  reportTime: { fontSize: 10, color: '#1e3a8a', fontWeight: 'bold' },
+  statusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, borderWidth: 1 },
+  statusText: { fontSize: 10, fontWeight: 'bold' },
+  reportTitle: { fontSize: 13, fontWeight: 'bold', color: '#0f172a', marginBottom: 2 },
+  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  locationText: { fontSize: 11, color: '#64748b', flex: 1 },
 });

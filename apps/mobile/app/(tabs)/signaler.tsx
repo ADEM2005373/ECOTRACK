@@ -18,25 +18,20 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import * as Location from 'expo-location';
+import { useRouter } from 'expo-router';
 import { colors, spacing, radius, textStyles } from '../../src/theme';
 import { useAuthStore } from '../../src/store/authStore';
 import { submitReport } from '../../src/services/reportApi';
 
-// ---------------------------------------------------------------------------
-// expo-image-picker (optional dep — gracefully absent if not installed)
-// ---------------------------------------------------------------------------
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let ImagePicker: any = null;
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   ImagePicker = require('expo-image-picker');
 } catch {
-  /* not installed — photo feature disabled */
+  /* not installed */
 }
 
-// ---------------------------------------------------------------------------
-// Category definitions
-// ---------------------------------------------------------------------------
 type Category = {
   value: string;
   label: string;
@@ -52,14 +47,16 @@ const CATEGORIES: Category[] = [
   { value: 'AUTRE', label: 'Autre', icon: '❓' },
 ];
 
-// ---------------------------------------------------------------------------
-// Main Screen
-// ---------------------------------------------------------------------------
+const DEMO_PHOTO_URL = 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80';
+
 export default function SignalerScreen() {
+  const router = useRouter();
+
   // Form state
   const [category, setCategory] = useState<string>(CATEGORIES[0]!.value);
   const [description, setDescription] = useState('');
   const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [photoBase64, setPhotoBase64] = useState<string | null>(null);
   const [categoryOpen, setCategoryOpen] = useState(false);
 
   // Location state
@@ -71,23 +68,22 @@ export default function SignalerScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Auth
   const authState = useAuthStore();
-  // The current authStore may not have a token yet (login ticket pending).
-  // We cast to any to allow forward-compatible access.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const token: string | null = (authState as any).token ?? (authState as any).accessToken ?? null;
+  const userId: string | null = authState.user?.id ?? null;
 
-  // ---------------------------------------------------------------------------
-  // Location
-  // ---------------------------------------------------------------------------
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-          if (!cancelled) setLocationText('📍 Permission refusée');
+          if (!cancelled) {
+            setLocationText('📍 GPS refusé — Position Zarzouna par défaut prête');
+            setLatitude(37.2667);
+            setLongitude(9.8667);
+          }
           return;
         }
         const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
@@ -96,7 +92,6 @@ export default function SignalerScreen() {
         setLatitude(lat);
         setLongitude(lon);
 
-        // Try reverse geocoding
         try {
           const [place] = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lon });
           if (place && !cancelled) {
@@ -107,15 +102,22 @@ export default function SignalerScreen() {
           if (!cancelled) setLocationText(`📍 ${lat.toFixed(5)}, ${lon.toFixed(5)}`);
         }
       } catch {
-        if (!cancelled) setLocationText('📍 Localisation indisponible');
+        if (!cancelled) {
+          setLocationText('📍 GPS indisponible — Position Zarzouna par défaut prête');
+          setLatitude(37.2667);
+          setLongitude(9.8667);
+        }
       }
     })();
     return () => { cancelled = true; };
   }, []);
 
-  // ---------------------------------------------------------------------------
-  // Photo picker
-  // ---------------------------------------------------------------------------
+  const useZarzounaFallback = useCallback(() => {
+    setLatitude(37.2667);
+    setLongitude(9.8667);
+    setLocationText('📍 Zarzouna Centre, Bizerte (37.2667, 9.8667)');
+  }, []);
+
   const pickPhoto = useCallback(async () => {
     if (!ImagePicker) {
       Alert.alert('Non disponible', 'La fonctionnalité photo nécessite expo-image-picker.');
@@ -123,16 +125,18 @@ export default function SignalerScreen() {
     }
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission refusée', 'L\'accès à la galerie est nécessaire.');
+      Alert.alert('Permission refusée', "L'accès à la galerie est nécessaire.");
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions?.Images ?? ('Images' as never),
       allowsEditing: true,
-      quality: 0.7,
+      quality: 0.5,
+      base64: true,
     });
     if (!result.canceled && result.assets?.[0]?.uri) {
       setPhotoUri(result.assets[0].uri);
+      setPhotoBase64(result.assets[0].base64 ?? null);
     }
   }, []);
 
@@ -143,12 +147,17 @@ export default function SignalerScreen() {
     }
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission refusée', 'L\'accès à la caméra est nécessaire.');
+      Alert.alert('Permission refusée', "L'accès à la caméra est nécessaire.");
       return;
     }
-    const result = await ImagePicker.launchCameraAsync({ allowsEditing: true, quality: 0.7 });
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 0.5,
+      base64: true,
+    });
     if (!result.canceled && result.assets?.[0]?.uri) {
       setPhotoUri(result.assets[0].uri);
+      setPhotoBase64(result.assets[0].base64 ?? null);
     }
   }, []);
 
@@ -159,18 +168,23 @@ export default function SignalerScreen() {
       [
         { text: '📷 Appareil photo', onPress: takePhoto },
         { text: '🖼️ Galerie', onPress: pickPhoto },
+        {
+          text: '✨ Photo Démo',
+          onPress: () => {
+            setPhotoUri(DEMO_PHOTO_URL);
+            setPhotoBase64(null);
+          },
+        },
         { text: 'Annuler', style: 'cancel' },
       ],
     );
   }, [takePhoto, pickPhoto]);
 
-  // ---------------------------------------------------------------------------
-  // Submit
-  // ---------------------------------------------------------------------------
   const resetForm = useCallback(() => {
     setCategory(CATEGORIES[0]!.value);
     setDescription('');
     setPhotoUri(null);
+    setPhotoBase64(null);
     setErrorMsg(null);
   }, []);
 
@@ -181,42 +195,49 @@ export default function SignalerScreen() {
       setErrorMsg('La description doit contenir au moins 20 caractères.');
       return;
     }
-    if (latitude === null || longitude === null) {
-      setErrorMsg('La localisation GPS est requise. Attendez qu\'elle soit récupérée.');
-      return;
-    }
+    const finalLat = latitude ?? 37.2667;
+    const finalLon = longitude ?? 9.8667;
 
     setSubmitting(true);
     try {
       const result = await submitReport({
         category,
         description: description.trim(),
-        latitude,
-        longitude,
+        latitude: finalLat,
+        longitude: finalLon,
         photoUri,
+        photoBase64,
+        reporterId: userId,
         token,
       });
 
       if (result.kind === 'success') {
-        Alert.alert('✅ Succès', 'Signalement envoyé avec succès !', [{ text: 'OK', onPress: resetForm }]);
+        Alert.alert(
+          '✅ Signalement enregistré',
+          'Votre signalement a été transmis en direct à la Mairie de Zarzouna.',
+          [
+            { text: 'Nouveau signalement', onPress: resetForm, style: 'cancel' },
+            {
+              text: 'Voir mes dossiers',
+              onPress: () => {
+                resetForm();
+                router.push('/(tabs)/mes-signalements');
+              },
+            },
+          ]
+        );
       } else {
         setErrorMsg(result.message);
       }
     } finally {
       setSubmitting(false);
     }
-  }, [category, description, latitude, longitude, photoUri, token, resetForm]);
+  }, [category, description, latitude, longitude, photoUri, photoBase64, userId, token, resetForm, router]);
 
-  // ---------------------------------------------------------------------------
-  // Helpers
-  // ---------------------------------------------------------------------------
   const selectedCategory = CATEGORIES.find((c) => c.value === category) ?? CATEGORIES[0]!;
   const descTooShort = description.trim().length > 0 && description.trim().length < 20;
-  const canSubmit = !submitting && description.trim().length >= 20 && latitude !== null;
+  const canSubmit = !submitting && description.trim().length >= 20;
 
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
   return (
     <KeyboardAvoidingView
       style={styles.flex}
@@ -228,16 +249,14 @@ export default function SignalerScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* ---- Header ---- */}
         <View style={styles.header}>
           <Text style={styles.headerIcon}>🌿</Text>
           <Text style={styles.headerTitle}>Signaler une anomalie</Text>
           <Text style={styles.headerSub}>
-            Contribuez à améliorer votre environnement
+            Contribuez à la propreté de Zarzouna en temps réel
           </Text>
         </View>
 
-        {/* ---- Catégorie ---- */}
         <View style={styles.card}>
           <Text style={styles.fieldLabel}>Catégorie *</Text>
           <TouchableOpacity
@@ -276,12 +295,11 @@ export default function SignalerScreen() {
           )}
         </View>
 
-        {/* ---- Description ---- */}
         <View style={styles.card}>
           <Text style={styles.fieldLabel}>Description * (min. 20 caractères)</Text>
           <TextInput
             style={[styles.textArea, descTooShort && styles.textAreaError]}
-            placeholder="Décrivez le problème..."
+            placeholder="Décrivez le problème (adresse précise, nature des déchets...)..."
             placeholderTextColor={colors.textMuted}
             multiline
             numberOfLines={5}
@@ -296,15 +314,14 @@ export default function SignalerScreen() {
           </Text>
         </View>
 
-        {/* ---- Photo ---- */}
         <View style={styles.card}>
-          <Text style={styles.fieldLabel}>Photo (facultatif)</Text>
+          <Text style={styles.fieldLabel}>Photo de l'anomalie</Text>
           {photoUri ? (
             <View style={styles.photoPreviewContainer}>
               <Image source={{ uri: photoUri }} style={styles.photoPreview} resizeMode="cover" />
               <TouchableOpacity
                 style={styles.photoRemove}
-                onPress={() => setPhotoUri(null)}
+                onPress={() => { setPhotoUri(null); setPhotoBase64(null); }}
                 accessibilityLabel="Supprimer la photo"
               >
                 <Text style={styles.photoRemoveText}>✕ Supprimer</Text>
@@ -313,15 +330,19 @@ export default function SignalerScreen() {
           ) : (
             <TouchableOpacity style={styles.photoButton} onPress={handlePhotoPress}>
               <Text style={styles.photoButtonText}>
-                📷 Prendre une photo / Choisir depuis la galerie
+                📷 Prendre une photo / Galerie / Démo
               </Text>
             </TouchableOpacity>
           )}
         </View>
 
-        {/* ---- Localisation ---- */}
         <View style={styles.card}>
-          <Text style={styles.fieldLabel}>Localisation</Text>
+          <View style={styles.locationHeaderRow}>
+            <Text style={styles.fieldLabel}>Localisation</Text>
+            <TouchableOpacity onPress={useZarzounaFallback}>
+              <Text style={styles.fallbackLink}>Utiliser Zarzouna Centre</Text>
+            </TouchableOpacity>
+          </View>
           <View style={styles.locationBox}>
             <Text style={styles.locationText}>{locationText}</Text>
           </View>
@@ -332,14 +353,12 @@ export default function SignalerScreen() {
           )}
         </View>
 
-        {/* ---- Error ---- */}
         {errorMsg && (
           <View style={styles.errorBox}>
             <Text style={styles.errorText}>⚠️ {errorMsg}</Text>
           </View>
         )}
 
-        {/* ---- Submit ---- */}
         <Pressable
           style={[styles.submitButton, !canSubmit && styles.submitButtonDisabled]}
           onPress={handleSubmit}
@@ -364,14 +383,10 @@ export default function SignalerScreen() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Styles
-// ---------------------------------------------------------------------------
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.dark.background },
   scroll: { flex: 1 },
   content: { padding: spacing.lg },
-
   header: {
     alignItems: 'center',
     marginBottom: spacing.xl,
@@ -389,7 +404,6 @@ const styles = StyleSheet.create({
     color: colors.dark.textSecondary,
     textAlign: 'center',
   },
-
   card: {
     backgroundColor: colors.dark.card,
     borderRadius: radius.lg,
@@ -405,8 +419,6 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-
-  // Picker
   pickerToggle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -435,8 +447,6 @@ const styles = StyleSheet.create({
   pickerOptionSelected: { backgroundColor: `${colors.primary}22` },
   pickerOptionText: { ...textStyles.body, color: colors.dark.textPrimary },
   pickerOptionTextSelected: { color: colors.primary },
-
-  // Description
   textArea: {
     ...textStyles.body,
     color: colors.dark.textPrimary,
@@ -450,8 +460,6 @@ const styles = StyleSheet.create({
   textAreaError: { borderColor: colors.danger },
   charCount: { ...textStyles.caption, color: colors.dark.textMuted, marginTop: spacing.xs },
   charCountError: { color: colors.danger },
-
-  // Photo
   photoButton: {
     backgroundColor: colors.dark.cardHover,
     borderRadius: radius.md,
@@ -477,8 +485,17 @@ const styles = StyleSheet.create({
     borderColor: colors.danger,
   },
   photoRemoveText: { ...textStyles.label, color: colors.danger },
-
-  // Location
+  locationHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  fallbackLink: {
+    fontSize: 11,
+    color: colors.primary,
+    marginBottom: spacing.sm,
+    fontWeight: '600',
+  },
   locationBox: {
     backgroundColor: colors.dark.cardHover,
     borderRadius: radius.md,
@@ -488,8 +505,6 @@ const styles = StyleSheet.create({
   },
   locationText: { ...textStyles.body, color: colors.dark.textPrimary },
   coordsText: { ...textStyles.caption, color: colors.dark.textMuted, marginTop: spacing.xs },
-
-  // Error
   errorBox: {
     backgroundColor: `${colors.danger}18`,
     borderRadius: radius.md,
@@ -499,8 +514,6 @@ const styles = StyleSheet.create({
     borderColor: `${colors.danger}44`,
   },
   errorText: { ...textStyles.body, color: colors.danger },
-
-  // Submit
   submitButton: {
     backgroundColor: colors.primary,
     borderRadius: radius.md,
