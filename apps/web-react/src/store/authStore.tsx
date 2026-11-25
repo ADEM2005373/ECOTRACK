@@ -14,6 +14,7 @@ export interface AuthUser {
   fullName: string;
   role: string;
   municipality?: string;
+  governorate?: string;
   territory?: MunicipalityTerritory;
 }
 

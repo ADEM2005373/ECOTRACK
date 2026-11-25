@@ -108,7 +108,8 @@ function SupervisionMapView({ config }: { config: MapConfig }) {
     }
 
     let cancelled = false;
-    fetch(`/api/v1/auth/territory?name=${encodeURIComponent(currentUser.municipality)}`)
+    const govParam = currentUser.governorate ? `&governorate=${encodeURIComponent(currentUser.governorate)}` : '';
+    fetch(`/api/v1/auth/territory?name=${encodeURIComponent(currentUser.municipality)}${govParam}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!cancelled && data?.territory?.center?.length === 2) {

@@ -212,7 +212,8 @@ export const AdminSaasDashboard: React.FC = () => {
           password: newMunPassword.trim() || 'Mairie2026!',
           fullName: newMunAdminName.trim() || `Maire / Directeur ${newMunName.trim()}`,
           role: 'ADMIN_MUNICIPALITE',
-          municipality: newMunName.trim()
+          municipality: newMunName.trim(),
+          governorate: newMunRegion.trim() || undefined
         })
       });
 

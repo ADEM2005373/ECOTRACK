@@ -7,9 +7,14 @@ export interface MunicipalityTerritory {
 
 const KNOWN_TUNISIAN_TERRITORIES: Record<string, MunicipalityTerritory> = {
   zarzouna: {
-    center: [37.2667, 9.8833],
-    bbox: [37.245, 37.29, 9.855, 9.915],
-    displayName: 'Zarzouna, Bizerte, Tunisie',
+    center: [37.2556, 9.8753],
+    bbox: [37.2438, 37.2693, 9.8638, 9.888],
+    displayName: 'Zarzouna, Gouvernorat Bizerte, Tunisie',
+  },
+  'bou salem': {
+    center: [36.6111, 8.9698],
+    bbox: [36.59, 36.635, 8.94, 9.0],
+    displayName: 'Bou Salem, Gouvernorat Jendouba, Tunisie',
   },
   bizerte: {
     center: [37.2746, 9.8739],
@@ -47,7 +52,7 @@ const KNOWN_TUNISIAN_TERRITORIES: Record<string, MunicipalityTerritory> = {
     displayName: 'Nabeul, Tunisie',
   },
   hammamet: {
-    center: [36.4000, 10.6167],
+    center: [36.4, 10.6167],
     bbox: [36.36, 36.44, 10.56, 10.67],
     displayName: 'Hammamet, Nabeul, Tunisie',
   },
@@ -58,17 +63,47 @@ const KNOWN_TUNISIAN_TERRITORIES: Record<string, MunicipalityTerritory> = {
   },
 };
 
-/**
- * Extrait le nom de la ville/commune à partir du libellé d'une mairie
- * Ex: "Mairie de Zarzouna" -> "Zarzouna", "Municipalité d'Ariana" -> "Ariana"
- */
 export function extractLocalityName(rawName: string): string {
   const cleaned = rawName
     .trim()
-    .replace(/^(mairie|municipalit[eé]|commune|ville|gouvernorat|d[eé]l[eé]gation)\s+(de\s+la\s+|du\s+|de\s+l['’]|d['’]|de\s+|des\s+)?/i, '')
+    .replace(/^(mairie|municipalit[eé]|commune|ville|d[eé]l[eé]gation)\s+(de\s+la\s+|du\s+|de\s+l['’]|d['’]|de\s+|des\s+)?/i, '')
     .replace(/\s*[-–·]\s*(centre|tri|direction|services).*$/i, '')
     .trim();
   return cleaned || rawName.trim();
+}
+
+export function extractGovernorateName(rawGov?: string): string {
+  if (!rawGov) return '';
+  return rawGov
+    .trim()
+    .replace(/^(gouvernorat|r[eé]gion|wilaya)\s+(de\s+la\s+|du\s+|de\s+l['’]|d['’]|de\s+)?/i, '')
+    .trim();
+}
+
+/**
+ * Normalise les noms tunisiens fréquemment collés (ex: "boussalem" -> "bou salem", "benard" -> "ben ...")
+ */
+function buildSearchVariants(locality: string): string[] {
+  const base = locality.trim();
+  const variants = [base];
+  const spaced = base
+    .replace(/^bou([a-z])/i, 'Bou $1')
+    .replace(/^ben([a-z])/i, 'Ben $1')
+    .replace(/^sidi([a-z])/i, 'Sidi $1')
+    .replace(/^ain([a-z])/i, 'Ain $1')
+    .replace(/^bir([a-z])/i, 'Bir $1')
+    .replace(/^oued([a-z])/i, 'Oued $1')
+    .replace(/^el([a-z])/i, 'El $1')
+    .replace(/ss/gi, 's');
+  if (spaced.toLowerCase() !== base.toLowerCase()) {
+    variants.push(spaced);
+  }
+  // Also try replacing double 's' after Bou (e.g. boussalem -> Bou Salem)
+  const bouSalemFix = base.replace(/^bouss/i, 'Bou S');
+  if (bouSalemFix.toLowerCase() !== base.toLowerCase() && !variants.includes(bouSalemFix)) {
+    variants.push(bouSalemFix);
+  }
+  return variants;
 }
 
 function downsampleRing(ring: number[][], maxPoints = 90): [number, number][] {
@@ -78,30 +113,51 @@ function downsampleRing(ring: number[][], maxPoints = 90): [number, number][] {
   for (let i = 0; i < ring.length; i += step) {
     const pt = ring[i];
     if (Array.isArray(pt) && pt.length >= 2 && Number.isFinite(pt[0]) && Number.isFinite(pt[1])) {
-      // GeoJSON is [lng, lat] -> Leaflet uses [lat, lng]
       out.push([Number(pt[1]), Number(pt[0])]);
     }
   }
   return out;
 }
 
-/**
- * Analyse le nom de la mairie, interroge Nominatim (OpenStreetMap) sur la Tunisie
- * et retourne le centre, la bounding box et le polygone territorial.
- */
-export async function resolveMunicipalityTerritory(municipalityName: string): Promise<MunicipalityTerritory | null> {
-  const locality = extractLocalityName(municipalityName);
-  if (!locality) return null;
+function normalizeAscii(str: string): string {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
 
-  const fallbackKey = locality.toLowerCase();
+function scoreCandidate(hit: any, cleanGov: string): number {
+  let score = 0;
+  const display = normalizeAscii(String(hit.display_name || ''));
+  const addrState = normalizeAscii(String(hit.address?.state || hit.address?.county || ''));
+  const type = String(hit.addresstype || hit.type || '').toLowerCase();
+  const cls = String(hit.class || '').toLowerCase();
 
+  if (cleanGov) {
+    const govNorm = normalizeAscii(cleanGov);
+    if (display.includes(govNorm) || addrState.includes(govNorm)) {
+      score += 150;
+    } else {
+      score -= 200; // Strong penalty when governorate does NOT match!
+    }
+  }
+
+  if (cls === 'boundary' || type === 'administrative' || type === 'municipality') score += 80;
+  else if (type === 'city' || type === 'town' || type === 'village') score += 60;
+  else if (type === 'suburb' || type === 'quarter' || type === 'neighbourhood' || type === 'hamlet') score -= 60;
+
+  if (hit.geojson?.type === 'Polygon' || hit.geojson?.type === 'MultiPolygon') {
+    score += 25;
+  }
+
+  return score;
+}
+
+async function queryNominatim(q: string): Promise<any[]> {
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&countrycodes=tn&format=json&addressdetails=1&polygon_geojson=1&limit=10&accept-language=fr`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5000);
   try {
-    const query = encodeURIComponent(`${locality}, Tunisia`);
-    const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&polygon_geojson=1&limit=1&accept-language=fr`;
-
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 5000);
-
     const res = await fetch(url, {
       headers: {
         'User-Agent': 'EcoTrack-Tunisia-SmartCity/2.0',
@@ -110,37 +166,86 @@ export async function resolveMunicipalityTerritory(municipalityName: string): Pr
       signal: controller.signal,
     });
     clearTimeout(timer);
+    if (!res.ok) return [];
+    const data = (await res.json()) as any[];
+    return Array.isArray(data) ? data : [];
+  } catch {
+    clearTimeout(timer);
+    return [];
+  }
+}
 
-    if (res.ok) {
-      const results = (await res.json()) as any[];
-      const hit = Array.isArray(results) && results.length > 0 ? results[0] : null;
-      if (hit && hit.lat && hit.lon && Array.isArray(hit.boundingbox) && hit.boundingbox.length === 4) {
-        const center: [number, number] = [parseFloat(hit.lat), parseFloat(hit.lon)];
+/**
+ * Analyse le nom de la mairie et son gouvernorat, interroge Nominatim sur la Tunisie (countrycodes=tn)
+ * et sélectionne le candidat correspondant exactement au gouvernorat et à la municipalité (jamais un simple quartier).
+ */
+export async function resolveMunicipalityTerritory(
+  municipalityName: string,
+  governorateName?: string
+): Promise<MunicipalityTerritory | null> {
+  const locality = extractLocalityName(municipalityName);
+  if (!locality) return null;
+
+  const cleanGov = extractGovernorateName(governorateName);
+  const variants = buildSearchVariants(locality);
+
+  const allCandidates: any[] = [];
+  for (const variant of variants) {
+    const q = cleanGov ? `${variant}, ${cleanGov}, Tunisia` : `${variant}, Tunisia`;
+    const hits = await queryNominatim(q);
+    allCandidates.push(...hits);
+    if (hits.length > 0 && cleanGov && hits.some((h) => scoreCandidate(h, cleanGov) > 100)) {
+      break;
+    }
+  }
+
+  // If governorate-filtered query yielded nothing, try without governorate in string but still score strictly by governorate
+  if (allCandidates.length === 0 && cleanGov) {
+    for (const variant of variants) {
+      const hits = await queryNominatim(`${variant}, Tunisia`);
+      allCandidates.push(...hits);
+    }
+  }
+
+  if (allCandidates.length > 0) {
+    allCandidates.sort((a, b) => scoreCandidate(b, cleanGov) - scoreCandidate(a, cleanGov));
+    const best = allCandidates[0];
+    const bestScore = scoreCandidate(best, cleanGov);
+
+    // Only accept if it didn't fail the governorate check when a governorate was explicitly given
+    if (!cleanGov || bestScore > -100) {
+      if (best?.lat && best?.lon && Array.isArray(best.boundingbox) && best.boundingbox.length === 4) {
+        const center: [number, number] = [parseFloat(best.lat), parseFloat(best.lon)];
         const bbox: [number, number, number, number] = [
-          parseFloat(hit.boundingbox[0]), // south
-          parseFloat(hit.boundingbox[1]), // north
-          parseFloat(hit.boundingbox[2]), // west
-          parseFloat(hit.boundingbox[3]), // east
+          parseFloat(best.boundingbox[0]),
+          parseFloat(best.boundingbox[1]),
+          parseFloat(best.boundingbox[2]),
+          parseFloat(best.boundingbox[3]),
         ];
 
         let polygon: [number, number][] | undefined;
-        if (hit.geojson?.type === 'Polygon' && Array.isArray(hit.geojson.coordinates?.[0])) {
-          polygon = downsampleRing(hit.geojson.coordinates[0]);
-        } else if (hit.geojson?.type === 'MultiPolygon' && Array.isArray(hit.geojson.coordinates?.[0]?.[0])) {
-          polygon = downsampleRing(hit.geojson.coordinates[0][0]);
+        if (best.geojson?.type === 'Polygon' && Array.isArray(best.geojson.coordinates?.[0])) {
+          polygon = downsampleRing(best.geojson.coordinates[0]);
+        } else if (best.geojson?.type === 'MultiPolygon' && Array.isArray(best.geojson.coordinates?.[0]?.[0])) {
+          polygon = downsampleRing(best.geojson.coordinates[0][0]);
         }
 
         return {
           center,
           bbox,
-          displayName: String(hit.display_name || `${locality}, Tunisie`),
+          displayName: String(best.display_name || `${locality}, Tunisie`),
           ...(polygon && polygon.length >= 3 ? { polygon } : {}),
         };
       }
     }
-  } catch {
-    // Fallback below if Nominatim is offline or times out
   }
 
-  return KNOWN_TUNISIAN_TERRITORIES[fallbackKey] ?? null;
+  for (const variant of variants) {
+    const key = normalizeAscii(variant);
+    if (KNOWN_TUNISIAN_TERRITORIES[key]) {
+      return KNOWN_TUNISIAN_TERRITORIES[key];
+    }
+  }
+
+  return null;
 }

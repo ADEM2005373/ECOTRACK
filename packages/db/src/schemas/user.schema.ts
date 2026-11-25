@@ -41,6 +41,10 @@ export const UserSchema = new Schema<IUserDocument>(
       type: String,
       trim: true
     },
+    governorate: {
+      type: String,
+      trim: true
+    },
     territory: {
       center: { type: [Number], default: undefined },
       bbox: { type: [Number], default: undefined },

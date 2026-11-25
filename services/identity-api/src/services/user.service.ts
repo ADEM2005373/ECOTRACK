@@ -7,7 +7,7 @@ export class UserService {
   /**
    * Crée un nouvel utilisateur avec validation, hachage Argon2id et résolution du territoire municipal
    */
-  async createUser(dto: CreateUserDto & { territory?: any }): Promise<IUser> {
+  async createUser(dto: CreateUserDto & { territory?: any; governorate?: string }): Promise<IUser> {
     const existing = await UserModel.findOne({ email: dto.email.toLowerCase().trim() });
     if (existing) {
       throw new Error(`Un compte existe déjà avec l'adresse e-mail: ${dto.email}`);
@@ -15,16 +15,17 @@ export class UserService {
 
     let territory = dto.territory;
     if (!territory && dto.municipality) {
-      // Réutiliser le territoire déjà résolu pour cette municipalité si disponible
+      // Réutiliser le territoire déjà résolu pour cette municipalité + gouvernorat si disponible
       const sameMairie = await UserModel.findOne({
         municipality: dto.municipality.trim(),
+        ...(dto.governorate ? { governorate: dto.governorate.trim() } : {}),
         'territory.center': { $exists: true, $ne: [] }
       }).select('territory');
 
       if (sameMairie?.territory?.center?.length) {
         territory = sameMairie.territory;
       } else {
-        territory = (await resolveMunicipalityTerritory(dto.municipality)) ?? undefined;
+        territory = (await resolveMunicipalityTerritory(dto.municipality, dto.governorate)) ?? undefined;
       }
     }
 
@@ -34,6 +35,7 @@ export class UserService {
       fullName: dto.fullName,
       phoneNumber: dto.phoneNumber,
       municipality: dto.municipality,
+      ...(dto.governorate ? { governorate: dto.governorate } : {}),
       ...(territory ? { territory } : {}),
       role: dto.role || UserRole.CITOYEN,
       isActive: true
@@ -51,7 +53,7 @@ export class UserService {
     if (!user || !user.municipality) return null;
     if (user.territory?.center?.length === 2) return user.territory;
 
-    const resolved = await resolveMunicipalityTerritory(user.municipality);
+    const resolved = await resolveMunicipalityTerritory(user.municipality, (user as any).governorate);
     if (resolved) {
       user.territory = resolved;
       await user.save();

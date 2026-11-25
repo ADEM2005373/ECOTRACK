@@ -234,7 +234,7 @@ function extractActorInfo(req: Request): {
  */
 const createUserHandler = async (req: Request, res: Response) => {
   try {
-    const { email, password, fullName, phoneNumber, role, municipality } = req.body;
+    const { email, password, fullName, phoneNumber, role, municipality, governorate } = req.body;
 
     if (!email || !EMAIL_REGEX.test(email.trim())) {
       return res.status(400).json({
@@ -263,7 +263,8 @@ const createUserHandler = async (req: Request, res: Response) => {
       fullName: fullName.trim(),
       phoneNumber: phoneNumber ? String(phoneNumber).trim() : undefined,
       role: role || UserRole.CITOYEN,
-      municipality: municipality ? String(municipality).trim() : undefined
+      municipality: municipality ? String(municipality).trim() : undefined,
+      governorate: governorate ? String(governorate).trim() : undefined
     });
 
     // Trace d'audit pour création d'utilisateur / collectivité
@@ -309,10 +310,11 @@ router.post('/admin/create-user', createUserHandler);
  */
 router.get('/territory', async (req: Request, res: Response) => {
   const name = String(req.query.name || '').trim();
+  const governorate = req.query.governorate ? String(req.query.governorate).trim() : undefined;
   if (!name) {
     return res.status(400).json({ error: 'VALIDATION_ERROR', message: 'Le paramètre name est requis.' });
   }
-  const territory = await resolveMunicipalityTerritory(name);
+  const territory = await resolveMunicipalityTerritory(name, governorate);
   if (!territory) {
     return res.status(404).json({ error: 'NOT_FOUND', message: `Territoire introuvable pour "${name}".` });
   }
