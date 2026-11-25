@@ -104,9 +104,9 @@ function SupervisionMapView({ config }: { config: MapConfig }) {
     }
     if (currentUser.territory?.center?.length === 2) {
       setResolvedTerritory(currentUser.territory);
-      return;
     }
 
+    // Toujours synchroniser le territoire depuis le backend pour corriger un éventuel cache obsolète
     let cancelled = false;
     const govParam = currentUser.governorate ? `&governorate=${encodeURIComponent(currentUser.governorate)}` : '';
     fetch(`/api/v1/auth/territory?name=${encodeURIComponent(currentUser.municipality)}${govParam}`)
@@ -130,7 +130,7 @@ function SupervisionMapView({ config }: { config: MapConfig }) {
     return () => {
       cancelled = true;
     };
-  }, [isGlobalAdmin, currentUser?.municipality, currentUser?.territory]);
+  }, [isGlobalAdmin, currentUser?.municipality, currentUser?.governorate, currentUser?.territory]);
 
   const scopedTerritory = resolvedTerritory;
 
