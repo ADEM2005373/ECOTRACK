@@ -238,6 +238,29 @@ def _get_imagenet_analyzer():
     return _IMAGENET_MODEL, _IMAGENET_LABELS, _IMAGENET_PREPROCESS
 
 
+_CATEGORY_BRIGADE: dict[str, str] = {
+    "DECHETS_DANGEREUX": "Brigade Intervention Spéciale",
+    "ENCOMBRANTS": "Brigade Ramassage Poids Lourd",
+    "VEGETAUX": "Brigade Espaces Verts",
+    "GRAVATS_CHANTIER": "Brigade Voirie & Gravats",
+    "DEBORDEMENT_BAC": "Brigade Collecte Express",
+    "GRAFFITI": "Brigade Peinture & Nettoyage",
+    "DEPOT_SAUVAGE": "Brigade Voirie & Salubrité",
+    "AUTRE": "Brigade Voirie & Salubrité",
+}
+
+_CATEGORY_SLA: dict[str, tuple[int, str]] = {
+    "DECHETS_DANGEREUX": (4, "Critique"),
+    "DEBORDEMENT_BAC": (12, "Élevée"),
+    "DEPOT_SAUVAGE": (24, "Élevée"),
+    "GRAVATS_CHANTIER": (48, "Moyenne"),
+    "ENCOMBRANTS": (48, "Moyenne"),
+    "GRAFFITI": (48, "Moyenne"),
+    "VEGETAUX": (72, "Faible"),
+    "AUTRE": (48, "Moyenne"),
+}
+
+
 def analyze_photo_bytes(
     image_bytes: bytes,
     claimed_category: str | None = None,
@@ -286,12 +309,21 @@ def analyze_photo_bytes(
 
     if waste_prob < 0.15:
         confidence = round(max(0.05, min(0.45, waste_prob * 1.5)), 4)
+        fallback_cat = claimed_category or "AUTRE"
+        brigade = _CATEGORY_BRIGADE.get(fallback_cat, "Brigade Voirie & Salubrité")
         return {
-            "suggestedCategory": claimed_category or "AUTRE",
+            "suggestedCategory": fallback_cat,
             "confidence": confidence,
             "isWasteDetected": False,
             "detectedObjects": top_objects[:5],
             "inferenceMs": round(inference_ms, 2),
+            "suggestedBrigade": brigade,
+            "suggestedSlaHours": 24,
+            "suggestedPriority": "À vérifier",
+            "aiDescription": (
+                f"Analyse visuelle : aucun déchet ni anomalie urbaine confirmée sur l'image "
+                f"(éléments détectés : {top3_summary}). Contrôle agent ou rejet conseillé avant mobilisation."
+            ),
             "justification": (
                 f"Alerte IA Vision : aucune preuve de déchet ou d'anomalie urbaine détectée sur la photo "
                 f"(objets identifiés : {top3_summary}). Vérification manuelle ou rejet recommandé."
@@ -302,17 +334,31 @@ def analyze_photo_bytes(
     claimed_norm = (claimed_category or "").upper().strip()
     if claimed_norm == "DECHETS_DANGEREUX" and cat_scores["DECHETS_DANGEREUX"] < 0.12:
         confidence = round(max(0.30, min(0.58, waste_prob)), 4)
+        suggested = best_cat
+        brigade = _CATEGORY_BRIGADE.get(suggested, "Brigade Voirie & Salubrité")
+        sla_hours, priority = _CATEGORY_SLA.get(suggested, (24, "Moyenne"))
         justification = (
             f"Attention : la photo montre des indices visuels ({', '.join(matched_items[:3]) or top3_summary}), "
-            f"mais aucun déchet dangereux confirmé. Catégorie probable : {best_cat}."
+            f"mais aucun déchet dangereux confirmé. Catégorie probable : {suggested}."
         )
-        suggested = best_cat
+        ai_description = (
+            f"Diagnostic IA : présence probable de {suggested.lower().replace('_', ' ')} "
+            f"({', '.join(matched_items[:3]) or top3_summary}) sans risque chimique/dangereux avéré. "
+            f"Affectation suggérée : {brigade} · SLA {sla_hours}h."
+        )
     else:
         confidence = round(max(0.55, min(0.95, 0.45 + waste_prob * 0.65)), 4)
         suggested = best_cat
+        brigade = _CATEGORY_BRIGADE.get(suggested, "Brigade Voirie & Salubrité")
+        sla_hours, priority = _CATEGORY_SLA.get(suggested, (24, "Élevée"))
         justification = (
             f"IA Vision (MobileNetV3) : indices détectés ({', '.join(matched_items[:3]) or top3_summary}) "
             f"→ catégorie {suggested}."
+        )
+        ai_description = (
+            f"Diagnostic IA : anomalie de type {suggested.lower().replace('_', ' ')} détectée "
+            f"({', '.join(matched_items[:3]) or top3_summary}). "
+            f"Intervention recommandée sous {sla_hours}h (priorité {priority}) par {brigade}."
         )
 
     return {
@@ -321,5 +367,9 @@ def analyze_photo_bytes(
         "isWasteDetected": True,
         "detectedObjects": top_objects[:5],
         "inferenceMs": round(inference_ms, 2),
+        "suggestedBrigade": brigade,
+        "suggestedSlaHours": sla_hours,
+        "suggestedPriority": priority,
+        "aiDescription": ai_description,
         "justification": justification,
     }

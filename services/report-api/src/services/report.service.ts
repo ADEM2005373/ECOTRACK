@@ -238,6 +238,10 @@ export class ReportService {
     let aiConfidenceScore = dto.aiConfidenceScore;
     let categorySuggested = dto.categorySuggested;
     let aiJustification = dto.aiJustification;
+    let aiDescription: string | undefined;
+    let slaHours: number | undefined;
+    let suggestedPriority: string | undefined;
+    let suggestedBrigade: string | undefined;
 
     if (typeof aiConfidenceScore !== 'number' && imageUrl) {
       const visionBase = (process.env.AI_VISION_URL || 'http://127.0.0.1:8000').replace(/\/$/, '');
@@ -256,16 +260,18 @@ export class ReportService {
             confidence?: number;
             suggestedCategory?: string;
             justification?: string;
+            aiDescription?: string;
+            suggestedSlaHours?: number;
+            suggestedPriority?: string;
+            suggestedBrigade?: string;
           };
-          if (typeof data.confidence === 'number') {
-            aiConfidenceScore = data.confidence;
-          }
-          if (typeof data.suggestedCategory === 'string' && data.suggestedCategory.trim()) {
-            categorySuggested = data.suggestedCategory;
-          }
-          if (typeof data.justification === 'string' && data.justification.trim()) {
-            aiJustification = data.justification;
-          }
+          if (typeof data.confidence === 'number') aiConfidenceScore = data.confidence;
+          if (typeof data.suggestedCategory === 'string' && data.suggestedCategory.trim()) categorySuggested = data.suggestedCategory;
+          if (typeof data.justification === 'string' && data.justification.trim()) aiJustification = data.justification;
+          if (typeof data.aiDescription === 'string' && data.aiDescription.trim()) aiDescription = data.aiDescription;
+          if (typeof data.suggestedSlaHours === 'number') slaHours = data.suggestedSlaHours;
+          if (typeof data.suggestedPriority === 'string' && data.suggestedPriority.trim()) suggestedPriority = data.suggestedPriority;
+          if (typeof data.suggestedBrigade === 'string' && data.suggestedBrigade.trim()) suggestedBrigade = data.suggestedBrigade;
         }
       } catch {
         // Ne jamais inventer un faux score de confiance si le service IA Vision est indisponible
@@ -285,6 +291,10 @@ export class ReportService {
       categorySuggested,
       aiConfidenceScore,
       ...(aiJustification ? { aiJustification } : {}),
+      ...(aiDescription ? { aiDescription } : {}),
+      ...(typeof slaHours === 'number' ? { slaHours } : {}),
+      ...(suggestedPriority ? { priority: suggestedPriority } : {}),
+      ...(suggestedBrigade ? { assignedTeamId: suggestedBrigade } : {}),
       municipality: routed.municipality,
       mairieCovered: routed.mairieCovered,
       detectedLocality: routed.detectedLocality,

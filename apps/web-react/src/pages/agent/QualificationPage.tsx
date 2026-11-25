@@ -189,10 +189,13 @@ export const QualificationPage: React.FC = () => {
               categoryCode: rawCat,
               categoryLabel: catLabel,
               confidenceScore: conf,
-              severity: r.priority || (conf > 0 && conf < 60 ? 'À vérifier' : 'Élevée'),
-              justification: r.aiJustification || (hasAiScore
-                ? `Analyse IA Vision effectuée pour le périmètre de ${municipality}.`
-                : `Aucune analyse IA Vision disponible pour cette photo. Vérification manuelle requise.`),
+              severity: `${r.priority || (conf > 0 && conf < 60 ? 'À vérifier' : 'Élevée')}${r.slaHours ? ` · SLA ${r.slaHours}h` : ''}`,
+              justification:
+                r.aiDescription ||
+                r.aiJustification ||
+                (hasAiScore
+                  ? `Analyse IA Vision effectuée pour le périmètre de ${r.municipality || municipality}.`
+                  : `Aucune analyse IA Vision disponible pour cette photo. Vérification manuelle requise.`),
             },
             assignedBrigade: r.assignedTeamId || CATEGORY_BRIGADE_ROUTING[rawCat] || 'Brigade Voirie & Salubrité',
             assignedWorker: r.assignedWorkerId

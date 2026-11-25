@@ -11,6 +11,8 @@ export interface IReportDocument extends Omit<IReport, 'id' | 'reporterId'>, Doc
   municipality?: string;
   district?: string;
   aiJustification?: string;
+  aiDescription?: string;
+  slaHours?: number;
   mairieCovered?: boolean;
   detectedLocality?: string;
 }
@@ -111,6 +113,14 @@ export const ReportSchema = new Schema<IReportDocument>(
     aiJustification: {
       type: String,
       trim: true
+    },
+    aiDescription: {
+      type: String,
+      trim: true
+    },
+    slaHours: {
+      type: Number,
+      min: 1
     },
     location: {
       type: GeoPointSchema,

@@ -140,17 +140,30 @@ function SupervisionMapView({ config }: { config: MapConfig }) {
     };
   }, [canManageReports, currentUser?.municipality, isGlobalAdmin]);
 
+const CATEGORY_DEFAULT_BRIGADE: Record<string, string> = {
+  DECHETS_DANGEREUX: 'Brigade Intervention Spéciale',
+  ENCOMBRANTS: 'Brigade Ramassage Poids Lourd',
+  VEGETAUX: 'Brigade Espaces Verts',
+  GRAVATS_CHANTIER: 'Brigade Voirie & Gravats',
+  DEBORDEMENT_BAC: 'Brigade Collecte Express',
+  GRAFFITI: 'Brigade Peinture & Nettoyage',
+  DEPOT_SAUVAGE: 'Brigade Voirie & Salubrité',
+  AUTRE: 'Brigade Voirie & Salubrité',
+};
+
   const openReportPanel = (report: MapReport) => {
     setSelectedReport(report);
     setSelectedCategory(report.category || 'DEPOT_SAUVAGE');
-    setSelectedBrigade(report.assignedTeamId || 'Brigade Voirie & Salubrité');
+    setSelectedBrigade(
+      report.assignedTeamId || CATEGORY_DEFAULT_BRIGADE[report.category] || 'Brigade Voirie & Salubrité'
+    );
     if (report.assignedWorkerId) {
       setSelectedWorker(report.assignedWorkerId);
     }
     setActionFeedback(null);
   };
 
-  const runTransition = async (transition: 'T1' | 'T2' | 'T_REJECT', extra: Record<string, unknown> = {}) => {
+  const runTransition = async (transition: 'T1' | 'T2' | 'T3' | 'T4' | 'T5', extra: Record<string, unknown> = {}) => {
     if (!selectedReport) return;
     setActionBusy(true);
     setActionFeedback(null);
@@ -175,13 +188,14 @@ function SupervisionMapView({ config }: { config: MapConfig }) {
         setActionFeedback(err?.message || `Erreur (${res.status})`);
         return;
       }
-      setActionFeedback(
-        transition === 'T1'
-          ? 'Signalement validé !'
-          : transition === 'T2'
-          ? 'Signalement affecté à la brigade !'
-          : 'Signalement rejeté.'
-      );
+      const msgMap: Record<string, string> = {
+        T1: 'Signalement validé (En cours de validation) !',
+        T2: 'Signalement affecté à la brigade !',
+        T3: 'Intervention démarrée (En traitement) !',
+        T4: 'Signalement clôturé (Résolu) !',
+        T5: 'Signalement rejeté.',
+      };
+      setActionFeedback(msgMap[transition] || 'Statut mis à jour !');
       retry();
       setTimeout(() => setSelectedReport(null), 900);
     } catch {
@@ -189,6 +203,13 @@ function SupervisionMapView({ config }: { config: MapConfig }) {
     } finally {
       setActionBusy(false);
     }
+  };
+
+  const toggleLegendStatus = (status: MapReport['status']) => {
+    setFilters((prev) => ({
+      ...prev,
+      status: prev.status === status ? null : status,
+    }));
   };
 
   const handleAssignFromMap = async () => {
@@ -288,7 +309,10 @@ function SupervisionMapView({ config }: { config: MapConfig }) {
         onReset={() => setFilters(NO_FILTERS)}
         disabled={state.status !== 'ready'}
       />
-      <MapLegend />
+      <MapLegend
+        activeStatuses={filters.status !== null ? new Set([filters.status]) : new Set()}
+        onToggleStatus={toggleLegendStatus}
+      />
 
       {state.status === 'ready' && (
         <p aria-live="polite" className="text-xs text-[#475569] font-medium">
@@ -426,57 +450,86 @@ function SupervisionMapView({ config }: { config: MapConfig }) {
                       : 'Non analysé'}
                   </span>
                 </div>
+                {selectedReport.aiDescription && (
+                  <p className="rounded bg-purple-50 px-2.5 py-1.5 text-purple-950 font-medium">
+                    {selectedReport.aiDescription}
+                  </p>
+                )}
                 <p className="text-slate-600">
                   {selectedReport.aiJustification || 'Aucune justification IA enregistrée.'}
                 </p>
-              </div>
-
-              <div className="space-y-2 border-t border-slate-100 pt-3">
-                <label className="block font-semibold text-slate-700">Catégorie validée</label>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900"
-                >
-                  <option value="DEPOT_SAUVAGE">Dépôt sauvage</option>
-                  <option value="ENCOMBRANTS">Encombrants</option>
-                  <option value="DECHETS_DANGEREUX">Déchets dangereux</option>
-                  <option value="VEGETAUX">Déchets verts</option>
-                  <option value="GRAFFITI">Graffiti / Dégradation</option>
-                  <option value="DEBORDEMENT_BAC">Débordement de bac</option>
-                  <option value="AUTRE">Autre anomalie</option>
-                </select>
-              </div>
-
-              <div className="space-y-2 border-t border-slate-100 pt-3">
-                <label className="block font-semibold text-slate-700">Brigade & Agent d’affectation</label>
-                <select
-                  value={selectedBrigade}
-                  onChange={(e) => setSelectedBrigade(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900"
-                >
-                  <option value="Brigade Voirie & Salubrité">Brigade Voirie & Salubrité</option>
-                  <option value="Brigade Ramassage Poids Lourd">Brigade Ramassage Poids Lourd</option>
-                  <option value="Brigade Espaces Verts">Brigade Espaces Verts</option>
-                  <option value="Brigade Intervention Spéciale">Brigade Intervention Spéciale</option>
-                  <option value="Brigade Collecte Express">Brigade Collecte Express</option>
-                </select>
-                <select
-                  value={selectedWorker}
-                  onChange={(e) => setSelectedWorker(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900"
-                >
-                  {staffList.length === 0 ? (
-                    <option value="Chef de Brigade">Chef de Brigade (par défaut)</option>
-                  ) : (
-                    staffList.map((s) => (
-                      <option key={s.id} value={s.fullName}>
-                        {s.fullName} ({s.role})
-                      </option>
-                    ))
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <span className="rounded bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                    Statut : {STATUS_LABELS[selectedReport.status]}
+                  </span>
+                  {selectedReport.slaHours && (
+                    <span className="rounded bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+                      SLA IA : {selectedReport.slaHours}h · {selectedReport.priority || 'Élevée'}
+                    </span>
                   )}
-                </select>
+                </div>
               </div>
+
+              {(selectedReport.status === 'NOUVEAU' ||
+                selectedReport.status === 'EN_COURS_DE_VALIDATION' ||
+                selectedReport.status === 'VALIDE') && (
+                <>
+                  <div className="space-y-2 border-t border-slate-100 pt-3">
+                    <label className="block font-semibold text-slate-700">Catégorie validée</label>
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => {
+                        const cat = e.target.value;
+                        setSelectedCategory(cat);
+                        setSelectedBrigade(CATEGORY_DEFAULT_BRIGADE[cat] || 'Brigade Voirie & Salubrité');
+                      }}
+                      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900"
+                    >
+                      <option value="DEPOT_SAUVAGE">Dépôt sauvage</option>
+                      <option value="ENCOMBRANTS">Encombrants</option>
+                      <option value="DECHETS_DANGEREUX">Déchets dangereux</option>
+                      <option value="VEGETAUX">Déchets verts</option>
+                      <option value="GRAFFITI">Graffiti / Dégradation</option>
+                      <option value="DEBORDEMENT_BAC">Débordement de bac</option>
+                      <option value="AUTRE">Autre anomalie</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2 border-t border-slate-100 pt-3">
+                    <label className="block font-semibold text-slate-700">
+                      Brigade (pré-sélectionnée par l’IA) & Agent
+                    </label>
+                    <select
+                      value={selectedBrigade}
+                      onChange={(e) => setSelectedBrigade(e.target.value)}
+                      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900"
+                    >
+                      <option value="Brigade Voirie & Salubrité">Brigade Voirie & Salubrité</option>
+                      <option value="Brigade Ramassage Poids Lourd">Brigade Ramassage Poids Lourd</option>
+                      <option value="Brigade Espaces Verts">Brigade Espaces Verts</option>
+                      <option value="Brigade Voirie & Gravats">Brigade Voirie & Gravats</option>
+                      <option value="Brigade Peinture & Nettoyage">Brigade Peinture & Nettoyage</option>
+                      <option value="Brigade Intervention Spéciale">Brigade Intervention Spéciale</option>
+                      <option value="Brigade Collecte Express">Brigade Collecte Express</option>
+                    </select>
+                    <select
+                      value={selectedWorker}
+                      onChange={(e) => setSelectedWorker(e.target.value)}
+                      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900"
+                    >
+                      {staffList.length === 0 ? (
+                        <option value="Chef de Brigade">Chef de Brigade (par défaut)</option>
+                      ) : (
+                        staffList.map((s) => (
+                          <option key={s.id} value={s.fullName}>
+                            {s.fullName} ({s.role})
+                          </option>
+                        ))
+                      )}
+                    </select>
+                  </div>
+                </>
+              )}
 
               {actionFeedback && (
                 <p className="rounded-lg bg-slate-100 px-3 py-2 font-semibold text-slate-800">
@@ -484,50 +537,98 @@ function SupervisionMapView({ config }: { config: MapConfig }) {
                 </p>
               )}
 
-              <div className="grid grid-cols-2 gap-2 pt-2">
-                <button
-                  type="button"
-                  disabled={actionBusy}
-                  onClick={() =>
-                    void runTransition('T1', {
-                      categoryValidated: selectedCategory,
-                      reviewValidated: true,
-                    })
-                  }
-                  className="flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
-                >
-                  <CheckCircle2 className="h-4 w-4" />
-                  Valider
-                </button>
+              {selectedReport.status === 'NOUVEAU' && (
+                <div className="grid grid-cols-2 gap-2 pt-2">
+                  <button
+                    type="button"
+                    disabled={actionBusy}
+                    onClick={() =>
+                      void runTransition('T1', {
+                        categoryValidated: selectedCategory,
+                        reviewValidated: true,
+                      })
+                    }
+                    className="flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    Valider (T1)
+                  </button>
+                  <button
+                    type="button"
+                    disabled={actionBusy}
+                    onClick={() => void handleAssignFromMap()}
+                    className="flex items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    <UserCheck className="h-4 w-4" />
+                    Valider & Affecter
+                  </button>
+                </div>
+              )}
+
+              {(selectedReport.status === 'EN_COURS_DE_VALIDATION' || selectedReport.status === 'VALIDE') && (
                 <button
                   type="button"
                   disabled={actionBusy}
                   onClick={() => void handleAssignFromMap()}
-                  className="flex items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                  className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
                 >
                   <UserCheck className="h-4 w-4" />
-                  Valider & Affecter
+                  Affecter à la brigade (T2)
                 </button>
-              </div>
+              )}
 
-              <div className="border-t border-slate-100 pt-3 space-y-2">
-                <input
-                  type="text"
-                  value={rejectReason}
-                  onChange={(e) => setRejectReason(e.target.value)}
-                  placeholder="Motif du rejet..."
-                  className="w-full rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-900"
-                />
+              {selectedReport.status === 'ASSIGNE' && (
                 <button
                   type="button"
                   disabled={actionBusy}
-                  onClick={() => void runTransition('T_REJECT', { reason: rejectReason })}
-                  className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-50"
+                  onClick={() => void runTransition('T3')}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-amber-600 px-3 py-2 font-semibold text-white hover:bg-amber-700 disabled:opacity-50"
                 >
-                  <XCircle className="h-4 w-4" />
-                  Rejeter le signalement
+                  <CheckCircle2 className="h-4 w-4" />
+                  Démarrer le traitement (T3)
                 </button>
-              </div>
+              )}
+
+              {selectedReport.status === 'EN_TRAITEMENT' && (
+                <button
+                  type="button"
+                  disabled={actionBusy}
+                  onClick={() => void runTransition('T4')}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Clôturer / Marquer Résolu (T4)
+                </button>
+              )}
+
+              {(selectedReport.status === 'NOUVEAU' ||
+                selectedReport.status === 'EN_COURS_DE_VALIDATION' ||
+                selectedReport.status === 'VALIDE') && (
+                <div className="border-t border-slate-100 pt-3 space-y-2">
+                  <input
+                    type="text"
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    placeholder="Motif du rejet..."
+                    className="w-full rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-900"
+                  />
+                  <button
+                    type="button"
+                    disabled={actionBusy}
+                    onClick={() => void runTransition('T5', { reason: rejectReason })}
+                    className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-50"
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Rejeter le signalement (T5)
+                  </button>
+                </div>
+              )}
+
+              {(selectedReport.status === 'RESOLU' || selectedReport.status === 'REJETE') && (
+                <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-center font-semibold text-slate-600">
+                  Dossier clôturé ({STATUS_LABELS[selectedReport.status]}) — aucune action supplémentaire.
+                </p>
+              )}
             </div>
           </div>
         )}

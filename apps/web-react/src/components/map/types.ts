@@ -38,6 +38,9 @@ export interface MapReport {
   district?: string | null;
   aiConfidenceScore?: number | null;
   aiJustification?: string | null;
+  aiDescription?: string | null;
+  slaHours?: number | null;
+  priority?: string | null;
   assignedTeamId?: string | null;
   assignedWorkerId?: string | null;
 }
