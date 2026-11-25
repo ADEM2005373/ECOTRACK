@@ -7,6 +7,7 @@ import { loginController, getPublicKeyController } from '../controllers/login.co
 import { registerController } from '../controllers/register.controller';
 import { loginRateLimitMiddleware } from '../middlewares/rate-limit.middleware';
 import { UserRole, AuditAction } from '@ecotrack/shared';
+import { resolveMunicipalityTerritory } from '../services/geocoding.service';
 
 const router = Router();
 
@@ -301,6 +302,22 @@ const createUserHandler = async (req: Request, res: Response) => {
 
 router.post('/users', createUserHandler);
 router.post('/admin/create-user', createUserHandler);
+
+/**
+ * GET /auth/territory?name=Mairie+de+Zarzouna
+ * Analyse le nom de la mairie et retourne le territoire géocodé (centre, bbox, polygone)
+ */
+router.get('/territory', async (req: Request, res: Response) => {
+  const name = String(req.query.name || '').trim();
+  if (!name) {
+    return res.status(400).json({ error: 'VALIDATION_ERROR', message: 'Le paramètre name est requis.' });
+  }
+  const territory = await resolveMunicipalityTerritory(name);
+  if (!territory) {
+    return res.status(404).json({ error: 'NOT_FOUND', message: `Territoire introuvable pour "${name}".` });
+  }
+  return res.status(200).json({ territory });
+});
 
 /**
  * DELETE /auth/users/:id

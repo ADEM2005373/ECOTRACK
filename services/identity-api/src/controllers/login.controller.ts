@@ -44,6 +44,16 @@ export async function loginController(req: Request, res: Response): Promise<Resp
     // 4. Réinitialisation du limiteur en cas de succès
     loginRateLimiter.resetAttempts(rateLimitKey);
 
+    // 4b. Résolution automatique du territoire municipal si absent (comptes existants)
+    if (user.municipality && !(user as any).territory?.center?.length) {
+      try {
+        const territory = await userService.ensureUserTerritory(user.id);
+        if (territory) (user as any).territory = territory;
+      } catch {
+        // non bloquant
+      }
+    }
+
     // 5. Génération des tokens JWT RS256 (Access Token 15 min + Refresh Token)
     const authTokens = tokenService.generateAuthTokens(user);
 

@@ -41,6 +41,12 @@ export const UserSchema = new Schema<IUserDocument>(
       type: String,
       trim: true
     },
+    territory: {
+      center: { type: [Number], default: undefined },
+      bbox: { type: [Number], default: undefined },
+      displayName: { type: String, trim: true },
+      polygon: { type: [[Number]], default: undefined }
+    },
     role: {
       type: String,
       enum: Object.values(UserRole),

@@ -1,12 +1,20 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
+export interface MunicipalityTerritory {
+  center: [number, number];
+  bbox: [number, number, number, number];
+  displayName?: string;
+  polygon?: [number, number][];
+}
+
 export interface AuthUser {
   id: string;
   email: string;
   fullName: string;
   role: string;
   municipality?: string;
+  territory?: MunicipalityTerritory;
 }
 
 interface AuthState {

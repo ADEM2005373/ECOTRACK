@@ -1,8 +1,9 @@
-import { useMemo, useState, type ReactNode } from 'react';
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { MapContainer, Marker, Polygon, Popup, Rectangle, TileLayer, useMap } from 'react-leaflet';
+import { AlertTriangle, MapPin, RefreshCw } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import './supervisionMap.css';
+import { useAuth, type MunicipalityTerritory } from '../../store/authStore';
 import { Button } from '../ui/Button';
 import { readMapConfig, type MapConfig } from './config';
 import { FilterBar } from './FilterBar';
@@ -45,16 +46,80 @@ export function SupervisionMap() {
   return <SupervisionMapView config={configResult.config} />;
 }
 
+function TerritoryViewport({ territory }: { territory: MunicipalityTerritory }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (territory.bbox && territory.bbox.length === 4) {
+      const [south, north, west, east] = territory.bbox;
+      const bounds: [[number, number], [number, number]] = [
+        [south, west],
+        [north, east],
+      ];
+      map.fitBounds(bounds, { padding: [24, 24], maxZoom: 15 });
+      const padLat = Math.max(0.02, (north - south) * 0.45);
+      const padLng = Math.max(0.02, (east - west) * 0.45);
+      map.setMaxBounds([
+        [south - padLat, west - padLng],
+        [north + padLat, east + padLng],
+      ]);
+      map.setMinZoom(11);
+    } else if (territory.center && territory.center.length === 2) {
+      map.setView(territory.center, 14);
+      map.setMinZoom(11);
+    }
+  }, [map, territory]);
+
+  return null;
+}
+
+function isInsideTerritory(position: [number, number], territory?: MunicipalityTerritory): boolean {
+  if (!territory?.bbox || territory.bbox.length !== 4) return true;
+  const [south, north, west, east] = territory.bbox;
+  const [lat, lng] = position;
+  const tol = 0.015; // slight tolerance for border anomalies
+  return lat >= south - tol && lat <= north + tol && lng >= west - tol && lng <= east + tol;
+}
+
 function SupervisionMapView({ config }: { config: MapConfig }) {
   const { state, retry } = useReports(config.apiBaseUrl);
   const [filters, setFilters] = useState<ReportFilters>(NO_FILTERS);
 
+  let currentUser: ReturnType<typeof useAuth>['state']['user'] = null;
+  try {
+    currentUser = useAuth().state.user;
+  } catch {
+    // Isolated unit tests without AuthProvider
+  }
+
+  const isGlobalAdmin = currentUser?.role === 'ADMIN_SAAS' || currentUser?.role === 'ADMIN';
+  const scopedTerritory = !isGlobalAdmin && currentUser?.territory?.center?.length === 2
+    ? currentUser.territory
+    : undefined;
+
   const reports = state.status === 'ready' ? state.data.reports : NO_REPORTS;
-  const categories = useMemo(() => categoryOptions(reports), [reports]);
-  const visibleReports = useMemo(() => filterReports(reports, filters), [reports, filters]);
+  const territorialReports = useMemo(
+    () => (scopedTerritory ? reports.filter((r) => isInsideTerritory(r.position, scopedTerritory)) : reports),
+    [reports, scopedTerritory]
+  );
+  const categories = useMemo(() => categoryOptions(territorialReports), [territorialReports]);
+  const visibleReports = useMemo(() => filterReports(territorialReports, filters), [territorialReports, filters]);
+
+  const initialCenter = scopedTerritory?.center ?? CITY_CENTER;
+  const initialZoom = scopedTerritory ? 13 : INITIAL_ZOOM;
 
   return (
     <div className="space-y-4">
+      {scopedTerritory && (
+        <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/70 px-4 py-2.5 text-xs text-emerald-900">
+          <div className="flex items-center gap-2 font-semibold">
+            <MapPin className="h-4 w-4 text-emerald-600" />
+            <span>Territoire ciblé : {currentUser?.municipality || scopedTerritory.displayName}</span>
+          </div>
+          <span className="text-[11px] text-emerald-700">{scopedTerritory.displayName}</span>
+        </div>
+      )}
+
       <FilterBar
         categories={categories}
         filters={filters}
@@ -66,7 +131,7 @@ function SupervisionMapView({ config }: { config: MapConfig }) {
 
       {state.status === 'ready' && (
         <p aria-live="polite" className="text-xs text-[#475569] font-medium">
-          {MAP_STRINGS.shownCount(visibleReports.length, reports.length)}
+          {MAP_STRINGS.shownCount(visibleReports.length, territorialReports.length)}
           {state.data.skipped > 0 && ` · ${MAP_STRINGS.skippedCount(state.data.skipped)}`}
         </p>
       )}
@@ -75,8 +140,24 @@ function SupervisionMapView({ config }: { config: MapConfig }) {
         aria-label={MAP_STRINGS.mapRegionLabel}
         className="relative h-[70vh] min-h-[420px] overflow-hidden rounded-xl border border-[#e2e8f0] shadow-sm"
       >
-        <MapContainer center={CITY_CENTER} zoom={INITIAL_ZOOM} className="h-full w-full">
+        <MapContainer center={initialCenter} zoom={initialZoom} className="h-full w-full">
           <TileLayer url={config.tileUrl} attribution={OSM_ATTRIBUTION} />
+          {scopedTerritory && <TerritoryViewport territory={scopedTerritory} />}
+          {scopedTerritory?.polygon && scopedTerritory.polygon.length >= 3 && (
+            <Polygon
+              positions={scopedTerritory.polygon}
+              pathOptions={{ color: '#059669', weight: 2.5, fillColor: '#10b981', fillOpacity: 0.08, dashArray: '6 4' }}
+            />
+          )}
+          {!scopedTerritory?.polygon && scopedTerritory?.bbox && scopedTerritory.bbox.length === 4 && (
+            <Rectangle
+              bounds={[
+                [scopedTerritory.bbox[0], scopedTerritory.bbox[2]],
+                [scopedTerritory.bbox[1], scopedTerritory.bbox[3]],
+              ]}
+              pathOptions={{ color: '#059669', weight: 2.5, fillColor: '#10b981', fillOpacity: 0.08, dashArray: '6 4' }}
+            />
+          )}
           {visibleReports.map((report) => (
             <Marker
               key={report.id}

@@ -1,15 +1,31 @@
 import { UserModel, IUserDocument } from '@ecotrack/db';
 import { CreateUserDto, UserRole, IUser } from '@ecotrack/shared';
 import { verifyPassword } from '../utils/hashing';
+import { resolveMunicipalityTerritory } from './geocoding.service';
 
 export class UserService {
   /**
-   * Crée un nouvel utilisateur avec validation et hachage Argon2id automatique
+   * Crée un nouvel utilisateur avec validation, hachage Argon2id et résolution du territoire municipal
    */
-  async createUser(dto: CreateUserDto): Promise<IUser> {
+  async createUser(dto: CreateUserDto & { territory?: any }): Promise<IUser> {
     const existing = await UserModel.findOne({ email: dto.email.toLowerCase().trim() });
     if (existing) {
       throw new Error(`Un compte existe déjà avec l'adresse e-mail: ${dto.email}`);
+    }
+
+    let territory = dto.territory;
+    if (!territory && dto.municipality) {
+      // Réutiliser le territoire déjà résolu pour cette municipalité si disponible
+      const sameMairie = await UserModel.findOne({
+        municipality: dto.municipality.trim(),
+        'territory.center': { $exists: true, $ne: [] }
+      }).select('territory');
+
+      if (sameMairie?.territory?.center?.length) {
+        territory = sameMairie.territory;
+      } else {
+        territory = (await resolveMunicipalityTerritory(dto.municipality)) ?? undefined;
+      }
     }
 
     const user = new UserModel({
@@ -18,12 +34,29 @@ export class UserService {
       fullName: dto.fullName,
       phoneNumber: dto.phoneNumber,
       municipality: dto.municipality,
+      ...(territory ? { territory } : {}),
       role: dto.role || UserRole.CITOYEN,
       isActive: true
     });
 
     await user.save();
     return user.toJSON() as IUser;
+  }
+
+  /**
+   * S'assure qu'un utilisateur rattaché à une municipalité dispose bien de son territoire géolocalisé
+   */
+  async ensureUserTerritory(userId: string): Promise<any> {
+    const user = await UserModel.findById(userId);
+    if (!user || !user.municipality) return null;
+    if (user.territory?.center?.length === 2) return user.territory;
+
+    const resolved = await resolveMunicipalityTerritory(user.municipality);
+    if (resolved) {
+      user.territory = resolved;
+      await user.save();
+    }
+    return resolved;
   }
 
   /**

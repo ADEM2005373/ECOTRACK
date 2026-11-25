@@ -16,6 +16,13 @@ export enum UserRole {
   OUVRIER = 'OUVRIER'
 }
 
+export interface IMunicipalityTerritory {
+  center: [number, number];
+  bbox: [number, number, number, number];
+  displayName?: string;
+  polygon?: [number, number][];
+}
+
 export interface IUser {
   id: string;
   email: string;
@@ -23,6 +30,7 @@ export interface IUser {
   phoneNumber?: string;
   role: UserRole;
   municipality?: string; // Mairie ou collectivité de rattachement
+  territory?: IMunicipalityTerritory;
   isActive: boolean;
   lastLogin?: Date;
   createdAt: Date;
