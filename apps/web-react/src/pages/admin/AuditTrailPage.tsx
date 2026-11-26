@@ -62,7 +62,8 @@ export const AuditTrailPage: React.FC = () => {
       const response = await fetch(`/api/v1/audit/logs?${queryParams.toString()}`, {
         headers: {
           'x-user-role': user?.role || 'ADMIN_SAAS',
-          'x-user-municipality': municipality,
+          // Only a municipal admin is scoped to a territory; the SaaS admin sees the global audit.
+          ...(isMaire && municipality ? { 'x-user-municipality': municipality } : {}),
         },
       });
       if (!response.ok) {

@@ -24,7 +24,7 @@ export class AuditController {
       // Isolation territoriale stricte : un administrateur municipal ne peut voir que les traces de sa collectivité
       const effectiveMunicipality = userRole === 'ADMIN_MUNICIPALITE'
         ? (callerMunicipality || requestedMunicipality)
-        : (requestedMunicipality || callerMunicipality);
+        : requestedMunicipality; // Global roles (ADMIN_SAAS/ADMIN) only filter when explicitly asked
 
       const filters: AuditQueryFilters = {
         actorId: req.query.actorId as string,
