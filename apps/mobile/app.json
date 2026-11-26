@@ -7,11 +7,6 @@
     "scheme": "ecotrack",
     "userInterfaceStyle": "light",
     "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#064E3B"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ecotrack.mobile"
@@ -40,7 +35,15 @@
           "locationAlwaysAndWhenInUsePermission": "EcoTrack utilise votre position pour trier les interventions proches."
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#064E3B"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
