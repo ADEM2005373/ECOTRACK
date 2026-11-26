@@ -84,6 +84,32 @@ describe('QualificationPage (ECO-31 / SCRUM-51 - Real Data & Dual Mode)', () => 
     expect(deleteBtns.length).toBeGreaterThan(0);
   });
 
+  it('shows brigade-resolved reports as "Résolu" (never "En attente de validation") and blocks re-assignment', async () => {
+    const resolved = [
+      { ...MOCK_REPORTS[0], _id: 'r1', reference: 'REP-2026-0101', status: 'RESOLU' },
+      { ...MOCK_REPORTS[0], _id: 'r2', reference: 'REP-2026-0102', status: 'EN_TRAITEMENT' },
+    ];
+    (global.fetch as any).mockImplementation((url: string) =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(url.includes('/api/v1/reports') ? { reports: resolved } : { users: MOCK_USERS }),
+      })
+    );
+
+    render(<QualificationPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('REP-2026-0101')).toBeDefined();
+    });
+    expect(screen.getAllByText('Résolu').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('En traitement').length).toBeGreaterThan(0);
+    // Only the filter <option> may carry this label, not a row badge
+    expect(screen.queryAllByText('En attente de validation').filter((el) => el.tagName !== 'OPTION')).toHaveLength(1); // KPI card title
+    for (const btn of screen.getAllByText('Assigner')) {
+      expect((btn.closest('button') as HTMLButtonElement).disabled).toBe(true);
+    }
+  });
+
   it('switches to AI Consultation view when clicking "Consulter", validates and returns to list with "Validé" status', async () => {
     render(<QualificationPage />);
 

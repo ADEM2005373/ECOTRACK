@@ -25,7 +25,8 @@ import {
   MapPin,
   Calendar,
   Layers,
-  Sparkles
+  Sparkles,
+  Wrench
 } from 'lucide-react';
 import { AnomalyCard, AnomalyReportData } from '../../components/moderation/AnomalyCard';
 import { FigmaSidebar } from '../../components/layout/FigmaSidebar';
@@ -100,7 +101,7 @@ export const QualificationPage: React.FC = () => {
 
   // Filtres et recherche pour la vue Liste
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'EN_ATTENTE' | 'VALIDE' | 'ASSIGNE' | 'REJETE'>('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'EN_ATTENTE' | 'VALIDE' | 'ASSIGNE' | 'EN_TRAITEMENT' | 'RESOLU' | 'REJETE'>('ALL');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
 
   // Modale de modification de catégorie (Override)
@@ -514,6 +515,10 @@ export const QualificationPage: React.FC = () => {
   const isCurrentValidated = report?.status === 'VALIDE';
   const isCurrentAssigned = report?.status === 'ASSIGNE';
   const isCurrentRejected = report?.status === 'REJETE';
+  // EN_TRAITEMENT / RESOLU: the brigade owns the report; the workflow (T1/T2/T5) refuses any qualification change.
+  const isCurrentInBrigade = report?.status === 'EN_TRAITEMENT' || report?.status === 'RESOLU';
+  // Mirrors workflow T2 "from" states (EN_COURS_DE_VALIDATION is shown as VALIDE here).
+  const canAssign = (status: string) => status === 'NOUVEAU' || status === 'VALIDE';
 
   // Filtrage des réclamations dans la vue Liste
   const filteredQueue = queue.filter((item) => {
@@ -533,8 +538,8 @@ export const QualificationPage: React.FC = () => {
       if (item.report.status !== 'VALIDE') return false;
     } else if (statusFilter === 'ASSIGNE') {
       if (item.report.status !== 'ASSIGNE') return false;
-    } else if (statusFilter === 'REJETE') {
-      if (item.report.status !== 'REJETE') return false;
+    } else if (statusFilter !== 'ALL') {
+      if (item.report.status !== statusFilter) return false;
     }
 
     if (categoryFilter !== 'ALL') {
@@ -576,11 +581,35 @@ export const QualificationPage: React.FC = () => {
         </span>
       );
     }
+    if (status === 'EN_TRAITEMENT') {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 whitespace-nowrap shadow-sm">
+          <Wrench className="w-3.5 h-3.5" />
+          En traitement
+        </span>
+      );
+    }
+    if (status === 'RESOLU') {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-600 text-white border border-emerald-700 whitespace-nowrap shadow-sm">
+          <CheckCircle2 className="w-3.5 h-3.5" />
+          Résolu
+        </span>
+      );
+    }
     if (status === 'REJETE') {
       return (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 whitespace-nowrap shadow-sm">
           <XCircle className="w-3.5 h-3.5" />
           Rejeté
+        </span>
+      );
+    }
+    if (status !== 'NOUVEAU') {
+      // Never disguise an unexpected status as "pending": show it as-is.
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap shadow-sm">
+          {status}
         </span>
       );
     }
@@ -762,6 +791,8 @@ export const QualificationPage: React.FC = () => {
                   <option value="EN_ATTENTE">En attente de validation</option>
                   <option value="VALIDE">Validé</option>
                   <option value="ASSIGNE">Assigné</option>
+                  <option value="EN_TRAITEMENT">En traitement</option>
+                  <option value="RESOLU">Résolu</option>
                   <option value="REJETE">Rejeté</option>
                 </select>
 
@@ -922,8 +953,9 @@ export const QualificationPage: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleOpenAssignModal(rawIndex)}
-                                  className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-[#059669] text-[#059669] hover:text-white border border-emerald-200 font-semibold text-xs transition flex items-center gap-1 shadow-sm"
-                                  title="Assigner à une brigade"
+                                  disabled={!canAssign(item.report.status)}
+                                  className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-[#059669] text-[#059669] hover:text-white border border-emerald-200 font-semibold text-xs transition flex items-center gap-1 shadow-sm disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-emerald-50 disabled:hover:text-[#059669]"
+                                  title={canAssign(item.report.status) ? 'Assigner à une brigade' : 'Affectation impossible à ce stade du workflow'}
                                 >
                                   <UserCheck className="w-3.5 h-3.5" />
                                   <span>Assigner</span>
@@ -1127,7 +1159,7 @@ export const QualificationPage: React.FC = () => {
 
                   {/* Boutons d'Action / Décision d'arbitrage */}
                   <div className="bg-white border border-[#e2e8f0] rounded-[14px] p-5 shadow-sm space-y-3">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <fieldset disabled={isCurrentInBrigade} className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 disabled:opacity-40 disabled:pointer-events-none">
                       {/* Bouton Vert : Valider */}
                       <button
                         type="button"
@@ -1157,11 +1189,21 @@ export const QualificationPage: React.FC = () => {
                         <XCircle className="w-4 h-4" />
                         <span>Rejeter l'anomalie</span>
                       </button>
-                    </div>
+                    </fieldset>
 
                     {/* Section Dispatching & Transition suivante */}
                     <div className="pt-2 border-t border-[#e2e8f0] space-y-2.5">
-                      {isCurrentValidated || isCurrentAssigned ? (
+                      {isCurrentInBrigade ? (
+                        <div className={`p-3 rounded-lg border text-xs ${report?.status === 'RESOLU' ? 'bg-emerald-50 border-emerald-200 text-[#047857]' : 'bg-indigo-50 border-indigo-200 text-indigo-700'}`}>
+                          <span className="font-semibold flex items-center gap-1.5">
+                            {report?.status === 'RESOLU' ? <CheckCircle2 className="w-4 h-4" /> : <Wrench className="w-4 h-4" />}
+                            {report?.status === 'RESOLU' ? 'Intervention terminée — signalement résolu (T4)' : 'Intervention en cours par la brigade (T3)'}
+                          </span>
+                          <p className="text-xs mt-1 opacity-90">
+                            Brigade : <strong>{queue[currentIndex]?.assignedBrigade || targetBrigade}</strong>. La qualification est verrouillée à ce stade du workflow.
+                          </p>
+                        </div>
+                      ) : isCurrentValidated || isCurrentAssigned ? (
                         <>
                           <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs">
                             <div className="flex items-center justify-between">
