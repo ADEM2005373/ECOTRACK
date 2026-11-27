@@ -195,7 +195,7 @@ export const AgentMairieDashboard: React.FC = () => {
 
   // 1b. Alertes terrain (Renfort & Pannes Matériel remontées par les chefs ouvriers)
   const [fieldAlerts, setFieldAlerts] = useState<any[]>([]);
-  const [showStaffPanel, setShowStaffPanel] = useState(false);
+  const [showStaffPanel, setShowStaffPanel] = useState(true);
 
   const fetchFieldAlerts = async () => {
     try {
@@ -286,6 +286,11 @@ export const AgentMairieDashboard: React.FC = () => {
     void fetchStaff();
     void fetchReports();
     void fetchFieldAlerts();
+    const timer = setInterval(() => {
+      void fetchStaff();
+      void fetchFieldAlerts();
+    }, 15000);
+    return () => clearInterval(timer);
   }, []);
 
   // Déclencheur d'affectation avec auto-routing intelligent
@@ -640,23 +645,27 @@ export const AgentMairieDashboard: React.FC = () => {
       </div>
 
       {/* ── 3b. ALERTES TERRAIN (RENFORT & PANNES) ───────── */}
-      {fieldAlerts.length > 0 && (
-        <div className="bg-rose-50/70 border border-rose-200 rounded-[10px] p-4 space-y-2.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-bold text-rose-900">
-              <AlertTriangle className="w-4 h-4 text-rose-600" />
-              <span>Alertes Terrain en Cours : Renfort &amp; Pannes ({fieldAlerts.length})</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => void fetchFieldAlerts()}
-              className="text-xs font-semibold text-rose-700 hover:underline"
-            >
-              Actualiser
-            </button>
+      <div className="bg-rose-50/60 border border-rose-200 rounded-[10px] p-4 space-y-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs font-bold text-rose-900">
+            <AlertTriangle className="w-4 h-4 text-rose-600" />
+            <span>Espace Alertes Brigades : Renfort &amp; Pannes ({fieldAlerts.length})</span>
           </div>
+          <button
+            type="button"
+            onClick={() => void fetchFieldAlerts()}
+            className="text-xs font-semibold text-rose-700 hover:underline"
+          >
+            Actualiser
+          </button>
+        </div>
+        {fieldAlerts.length === 0 ? (
+          <p className="text-xs text-[#64748b] bg-white/70 border border-rose-100 rounded-[8px] px-3 py-2">
+            Aucune alerte de renfort ou de panne signalée par les brigades pour le moment.
+          </p>
+        ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-            {fieldAlerts.slice(0, 4).map((al: any, idx: number) => {
+            {fieldAlerts.slice(0, 6).map((al: any, idx: number) => {
               const isBreakdown = al.action === 'EQUIPMENT_BREAKDOWN_REPORTED';
               return (
                 <div key={al.id || idx} className="bg-white border border-rose-200 rounded-[8px] p-3 text-xs space-y-1">
@@ -678,8 +687,8 @@ export const AgentMairieDashboard: React.FC = () => {
               );
             })}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* ── 3c. LISTE DES AGENTS & CHEFS DE BRIGADE (ACTIFS / INACTIFS) ───────── */}
       {showStaffPanel && (

@@ -272,6 +272,11 @@ export const AdminMairieDashboard: React.FC = () => {
     fetchMunicipalReports();
     fetchAuditLogs();
     fetchFieldAlerts();
+    const timer = setInterval(() => {
+      fetchAgents();
+      fetchFieldAlerts();
+    }, 15000);
+    return () => clearInterval(timer);
   }, [municipality]);
 
   const [reportSearch, setReportSearch] = useState('');
@@ -560,7 +565,7 @@ export const AdminMairieDashboard: React.FC = () => {
           <PeriodFilterBar
             preset={periodPreset}
             onPresetChange={setPeriodPreset}
-            onRefresh={() => { fetchAgents(); }}
+            onRefresh={() => { fetchAgents(); fetchMunicipalReports(); fetchFieldAlerts(); }}
           />
         </div>
         <div className="flex flex-wrap items-center gap-2 shrink-0">
