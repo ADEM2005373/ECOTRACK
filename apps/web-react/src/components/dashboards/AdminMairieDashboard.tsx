@@ -1070,7 +1070,6 @@ export const AdminMairieDashboard: React.FC = () => {
                   >
                     <option value="AGENT_MAIRIE">Agent Mairie (Traitement Bureautique &amp; Dispatching)</option>
                     <option value="CHEF_OUVRIER">Chef Ouvrier (Terrain / Responsable Brigade)</option>
-                    <option value="OUVRIER">Ouvrier Technique (Équipe de Terrain)</option>
                   </select>
                 </div>
 
