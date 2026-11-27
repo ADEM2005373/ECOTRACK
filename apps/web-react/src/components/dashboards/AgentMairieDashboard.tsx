@@ -199,7 +199,7 @@ export const AgentMairieDashboard: React.FC = () => {
 
   const fetchFieldAlerts = async () => {
     try {
-      const res = await fetch('/api/v1/audit/logs?action=EQUIPMENT_BREAKDOWN_REPORTED,FIELD_ISSUE_REPORTED&limit=30', {
+      const res = await fetch(`/api/v1/audit/field-alerts?municipality=${encodeURIComponent(municipality)}&limit=30`, {
         headers: {
           'x-user-role': 'AGENT_MAIRIE',
           'x-user-municipality': municipality,
@@ -208,13 +208,7 @@ export const AgentMairieDashboard: React.FC = () => {
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data.logs)) {
-          const munLower = municipality.toLowerCase();
-          const filtered = data.logs.filter((l: any) => {
-            const logMun = l.after?.municipality;
-            if (!logMun) return true;
-            return logMun.toLowerCase().includes(munLower) || munLower.includes(logMun.toLowerCase());
-          });
-          setFieldAlerts(filtered);
+          setFieldAlerts(data.logs);
         }
       }
     } catch {
@@ -291,7 +285,7 @@ export const AgentMairieDashboard: React.FC = () => {
       void fetchFieldAlerts();
     }, 15000);
     return () => clearInterval(timer);
-  }, []);
+  }, [municipality]);
 
   // Déclencheur d'affectation avec auto-routing intelligent
   const openAssignModal = (incident: ReportItem) => {

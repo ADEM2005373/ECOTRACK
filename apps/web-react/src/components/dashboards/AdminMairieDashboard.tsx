@@ -246,7 +246,7 @@ export const AdminMairieDashboard: React.FC = () => {
   const [fieldAlerts, setFieldAlerts] = useState<any[]>([]);
 
   const fetchFieldAlerts = () => {
-    fetch('/api/v1/audit/logs?action=EQUIPMENT_BREAKDOWN_REPORTED,FIELD_ISSUE_REPORTED&limit=30', {
+    fetch(`/api/v1/audit/field-alerts?municipality=${encodeURIComponent(municipality)}&limit=30`, {
       headers: {
         'x-user-role': 'ADMIN_MUNICIPALITE',
         'x-user-municipality': municipality,
@@ -255,13 +255,7 @@ export const AdminMairieDashboard: React.FC = () => {
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data.logs)) {
-          const munLower = municipality.toLowerCase();
-          const filtered = data.logs.filter((l: any) => {
-            const logMun = l.after?.municipality;
-            if (!logMun) return true;
-            return logMun.toLowerCase().includes(munLower) || munLower.includes(logMun.toLowerCase());
-          });
-          setFieldAlerts(filtered);
+          setFieldAlerts(data.logs);
         }
       })
       .catch(() => {});

@@ -6,6 +6,9 @@ const router = Router();
 // Route sécurisée pour les administrateurs
 router.get('/logs', (req, res) => auditController.getLogs(req, res));
 
+// Alertes terrain (renfort & pannes) pour Agent Mairie et Admin Mairie
+router.get('/field-alerts', (req, res) => auditController.getFieldAlerts(req, res));
+
 // Ingestion d'événements d'audit
 router.post('/log', (req, res) => auditController.createLog(req, res));
 

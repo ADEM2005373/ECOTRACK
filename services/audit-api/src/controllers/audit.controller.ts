@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { auditService } from '../services/audit.service';
+import { AuditLogModel } from '@ecotrack/db';
 import { UserRole, AuditQueryFilters } from '@ecotrack/shared';
 
 export class AuditController {
@@ -40,6 +41,36 @@ export class AuditController {
 
       const result = await auditService.queryLogs(filters);
       return res.status(200).json(result);
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * GET /api/v1/audit/field-alerts
+   * Récupère les alertes terrain (renfort et pannes matériel) pour l'Agent Mairie et l'Admin Mairie
+   */
+  async getFieldAlerts(req: Request, res: Response) {
+    try {
+      const limit = Math.min(100, Math.max(1, parseInt(String(req.query.limit || '30'), 10) || 30));
+      const requestedMun = String(req.query.municipality || req.headers['x-user-municipality'] || '').trim().toLowerCase();
+
+      const docs = await AuditLogModel.find({
+        action: { $in: ['EQUIPMENT_BREAKDOWN_REPORTED', 'FIELD_ISSUE_REPORTED'] }
+      })
+        .sort({ timestamp: -1 })
+        .limit(limit);
+
+      const logs = docs
+        .map(d => d.toJSON() as any)
+        .filter(l => {
+          if (!requestedMun) return true;
+          const logMun = String(l.after?.municipality || '').trim().toLowerCase();
+          if (!logMun) return true; // Inclure les alertes mobiles sans champ municipality explicite
+          return logMun.includes(requestedMun) || requestedMun.includes(logMun);
+        });
+
+      return res.status(200).json({ logs, total: logs.length });
     } catch (error: any) {
       return res.status(500).json({ error: error.message });
     }
