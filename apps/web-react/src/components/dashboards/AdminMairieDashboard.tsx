@@ -120,14 +120,35 @@ export const AdminMairieDashboard: React.FC = () => {
   };
 
   // 2. Catégories & Seuils SLA locaux (Figma: WEB_ADM_02_CATEGORIES)
-  const [categories, setCategories] = useState<SlaCategory[]>([
+  const DEFAULT_SLA_CATEGORIES: SlaCategory[] = [
     { slug: 'DEPOT_SAUVAGE', label: 'Dépôts sauvages', defaultSeverity: 'Élevée', slaHours: 24, brigade: 'Voirie & Salubrité' },
     { slug: 'ENCOMBRANTS', label: 'Objets encombrants', defaultSeverity: 'Moyenne', slaHours: 48, brigade: 'Ramassage Poids Lourd' },
     { slug: 'DECHETS_DANGEREUX', label: 'Déchets dangereux ou toxiques', defaultSeverity: 'Critique', slaHours: 12, brigade: 'Intervention Spéciale' },
     { slug: 'GRAFFITI', label: 'Dégradations & Graffitis', defaultSeverity: 'Faible', slaHours: 72, brigade: 'Peinture & Nettoyage' },
     { slug: 'DEBORDEMENT_BAC', label: 'Débordement de bacs à ordures', defaultSeverity: 'Élevée', slaHours: 24, brigade: 'Collecte Express' },
     { slug: 'DECHETS_VERTS', label: 'Déchets végétaux & Élagage', defaultSeverity: 'Moyenne', slaHours: 48, brigade: 'Espaces Verts' },
-  ]);
+  ];
+
+  const [categories, setCategories] = useState<SlaCategory[]>(() => {
+    try {
+      const saved = localStorage.getItem(`ecotrack_sla_${municipality}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {
+      // ignore invalid localStorage data
+    }
+    return DEFAULT_SLA_CATEGORIES;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(`ecotrack_sla_${municipality}`, JSON.stringify(categories));
+    } catch {
+      // ignore storage quota errors
+    }
+  }, [categories, municipality]);
 
   // 3. Réclamations et signalements municipaux (chargés depuis la base MongoDB)
   const [reports, setReports] = useState<MunicipalReport[]>([]);
@@ -211,8 +232,9 @@ export const AdminMairieDashboard: React.FC = () => {
   const [newUserRole, setNewUserRole] = useState('AGENT_MAIRIE');
   const [newUserBrigade, setNewUserBrigade] = useState('Voirie & Salubrité');
 
-  // Modal d'édition SLA
+  // Modal de création / édition SLA
   const [editingCategory, setEditingCategory] = useState<SlaCategory | null>(null);
+  const [isCreatingSla, setIsCreatingSla] = useState(false);
 
   // Modal d'assignation de signalement
   const [assigningReport, setAssigningReport] = useState<MunicipalReport | null>(null);
@@ -309,15 +331,47 @@ export const AdminMairieDashboard: React.FC = () => {
     }
   };
 
-  // Mise à jour SLA d'une catégorie
+  // Création ou mise à jour d'une catégorie SLA
   const handleSaveSla = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingCategory) return;
-    setCategories(prev =>
-      prev.map(c => c.slug === editingCategory.slug ? editingCategory : c)
-    );
-    showToast(`Seuil SLA de « ${editingCategory.label} » mis à jour (${editingCategory.slaHours}h)`);
+    const cleanLabel = editingCategory.label.trim();
+    const cleanBrigade = editingCategory.brigade.trim();
+    if (!cleanLabel || !cleanBrigade) return;
+
+    if (isCreatingSla) {
+      const baseSlug = cleanLabel
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase()
+        .replace(/[^A-Z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '') || 'CATEGORIE_SLA';
+      const uniqueSlug = categories.some(c => c.slug === baseSlug)
+        ? `${baseSlug}_${Date.now().toString().slice(-4)}`
+        : baseSlug;
+      const newCategory: SlaCategory = {
+        ...editingCategory,
+        slug: uniqueSlug,
+        label: cleanLabel,
+        brigade: cleanBrigade,
+      };
+      setCategories(prev => [...prev, newCategory]);
+      showToast(`Catégorie SLA « ${cleanLabel} » créée (${editingCategory.slaHours}h)`);
+    } else {
+      setCategories(prev =>
+        prev.map(c => c.slug === editingCategory.slug ? { ...editingCategory, label: cleanLabel, brigade: cleanBrigade } : c)
+      );
+      showToast(`Catégorie SLA « ${cleanLabel} » mise à jour (${editingCategory.slaHours}h)`);
+    }
     setEditingCategory(null);
+    setIsCreatingSla(false);
+  };
+
+  // Suppression d'une catégorie SLA
+  const handleDeleteSla = (cat: SlaCategory) => {
+    if (!window.confirm(`Supprimer la catégorie SLA « ${cat.label} » ?`)) return;
+    setCategories(prev => prev.filter(c => c.slug !== cat.slug));
+    showToast(`Catégorie SLA « ${cat.label} » supprimée`);
   };
 
   // Assignation d'un signalement à un chef ouvrier
@@ -848,11 +902,27 @@ export const AdminMairieDashboard: React.FC = () => {
       {/* ================= ONGLET 4 : CATÉGORIES & SLA (Figma: WEB_ADM_02_CATEGORIES) ================= */}
       {activeTab === 'categories' && (
         <div className="bg-white border border-[#e2e8f0] rounded-[12px] shadow-sm overflow-hidden p-6 space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h3 className="text-base font-bold text-[#0f172a]">Configuration des Catégories & Délais Légaux (SLA)</h3>
-              <p className="text-xs text-[#475569]">Ajustez les délais d'intervention maximaux et les brigades responsables pour {municipality}.</p>
+              <p className="text-xs text-[#475569]">Créez, modifiez ou supprimez les catégories d'anomalies, leurs délais maximaux et brigades responsables pour {municipality}.</p>
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                setIsCreatingSla(true);
+                setEditingCategory({
+                  slug: '',
+                  label: '',
+                  defaultSeverity: 'Moyenne',
+                  slaHours: 24,
+                  brigade: 'Voirie & Salubrité',
+                });
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[8px] text-xs font-semibold bg-[#059669] hover:bg-[#047857] text-white shadow-sm transition shrink-0"
+            >
+              + Ajouter une catégorie SLA
+            </button>
           </div>
 
           <div className="border border-[#e2e8f0] rounded-[8px] overflow-hidden">
@@ -867,30 +937,51 @@ export const AdminMairieDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#e2e8f0]">
-                {categories.map((c) => (
-                  <tr key={c.slug} className="hover:bg-[#f8fafc] h-[52px]">
-                    <td className="py-2.5 px-4 font-semibold text-[#0f172a]">{c.label}</td>
-                    <td className="py-2.5 px-4">
-                      <span className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
-                        c.defaultSeverity === 'Critique' ? 'bg-rose-50 text-rose-700 border border-rose-200' :
-                        c.defaultSeverity === 'Élevée' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                        'bg-slate-100 text-slate-700'
-                      }`}>
-                        {c.defaultSeverity}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-4 font-bold text-[#059669]">{c.slaHours} heures</td>
-                    <td className="py-2.5 px-4 text-[#475569]">{c.brigade}</td>
-                    <td className="py-2.5 px-4 text-right">
-                      <button
-                        onClick={() => setEditingCategory(c)}
-                        className="px-2.5 py-1 text-xs font-semibold text-[#1e3a8a] bg-[#eff6ff] hover:bg-[#dbeafe] rounded-[6px] border border-[#bfdbfe] transition"
-                      >
-                        Ajuster SLA
-                      </button>
+                {categories.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-8 px-4 text-center text-xs text-[#64748b]">
+                      Aucune catégorie SLA configurée. Cliquez sur « + Ajouter une catégorie SLA » pour en créer une.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  categories.map((c) => (
+                    <tr key={c.slug} className="hover:bg-[#f8fafc] h-[52px]">
+                      <td className="py-2.5 px-4 font-semibold text-[#0f172a]">{c.label}</td>
+                      <td className="py-2.5 px-4">
+                        <span className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
+                          c.defaultSeverity === 'Critique' ? 'bg-rose-50 text-rose-700 border border-rose-200' :
+                          c.defaultSeverity === 'Élevée' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                          'bg-slate-100 text-slate-700'
+                        }`}>
+                          {c.defaultSeverity}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-4 font-bold text-[#059669]">{c.slaHours} heures</td>
+                      <td className="py-2.5 px-4 text-[#475569]">{c.brigade}</td>
+                      <td className="py-2.5 px-4 text-right">
+                        <div className="inline-flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsCreatingSla(false);
+                              setEditingCategory({ ...c });
+                            }}
+                            className="px-2.5 py-1 text-xs font-semibold text-[#1e3a8a] bg-[#eff6ff] hover:bg-[#dbeafe] rounded-[6px] border border-[#bfdbfe] transition"
+                          >
+                            Modifier
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteSla(c)}
+                            className="px-2.5 py-1 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-[6px] border border-rose-200 transition"
+                          >
+                            Supprimer
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -1140,25 +1231,50 @@ export const AdminMairieDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Modal 2: Ajustement Seuil SLA */}
+      {/* Modal 2: Création / Modification Catégorie SLA */}
       {editingCategory && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white border border-[#e2e8f0] rounded-[12px] p-6 max-w-md w-full shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-3">
               <div>
-                <h3 className="text-base font-bold text-[#0f172a]">Ajustement du Seuil SLA</h3>
-                <p className="text-xs text-[#64748b]">{editingCategory.label}</p>
+                <h3 className="text-base font-bold text-[#0f172a]">
+                  {isCreatingSla ? 'Nouvelle Catégorie SLA' : 'Modifier la Catégorie SLA'}
+                </h3>
+                <p className="text-xs text-[#64748b]">
+                  {isCreatingSla ? `Définir un nouveau délai légal pour ${municipality}` : editingCategory.label}
+                </p>
               </div>
-              <button onClick={() => setEditingCategory(null)} className="text-[#94a3b8] hover:text-[#0f172a]">✕</button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingCategory(null);
+                  setIsCreatingSla(false);
+                }}
+                className="text-[#94a3b8] hover:text-[#0f172a]"
+              >
+                ✕
+              </button>
             </div>
 
             <form onSubmit={handleSaveSla} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-[#0f172a] mb-1">Nom de la catégorie (Type d'anomalie)</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ex : Éclairage public défectueux"
+                  value={editingCategory.label}
+                  onChange={e => setEditingCategory({ ...editingCategory, label: e.target.value })}
+                  className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
+                />
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-[#0f172a] mb-1">Délai Max d'Intervention (Heures)</label>
                 <input
                   type="number"
                   min={1}
-                  max={168}
+                  max={720}
                   required
                   value={editingCategory.slaHours}
                   onChange={e => setEditingCategory({ ...editingCategory, slaHours: parseInt(e.target.value) || 24 })}
@@ -1186,6 +1302,7 @@ export const AdminMairieDashboard: React.FC = () => {
                 <input
                   type="text"
                   required
+                  placeholder="Ex : Voirie & Salubrité"
                   value={editingCategory.brigade}
                   onChange={e => setEditingCategory({ ...editingCategory, brigade: e.target.value })}
                   className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
@@ -1195,7 +1312,10 @@ export const AdminMairieDashboard: React.FC = () => {
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#e2e8f0]">
                 <button
                   type="button"
-                  onClick={() => setEditingCategory(null)}
+                  onClick={() => {
+                    setEditingCategory(null);
+                    setIsCreatingSla(false);
+                  }}
                   className="px-4 py-2 rounded-[8px] text-xs font-semibold text-[#475569] hover:bg-[#f1f5f9]"
                 >
                   Annuler
@@ -1204,7 +1324,7 @@ export const AdminMairieDashboard: React.FC = () => {
                   type="submit"
                   className="px-4 py-2 rounded-[8px] text-xs font-semibold bg-[#059669] hover:bg-[#047857] text-white shadow-sm"
                 >
-                  Enregistrer les Modifications
+                  {isCreatingSla ? 'Créer la Catégorie' : 'Enregistrer les Modifications'}
                 </button>
               </div>
             </form>
