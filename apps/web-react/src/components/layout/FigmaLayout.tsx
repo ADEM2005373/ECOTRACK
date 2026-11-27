@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import { useAuth } from '../../store/authStore';
 import { FigmaSidebar } from './FigmaSidebar';
+import { FloatingHelpButton } from '../ui/DashboardOverviewKit';
 import { Bell, ChevronRight } from 'lucide-react';
 
 interface FigmaLayoutProps {
@@ -101,6 +102,7 @@ export const FigmaLayout: React.FC<FigmaLayoutProps> = ({
             Plateforme EcoTrack V2 · République Tunisienne · Conforme CDCF V2 &amp; RGPD · Tous droits réservés 2026
           </p>
         </footer>
+        <FloatingHelpButton role={role} />
       </div>
     </div>
   );

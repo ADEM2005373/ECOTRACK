@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../store/authStore';
+import { WelcomeBanner, PeriodFilterBar, CalmKpiGrid, PeriodPreset } from '../ui/DashboardOverviewKit';
 import {
   ShieldCheck,
   MapPin,
@@ -19,7 +20,6 @@ import {
   ZoomIn,
   ZoomOut,
   Plus,
-  RefreshCw,
   Send,
   Trash2
 } from 'lucide-react';
@@ -115,6 +115,7 @@ export const AgentMairieDashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
+  const [periodPreset, setPeriodPreset] = useState<PeriodPreset>('30d');
 
   // Modale d'affectation automatique vers brigade
   const [assignTarget, setAssignTarget] = useState<ReportItem | null>(null);
@@ -476,55 +477,44 @@ export const AgentMairieDashboard: React.FC = () => {
   const dispatchRate = reports.length > 0 ? Math.round(((inProgressCount + resolvedCount) / reports.length) * 100) : 100;
 
   return (
-    <div className="space-y-6">
-      {/* ── 1. HEADER DU POSTE AGENT MAIRIE (Figma: WEB_AGT_01_INBOX) ────────────────── */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 bg-white border border-[#e2e8f0] p-5 rounded-[12px] shadow-sm">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-[#059669] border border-emerald-200">
-              Pôle Traitement Bureautique &amp; Dispatching
-            </span>
-            <span className="text-xs text-[#64748b]">• {municipality}</span>
-          </div>
-          <h1 className="text-[22px] font-bold text-[#0f172a] font-heading tracking-tight mt-1">
-            Boîte de Réception &amp; Dispatching Opérationnel
-          </h1>
-          <p className="text-[13px] text-[#475569] mt-0.5 max-w-2xl">
-            Analysez les signalements citoyens, vérifiez la détection IA Vision et affectez chaque dossier à la brigade technique spécialisée compétente.
-          </p>
+    <div className="space-y-5">
+      {/* ── 1. ACCUEIL CALME & LISIBLE (AGENT MAIRIE) ─────────────────────────── */}
+      <WelcomeBanner
+        name={authState.user?.fullName || 'Agent Municipal'}
+        badge={`${municipality} · Centre de Traitement`}
+        subtitle={`Voici l'activité de votre commune : ${pendingCount} signalement(s) à vérifier, ${inProgressCount} en cours sur le terrain et ${resolvedCount} résolu(s).`}
+      />
+
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div className="flex-1">
+          <PeriodFilterBar
+            preset={periodPreset}
+            onPresetChange={setPeriodPreset}
+            onRefresh={fetchReports}
+            loading={loading}
+          />
         </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={fetchReports}
-            className="inline-flex items-center gap-1.5 bg-slate-50 border border-[#e2e8f0] hover:bg-slate-100 text-[#334155] font-semibold px-3 h-[40px] rounded-[8px] text-[12px] transition"
-            title="Rafraîchir les données MongoDB"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            <span>Actualiser</span>
-          </button>
-
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <Link
             to="/supervision"
-            className="inline-flex items-center gap-1.5 bg-white border border-[#1e3a8a] text-[#1e3a8a] hover:bg-[#eff6ff] font-semibold px-3.5 h-[40px] rounded-[8px] text-[12px] transition shadow-sm"
+            className="inline-flex items-center gap-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold px-3.5 h-[42px] rounded-xl text-xs transition shadow-xs"
           >
-            <MapPin className="w-3.5 h-3.5" />
-            <span>Carte Territoriale</span>
+            <MapPin className="w-4 h-4 text-blue-600" />
+            <span>Carte de la commune</span>
           </Link>
-
           <Link
             to="/agent/qualification"
-            className="inline-flex items-center gap-1.5 bg-[#059669] hover:bg-[#047857] text-white font-semibold px-3.5 h-[40px] rounded-[8px] text-[12px] transition shadow-sm shadow-emerald-600/20"
+            className="inline-flex items-center gap-1.5 bg-[#059669] hover:bg-[#047857] text-white font-semibold px-4 h-[42px] rounded-xl text-xs transition shadow-xs"
           >
             <ShieldCheck className="w-4 h-4" />
-            <span>Atelier Qualification Split-Screen</span>
+            <span>Vérifier avec l&apos;IA</span>
           </Link>
         </div>
       </div>
 
       {/* ── TOAST DE CONFIRMATION ────────────────────────────────────────────── */}
       {notice && (
-        <div className="bg-[#ecfdf5] border border-[#a7f3d0] p-4 rounded-[8px] flex items-center justify-between text-xs text-[#065f46] shadow-sm animate-in fade-in">
+        <div className="bg-[#ecfdf5] border border-[#a7f3d0] p-4 rounded-xl flex items-center justify-between text-xs text-[#065f46] shadow-xs">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0" />
             <span className="font-semibold">{notice}</span>
@@ -533,44 +523,59 @@ export const AgentMairieDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* ── 2. COMPTEURS KPIS OPÉRATIONNELS ───────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-[#e2e8f0] p-4 rounded-[12px] shadow-sm">
-          <div className="flex items-center justify-between text-xs text-[#475569]">
-            <span>À Qualifier (Nouveaux)</span>
-            <Sparkles className="w-4 h-4 text-amber-500" />
-          </div>
-          <div className="text-2xl font-bold text-[#0f172a] mt-1.5 font-heading">{pendingCount}</div>
-          <p className="text-[11px] text-amber-600 font-medium mt-1">Examen bureautique requis</p>
-        </div>
-
-        <div className="bg-white border border-[#e2e8f0] p-4 rounded-[12px] shadow-sm">
-          <div className="flex items-center justify-between text-xs text-[#475569]">
-            <span>Dispatchés aux Brigades</span>
-            <Truck className="w-4 h-4 text-blue-600" />
-          </div>
-          <div className="text-2xl font-bold text-[#1e3a8a] mt-1.5 font-heading">{inProgressCount}</div>
-          <p className="text-[11px] text-blue-600 font-medium mt-1">En cours de traitement terrain</p>
-        </div>
-
-        <div className="bg-white border border-[#e2e8f0] p-4 rounded-[12px] shadow-sm">
-          <div className="flex items-center justify-between text-xs text-[#475569]">
-            <span>Chantiers Résolus</span>
-            <CheckCircle2 className="w-4 h-4 text-[#059669]" />
-          </div>
-          <div className="text-2xl font-bold text-[#059669] mt-1.5 font-heading">{resolvedCount}</div>
-          <p className="text-[11px] text-[#059669] font-medium mt-1">Avec preuve photo validée</p>
-        </div>
-
-        <div className="bg-white border border-[#e2e8f0] p-4 rounded-[12px] shadow-sm">
-          <div className="flex items-center justify-between text-xs text-[#475569]">
-            <span>Taux de Prise en Charge</span>
-            <Clock className="w-4 h-4 text-purple-600" />
-          </div>
-          <div className="text-2xl font-bold text-purple-600 mt-1.5 font-heading">{dispatchRate}%</div>
-          <p className="text-[11px] text-purple-600 font-medium mt-1">Objectif SLA communal &lt; 24h</p>
-        </div>
-      </div>
+      {/* ── 2. 6 CARTES INDICATEURS AÉRÉES (STYLE TIJARALINK) ─────────────────── */}
+      <CalmKpiGrid
+        items={[
+          {
+            id: 'pending',
+            label: 'À vérifier',
+            value: pendingCount,
+            subtitle: 'Nouveaux signalements reçus',
+            icon: <Sparkles className="w-5 h-5" />,
+            tone: 'amber',
+          },
+          {
+            id: 'assigned',
+            label: 'En cours terrain',
+            value: inProgressCount,
+            subtitle: 'Pris en charge par les brigades',
+            icon: <Truck className="w-5 h-5" />,
+            tone: 'blue',
+          },
+          {
+            id: 'resolved',
+            label: 'Dossiers résolus',
+            value: resolvedCount,
+            subtitle: 'Nettoyage validé avec photo',
+            icon: <CheckCircle2 className="w-5 h-5" />,
+            tone: 'emerald',
+          },
+          {
+            id: 'total',
+            label: 'Total commune',
+            value: reports.length,
+            subtitle: 'Signalements enregistrés',
+            icon: <Layers className="w-5 h-5" />,
+            tone: 'teal',
+          },
+          {
+            id: 'rate',
+            label: 'Taux de prise en charge',
+            value: `${dispatchRate}%`,
+            subtitle: 'Objectif municipal < 24h',
+            icon: <Clock className="w-5 h-5" />,
+            tone: 'indigo',
+          },
+          {
+            id: 'staff',
+            label: 'Équipes actives',
+            value: communalStaff.length,
+            subtitle: 'Chefs ouvriers & agents prêts',
+            icon: <UserCheck className="w-5 h-5" />,
+            tone: 'rose',
+          },
+        ]}
+      />
 
       {/* ── 3. BANNIÈRE AUTO-ROUTING (RÈGLE D'AFFECTATION BUREAU -> BRIGADES) ───────── */}
       <div className="bg-[#eff6ff] border border-[#bfdbfe] p-3.5 rounded-[10px] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs text-[#1e3a8a]">

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../../store/authStore';
+import { WelcomeBanner, PeriodFilterBar, CalmKpiGrid, PeriodPreset } from '../ui/DashboardOverviewKit';
 import {
   Brain,
   ShieldCheck,
@@ -88,8 +90,10 @@ const INITIAL_ALERTS: TechnicalAlert[] = [
 ];
 
 export const AdminSaasDashboard: React.FC = () => {
+  const { state: authState } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const currentTabParam = searchParams.get('tab') as 'overview' | 'municipalities' | 'infrastructure' | 'alerts' | 'audit' | null;
+  const [periodPreset, setPeriodPreset] = useState<PeriodPreset>('30d');
 
   // Tabs State: 'overview' | 'municipalities' | 'infrastructure' | 'alerts' | 'audit'
   const [activeTab, setActiveTab] = useState<'overview' | 'municipalities' | 'infrastructure' | 'alerts' | 'audit'>(
@@ -279,44 +283,61 @@ export const AdminSaasDashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* 1. Header Admin SaaS & Quick Actions */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-[26px] font-bold text-[#0f172a] font-heading tracking-tight">
-            Tour de Contrôle SaaS Multi-Collectivités
-          </h1>
-          <p className="text-[13px] text-[#475569] mt-0.5">
-            Supervision globale métropolitaine, gouvernance des mairies, monitoring des serveurs &amp; flux, et journal immuable.
-          </p>
-        </div>
+    <div className="space-y-5">
+      {/* 1. Accueil Calme Admin SaaS */}
+      <WelcomeBanner
+        name={authState.user?.fullName || 'Superviseur National'}
+        badge="Plateforme Nationale EcoTrack"
+        subtitle={`Vue d'ensemble simple : ${municipalities.length} mairie(s) connectée(s) et ${reportsCount} signalement(s) enregistrés sur le territoire.`}
+      />
 
-        <div className="flex flex-wrap items-center gap-2.5">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div className="flex-1">
+          <PeriodFilterBar
+            preset={periodPreset}
+            onPresetChange={setPeriodPreset}
+            onRefresh={() => window.location.reload()}
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <button
             onClick={() => setNewMunModalOpen(true)}
-            className="inline-flex items-center gap-1.5 bg-[#059669] hover:bg-[#047857] text-white font-semibold px-3.5 h-[42px] rounded-lg text-xs transition shadow-sm"
+            className="inline-flex items-center gap-1.5 bg-[#059669] hover:bg-[#047857] text-white font-semibold px-3.5 h-[42px] rounded-xl text-xs transition shadow-xs"
           >
             <Plus className="w-4 h-4" />
-            <span>Créer / Intégrer Mairie</span>
+            <span>Ajouter une Mairie</span>
           </button>
 
           <button
             onClick={() => setReopenModalOpen(true)}
-            className="inline-flex items-center gap-1.5 bg-[#d97706] hover:bg-[#b45309] text-white font-semibold px-3.5 h-[42px] rounded-lg text-xs transition shadow-sm"
+            className="inline-flex items-center gap-1.5 bg-[#d97706] hover:bg-[#b45309] text-white font-semibold px-3.5 h-[42px] rounded-xl text-xs transition shadow-xs"
           >
             <RotateCcw className="w-4 h-4" />
-            <span>Réouverture Administrative</span>
+            <span>Réouverture Dossier</span>
           </button>
 
           <button
             onClick={handleExportBackup}
-            className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-[#e2e8f0] text-[#0f172a] font-semibold px-3.5 h-[42px] rounded-lg text-xs transition shadow-sm"
+            className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold px-3.5 h-[42px] rounded-xl text-xs transition shadow-xs"
           >
             <Download className="w-4 h-4 text-[#059669]" />
-            <span>Sauvegarde SaaS (JSON)</span>
+            <span>Sauvegarde JSON</span>
           </button>
         </div>
       </div>
+
+      {activeTab === 'overview' && (
+        <CalmKpiGrid
+          items={[
+            { id: 'mairies', label: 'Mairies inscrites', value: municipalities.length, subtitle: 'Collectivités actives en Tunisie', icon: <Building2 className="w-5 h-5" />, tone: 'blue' },
+            { id: 'reports', label: 'Total signalements', value: reportsCount, subtitle: 'Dossiers reçus sur la plateforme', icon: <MapPin className="w-5 h-5" />, tone: 'emerald' },
+            { id: 'services', label: 'Disponibilité services', value: '99.9%', subtitle: 'Serveurs opérationnels', icon: <Server className="w-5 h-5" />, tone: 'teal' },
+            { id: 'ia', label: 'Fiabilité IA Vision', value: 'MobileNetV3', subtitle: 'Analyse photo active (GPU)', icon: <Brain className="w-5 h-5" />, tone: 'indigo' },
+            { id: 'alerts', label: 'Alertes système', value: INITIAL_ALERTS.filter(a => !a.resolved).length, subtitle: 'Points d’attention en cours', icon: <AlertTriangle className="w-5 h-5" />, tone: 'amber' },
+            { id: 'audit', label: 'Traçabilité RGPD', value: '100%', subtitle: 'Historique immuable actif', icon: <ShieldCheck className="w-5 h-5" />, tone: 'rose' },
+          ]}
+        />
+      )}
 
       {feedbackSuccess && (
         <div className="bg-[#ecfdf5] border border-[#a7f3d0] p-4 rounded-xl flex items-center justify-between text-xs text-[#065f46] shadow-sm">

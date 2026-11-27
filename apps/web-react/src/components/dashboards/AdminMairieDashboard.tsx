@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../store/authStore';
+import { WelcomeBanner, PeriodFilterBar, CalmKpiGrid, PeriodPreset } from '../ui/DashboardOverviewKit';
 import {
   Users,
   BarChart3,
@@ -67,6 +68,7 @@ export const AdminMairieDashboard: React.FC = () => {
       ? currentTabParam
       : 'overview'
   );
+  const [periodPreset, setPeriodPreset] = useState<PeriodPreset>('30d');
 
   useEffect(() => {
     if (currentTabParam && ['overview', 'reports', 'users', 'categories', 'audit'].includes(currentTabParam)) {
@@ -380,46 +382,58 @@ export const AdminMairieDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Header Admin Municipalité (Figma: WEB_ADM_01_USERS) */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-[26px] font-bold text-[#0f172a] font-heading tracking-tight">
-              Direction Municipale
-            </h1>
-            <span className="px-2.5 py-0.5 rounded-[6px] text-[11px] font-bold bg-[#eff6ff] text-[#1e40af] border border-[#bfdbfe]">
-              {municipality}
-            </span>
-          </div>
-          <p className="text-[13px] text-[#475569] mt-0.5">
-            Pilotage stratégique des services urbains de la commune, suivi des délais d'intervention (SLA) et coordination des brigades.
-          </p>
-        </div>
+      {/* Accueil Calme Admin Municipalité */}
+      <WelcomeBanner
+        name={authState.user?.fullName || 'Directeur Municipal'}
+        badge={municipality}
+        subtitle={`Suivi simple de votre commune : ${newCount} signalement(s) à traiter, ${resolvedCount} résolu(s) et ${agents.length} membre(s) dans vos équipes.`}
+      />
 
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div className="flex-1">
+          <PeriodFilterBar
+            preset={periodPreset}
+            onPresetChange={setPeriodPreset}
+            onRefresh={() => { fetchAgents(); }}
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <Link
             to="/admin/analytics"
-            className="inline-flex items-center gap-2 bg-[#059669] hover:bg-[#047857] text-white font-semibold px-4 h-[44px] rounded-[8px] text-[13px] transition shadow-sm"
+            className="inline-flex items-center gap-1.5 bg-[#059669] hover:bg-[#047857] text-white font-semibold px-4 h-[42px] rounded-xl text-xs transition shadow-xs"
           >
             <BarChart3 className="w-4 h-4" />
-            <span>Pilotage &amp; Analyses</span>
+            <span>Statistiques</span>
           </Link>
           <Link
             to="/supervision"
-            className="inline-flex items-center gap-2 bg-white border border-[#1e3a8a] text-[#1e3a8a] hover:bg-[#eff6ff] font-semibold px-4 h-[44px] rounded-[8px] text-[13px] transition shadow-sm"
+            className="inline-flex items-center gap-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold px-3.5 h-[42px] rounded-xl text-xs transition shadow-xs"
           >
-            <MapPin className="w-4 h-4" />
-            <span>Carte Territoriale</span>
+            <MapPin className="w-4 h-4 text-blue-600" />
+            <span>Carte commune</span>
           </Link>
           <Link
             to="/admin/audit"
-            className="inline-flex items-center gap-2 bg-white border border-[#e2e8f0] text-[#0f172a] hover:bg-slate-50 font-semibold px-4 h-[44px] rounded-[8px] text-[13px] transition shadow-sm"
+            className="inline-flex items-center gap-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold px-3.5 h-[42px] rounded-xl text-xs transition shadow-xs"
           >
             <ShieldCheck className="w-4 h-4 text-[#059669]" />
-            <span>Journal d'Audit</span>
+            <span>Historique</span>
           </Link>
         </div>
       </div>
+
+      {activeTab === 'overview' && (
+        <CalmKpiGrid
+          items={[
+            { id: 'new', label: 'Nouveaux à vérifier', value: newCount, subtitle: 'En attente de validation mairie', icon: <AlertTriangle className="w-5 h-5" />, tone: 'amber' },
+            { id: 'total', label: 'Total signalements', value: totalReportsCount, subtitle: `Enregistrés pour ${municipality}`, icon: <FileText className="w-5 h-5" />, tone: 'blue' },
+            { id: 'resolved', label: 'Dossiers résolus', value: resolvedCount, subtitle: 'Interventions clôturées', icon: <CheckCircle2 className="w-5 h-5" />, tone: 'emerald' },
+            { id: 'rate', label: 'Taux de résolution', value: `${resolutionRate}%`, subtitle: 'Performance globale commune', icon: <TrendingUp className="w-5 h-5" />, tone: 'teal' },
+            { id: 'staff', label: 'Équipes locales', value: agents.length, subtitle: 'Agents et chefs ouvriers actifs', icon: <Users className="w-5 h-5" />, tone: 'indigo' },
+            { id: 'sla', label: 'Délai moyen SLA', value: '24h', subtitle: 'Objectif de réponse communal', icon: <Clock className="w-5 h-5" />, tone: 'rose' },
+          ]}
+        />
+      )}
 
       {/* Onglets de navigation interne (Figma: Overview / Reports / Users / Categories / Audit) */}
       <div className="flex items-center gap-2 border-b border-[#e2e8f0] pb-2 overflow-x-auto">

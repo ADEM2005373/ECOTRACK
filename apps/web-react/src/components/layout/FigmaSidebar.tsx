@@ -16,8 +16,7 @@ import {
   LogOut,
   AlertTriangle,
   Building2,
-  Server,
-  HelpCircle
+  Server
 } from 'lucide-react';
 
 interface FigmaSidebarProps {
@@ -102,35 +101,35 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
 
     if (role === 'AGENT_MAIRIE' || role === 'AGENT') {
       return [
-        { id: 'inbox', label: 'Boîte de réception', icon: <Inbox className="w-4 h-4 text-emerald-400" />, path: '/' },
-        { id: 'qualification', label: 'Atelier de Qualification', icon: <ShieldCheck className="w-4 h-4 text-purple-400" />, path: '/agent/qualification' },
-        { id: 'map', label: 'Carte opérationnelle', icon: <MapPin className="w-4 h-4 text-blue-400" />, path: '/supervision' },
+        { id: 'inbox', label: 'Tableau de bord', icon: <Inbox className="w-4 h-4 text-emerald-600" />, path: '/' },
+        { id: 'qualification', label: 'Signalements à vérifier', icon: <ShieldCheck className="w-4 h-4 text-indigo-600" />, path: '/agent/qualification' },
+        { id: 'map', label: 'Carte des anomalies', icon: <MapPin className="w-4 h-4 text-blue-600" />, path: '/supervision' },
       ];
     }
 
     if (role === 'ADMIN_MUNICIPALITE') {
       return [
-        { id: 'overview', label: 'Direction Municipale', icon: <Inbox className="w-4 h-4 text-blue-400" />, path: '/' },
-        { id: 'qualification', label: 'Qualification IA & Affectation', icon: <ShieldCheck className="w-4 h-4 text-purple-400" />, path: '/agent/qualification' },
-        { id: 'reports', label: 'Signalements & Suivi', icon: <FileText className="w-4 h-4 text-amber-400" />, path: '/?tab=reports' },
-        { id: 'users', label: 'Utilisateurs & Brigades', icon: <Users className="w-4 h-4 text-emerald-400" />, path: '/?tab=users' },
-        { id: 'categories', label: 'Catégories & Seuils SLA', icon: <Tags className="w-4 h-4 text-purple-400" />, path: '/?tab=categories' },
-        { id: 'powerbi', label: 'Pilotage & Analyses', icon: <BarChart3 className="w-4 h-4 text-indigo-400" />, path: '/admin/analytics' },
-        { id: 'map', label: 'Carte Territoriale', icon: <MapPin className="w-4 h-4 text-teal-400" />, path: '/supervision' },
-        { id: 'audit', label: 'Journal d’Audit Territorial', icon: <ShieldCheck className="w-4 h-4 text-teal-400" />, path: '/admin/audit' },
+        { id: 'overview', label: 'Tableau de bord', icon: <Inbox className="w-4 h-4 text-emerald-600" />, path: '/' },
+        { id: 'qualification', label: 'Vérification IA & Brigades', icon: <ShieldCheck className="w-4 h-4 text-indigo-600" />, path: '/agent/qualification' },
+        { id: 'reports', label: 'Tous les signalements', icon: <FileText className="w-4 h-4 text-amber-600" />, path: '/?tab=reports' },
+        { id: 'users', label: 'Mes équipes & Agents', icon: <Users className="w-4 h-4 text-emerald-600" />, path: '/?tab=users' },
+        { id: 'categories', label: 'Catégories & Délais SLA', icon: <Tags className="w-4 h-4 text-purple-600" />, path: '/?tab=categories' },
+        { id: 'powerbi', label: 'Statistiques & Rapports', icon: <BarChart3 className="w-4 h-4 text-blue-600" />, path: '/admin/analytics' },
+        { id: 'map', label: 'Carte de la commune', icon: <MapPin className="w-4 h-4 text-teal-600" />, path: '/supervision' },
+        { id: 'audit', label: 'Historique des actions', icon: <ShieldCheck className="w-4 h-4 text-slate-600" />, path: '/admin/audit' },
       ];
     }
 
-    // ADMIN_SAAS : TOUTES LES FONCTIONNALITÉS DEMANDÉES DIRECTEMENT DANS LE MENU
+    // ADMIN_SAAS : Navigation claire sans jargon excessif en façade
     return [
-      { id: 'overview', label: 'Tour de Contrôle SaaS', icon: <Inbox className="w-4 h-4 text-emerald-400" />, path: '/' },
-      { id: 'municipalities', label: 'Supervision des Mairies', icon: <Building2 className="w-4 h-4 text-blue-400" />, path: '/?tab=municipalities' },
-      { id: 'infrastructure', label: 'Serveurs & Flux K8s', icon: <Server className="w-4 h-4 text-cyan-400" />, path: '/?tab=infrastructure', count: '11/11' },
-      { id: 'alerts', label: 'Alertes Techniques', icon: <AlertTriangle className="w-4 h-4 text-amber-400" />, path: '/?tab=alerts' },
-      { id: 'ai-governance', label: 'Gouvernance IA & MLOps', icon: <Brain className="w-4 h-4 text-purple-400" />, path: '/admin/ai-governance' },
-      { id: 'powerbi', label: 'Analyses Multi-Villes', icon: <BarChart3 className="w-4 h-4 text-indigo-400" />, path: '/admin/analytics' },
-      { id: 'map', label: 'Carte Métropolitaine', icon: <MapPin className="w-4 h-4 text-emerald-400" />, path: '/supervision' },
-      { id: 'audit', label: 'Journal d’Audit & Backup', icon: <ShieldCheck className="w-4 h-4 text-teal-400" />, path: '/admin/audit' },
+      { id: 'overview', label: 'Tableau de bord national', icon: <Inbox className="w-4 h-4 text-emerald-600" />, path: '/' },
+      { id: 'municipalities', label: 'Mairies inscrites', icon: <Building2 className="w-4 h-4 text-blue-600" />, path: '/?tab=municipalities' },
+      { id: 'powerbi', label: 'Statistiques Multi-Villes', icon: <BarChart3 className="w-4 h-4 text-indigo-600" />, path: '/admin/analytics' },
+      { id: 'map', label: 'Carte Nationale', icon: <MapPin className="w-4 h-4 text-emerald-600" />, path: '/supervision' },
+      { id: 'ai-governance', label: 'Réglages IA Vision', icon: <Brain className="w-4 h-4 text-purple-600" />, path: '/admin/ai-governance' },
+      { id: 'infrastructure', label: 'État des serveurs', icon: <Server className="w-4 h-4 text-cyan-600" />, path: '/?tab=infrastructure', count: '11/11' },
+      { id: 'alerts', label: 'Alertes système', icon: <AlertTriangle className="w-4 h-4 text-amber-600" />, path: '/?tab=alerts' },
+      { id: 'audit', label: 'Historique & Sauvegarde', icon: <ShieldCheck className="w-4 h-4 text-teal-600" />, path: '/admin/audit' },
     ];
   };
 
@@ -140,34 +139,34 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
     : 'ET';
 
   return (
-    <aside className="bg-[#102c35] flex flex-col justify-between h-screen w-[240px] px-[16px] py-[20px] shrink-0 text-white select-none z-30 overflow-y-auto">
-      <div className="flex flex-col gap-[18px]">
+    <aside className="bg-white border-r border-slate-200 flex flex-col justify-between h-screen w-[245px] px-[14px] py-[18px] shrink-0 text-slate-700 select-none z-30 overflow-y-auto">
+      <div className="flex flex-col gap-[16px]">
         {/* Logo & Marque ECOTRACK */}
         <div className="flex items-center gap-[10px] px-[8px]">
-          <EcoTrackLogo size={36} className="rounded-[9px] shadow-sm" />
+          <EcoTrackLogo size={34} className="rounded-[9px] shadow-xs" />
           <div className="flex flex-col">
-            <span className="font-heading font-bold text-[18px] text-white tracking-tight leading-tight">
+            <span className="font-heading font-bold text-[17px] text-slate-900 tracking-tight leading-tight">
               ECOTRACK
             </span>
-            <span className="text-[#aec5cb] text-[10px] tracking-[2px] font-sans font-semibold">
-              CONSOLE V2
+            <span className="text-emerald-600 text-[10px] tracking-[1.5px] font-sans font-semibold">
+              PORTAIL MUNICIPAL
             </span>
           </div>
         </div>
 
-        {/* Figma: Territoire & Collectivité */}
-        <div className="bg-[#1b4449] rounded-[8px] p-[10px] flex flex-col gap-[3px]">
-          <p className="font-semibold text-[12px] text-white leading-tight">
-            {role === 'ADMIN_SAAS' || role === 'ADMIN' ? 'Plateforme SaaS Centrale' : (user?.municipality || 'Municipalité de Tunis')}
+        {/* Territoire & Collectivité */}
+        <div className="bg-emerald-50/70 border border-emerald-100 rounded-xl p-[10px] flex flex-col gap-[3px]">
+          <p className="font-semibold text-[12px] text-slate-900 leading-tight">
+            {role === 'ADMIN_SAAS' || role === 'ADMIN' ? 'Plateforme Nationale' : (user?.municipality || 'Municipalité de Tunis')}
           </p>
-          <p className="text-[#aec5cb] text-[10px] leading-tight">
+          <p className="text-emerald-700 text-[10px] leading-tight">
             {roleConfig.roleSubtitle}
           </p>
         </div>
 
-        {/* Figma: Section Navigation */}
+        {/* Section Navigation */}
         <div className="flex flex-col gap-[6px]">
-          <p className="text-[#aec5cb] text-[10px] font-semibold tracking-[1.2px] uppercase px-[4px]">
+          <p className="text-slate-400 text-[10px] font-semibold tracking-[1px] uppercase px-[6px]">
             {roleConfig.sectionTitle}
           </p>
 
@@ -189,20 +188,20 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
                   key={item.id}
                   to={item.path}
                   onClick={() => onSelectTab && onSelectTab(item.id)}
-                  className={`flex items-center justify-between h-[40px] px-[10px] rounded-[8px] transition-colors cursor-pointer ${
-                    isMatch 
-                      ? 'bg-[#1b4449] text-white font-semibold' 
-                      : 'text-[#aec5cb] hover:bg-[#1b4449]/50 hover:text-white font-normal'
+                  className={`flex items-center justify-between h-[38px] px-[10px] rounded-xl transition-colors cursor-pointer ${
+                    isMatch
+                      ? 'bg-emerald-50 text-emerald-700 font-semibold border border-emerald-100'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
                   }`}
                 >
                   <div className="flex items-center gap-[9px] min-w-0">
                     <span className="shrink-0 size-[16px] flex items-center justify-center">
                       {item.icon}
                     </span>
-                    <span className="text-[11px] truncate">{item.label}</span>
+                    <span className="text-[12px] truncate">{item.label}</span>
                   </div>
                   {item.count && (
-                    <span className="text-[#6ee7b7] text-[10px] font-semibold shrink-0 ml-1.5">
+                    <span className="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full text-[10px] font-semibold shrink-0 ml-1.5">
                       {item.count}
                     </span>
                   )}
@@ -213,23 +212,18 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
         </div>
       </div>
 
-      {/* Figma: Pied de navigation & Profil */}
-      <div className="flex flex-col gap-[12px] pt-[12px] border-t border-[#355259]">
-        <div className="flex items-center gap-[8px] px-[6px] text-[#aec5cb] hover:text-white text-[11px] cursor-pointer transition">
-          <HelpCircle className="size-[16px]" />
-          <span>Centre d'aide &amp; Documentation</span>
-        </div>
-
-        <div className="flex items-center justify-between pt-[8px] border-t border-[#1b4449]">
+      {/* Pied de navigation & Profil */}
+      <div className="flex flex-col gap-[10px] pt-[12px] border-t border-slate-200">
+        <div className="flex items-center justify-between pt-[4px]">
           <div className="flex items-center gap-[8px] min-w-0">
-            <div className="bg-[#355259] rounded-full size-[30px] flex items-center justify-center text-white font-semibold text-[10px] shrink-0">
+            <div className="bg-emerald-600 rounded-full size-[32px] flex items-center justify-center text-white font-semibold text-[11px] shrink-0">
               {userInitials}
             </div>
             <div className="flex flex-col min-w-0">
-              <p className="font-semibold text-[11px] text-white truncate leading-tight">
+              <p className="font-semibold text-[12px] text-slate-900 truncate leading-tight">
                 {user?.fullName || 'Utilisateur'}
               </p>
-              <p className="text-[10px] text-[#aec5cb] truncate leading-tight">
+              <p className="text-[10px] text-slate-500 truncate leading-tight">
                 {roleConfig.roleLabel}
               </p>
             </div>
@@ -238,7 +232,7 @@ export const FigmaSidebar: React.FC<FigmaSidebarProps> = ({ onSelectTab }) => {
           <button
             onClick={() => { logout(); navigate('/login'); }}
             title="Se déconnecter"
-            className="text-[#aec5cb] hover:text-rose-400 p-1 rounded transition"
+            className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition"
           >
             <LogOut className="w-4 h-4" />
           </button>
