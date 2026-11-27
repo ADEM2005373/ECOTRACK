@@ -122,7 +122,7 @@ export default function ProfilScreen() {
       entityType: 'Equipment',
       entityId: brigadeName,
       reason: 'Signalement panne camion benne / matériel depuis application mobile.',
-      after: { brigade: brigadeName, status: 'PANNE_SIGNALEE' },
+      after: { brigade: brigadeName, status: 'PANNE_SIGNALEE', municipality: user?.municipality },
       token: accessToken || undefined,
     });
 

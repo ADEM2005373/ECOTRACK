@@ -360,7 +360,8 @@ export async function reportFieldIssue(
   reportId: string,
   issueNote: string,
   actorId?: string,
-  token?: string
+  token?: string,
+  municipality?: string
 ): Promise<ApiResult<{ logged: boolean }>> {
   return logWorkerEvent({
     actorId: actorId || 'chef.voirie@zarzouna.tn',
@@ -369,7 +370,7 @@ export async function reportFieldIssue(
     entityType: 'Report',
     entityId: reportId,
     reason: issueNote,
-    after: { issueNote, status: 'BLOQUE_RENFORT_DEMANDE' },
+    after: { issueNote, status: 'BLOQUE_RENFORT_DEMANDE', ...(municipality ? { municipality } : {}) },
     token,
   });
 }

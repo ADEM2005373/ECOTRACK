@@ -30,6 +30,7 @@ export interface IUser {
   phoneNumber?: string;
   role: UserRole;
   municipality?: string; // Mairie ou collectivité de rattachement
+  brigade?: string;
   governorate?: string;
   territory?: IMunicipalityTerritory;
   isActive: boolean;

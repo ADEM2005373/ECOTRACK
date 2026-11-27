@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../store/authStore';
 import {
   Wrench,
   MapPin,
@@ -24,6 +25,7 @@ interface WorkerTask {
 }
 
 export const ChefOuvrierDashboard: React.FC = () => {
+  const { state: authState } = useAuth();
   const [tasks, setTasks] = useState<WorkerTask[]>([]);
 
   useEffect(() => {
@@ -78,6 +80,50 @@ export const ChefOuvrierDashboard: React.FC = () => {
     setTimeout(() => setFeedback(null), 4000);
   };
 
+  // Action : Envoyer une alerte terrain (Demande de renfort ou Panne matériel)
+  const handleSendFieldAlert = async (type: 'RENFORT' | 'PANNE') => {
+    const defaultMsg =
+      type === 'PANNE'
+        ? 'Signalement panne camion benne / matériel sur chantier.'
+        : 'Besoin de renfort d’équipe / matériel supplémentaire sur chantier.';
+    const note = window.prompt(
+      type === 'PANNE' ? 'Décrivez la panne matériel / véhicule :' : 'Précisez le besoin de renfort :',
+      defaultMsg
+    );
+    if (!note || !note.trim()) return;
+
+    try {
+      const res = await fetch('/api/v1/audit/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          actorId: authState.user?.fullName || authState.user?.email || 'Chef Ouvrier',
+          actorRole: 'CHEF_OUVRIER',
+          action: type === 'PANNE' ? 'EQUIPMENT_BREAKDOWN_REPORTED' : 'FIELD_ISSUE_REPORTED',
+          entityType: type === 'PANNE' ? 'Equipment' : 'Report',
+          entityId: authState.user?.municipality || 'Terrain',
+          reason: note.trim(),
+          after: {
+            issueNote: note.trim(),
+            brigade: 'Voirie & Salubrité',
+            municipality: authState.user?.municipality,
+            status: type === 'PANNE' ? 'PANNE_SIGNALEE' : 'BLOQUE_RENFORT_DEMANDE',
+          },
+        }),
+      });
+      if (res.ok) {
+        setFeedback(
+          type === 'PANNE'
+            ? 'Alerte panne matériel transmise à la Mairie.'
+            : 'Demande de renfort transmise à la Mairie.'
+        );
+        setTimeout(() => setFeedback(null), 4000);
+      }
+    } catch {
+      // ignorer erreur réseau
+    }
+  };
+
   const pendingCount = tasks.filter(t => t.status === 'ASSIGNE').length;
   const inProgressCount = tasks.filter(t => t.status === 'EN_COURS').length;
   const resolvedCount = tasks.filter(t => t.status === 'RESOLU').length;
@@ -95,7 +141,21 @@ export const ChefOuvrierDashboard: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={() => void handleSendFieldAlert('RENFORT')}
+            className="px-3 py-2 rounded-[8px] bg-rose-50 border border-rose-200 text-rose-800 hover:bg-rose-100 text-xs font-semibold transition"
+          >
+            Demander Renfort
+          </button>
+          <button
+            type="button"
+            onClick={() => void handleSendFieldAlert('PANNE')}
+            className="px-3 py-2 rounded-[8px] bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 text-xs font-semibold transition"
+          >
+            Signaler Panne
+          </button>
           <div className="px-3.5 py-2 rounded-[8px] bg-white border border-[#e2e8f0] text-xs font-semibold text-[#0f172a] shadow-sm flex items-center gap-2">
             <span className="size-2 rounded-full bg-[#059669] animate-pulse" />
             <span>GPS Camion Déployé : Équipe 04</span>

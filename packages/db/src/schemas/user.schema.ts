@@ -41,6 +41,10 @@ export const UserSchema = new Schema<IUserDocument>(
       type: String,
       trim: true
     },
+    brigade: {
+      type: String,
+      trim: true
+    },
     governorate: {
       type: String,
       trim: true

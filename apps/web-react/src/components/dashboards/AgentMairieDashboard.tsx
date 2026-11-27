@@ -21,7 +21,8 @@ import {
   ZoomOut,
   Plus,
   Send,
-  Trash2
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 
 export interface ReportItem {
@@ -48,8 +49,11 @@ export interface ReportItem {
 export interface StaffMember {
   id: string;
   fullName: string;
+  email?: string;
   role: string;
   municipality?: string;
+  brigade?: string;
+  isActive: boolean;
 }
 
 // Table de correspondance métier : Catégorie d'anomalie -> Brigade Spécialisée
@@ -160,7 +164,7 @@ export const AgentMairieDashboard: React.FC = () => {
     setTimeout(() => setNotice(null), 4000);
   };
 
-  // 1. Chargement des effectifs communaux réels (CHEF_OUVRIER et OUVRIER)
+  // 1. Chargement des effectifs communaux réels (AGENT_MAIRIE et CHEF_OUVRIER, actifs et inactifs)
   const fetchStaff = async () => {
     try {
       const res = await fetch('/api/v1/auth/users');
@@ -169,16 +173,48 @@ export const AgentMairieDashboard: React.FC = () => {
         if (Array.isArray(data.users)) {
           const list: StaffMember[] = data.users
             .filter((u: any) =>
-              (u.role === 'CHEF_OUVRIER' || u.role === 'OUVRIER') &&
+              (u.role === 'CHEF_OUVRIER' || u.role === 'AGENT_MAIRIE' || u.role === 'OUVRIER') &&
               (!u.municipality || u.municipality === municipality || municipality.includes(u.municipality) || u.municipality.includes(municipality))
             )
             .map((u: any) => ({
               id: u.id,
               fullName: u.fullName,
+              email: u.email,
               role: u.role,
-              municipality: u.municipality
+              municipality: u.municipality,
+              brigade: u.brigade || (u.role === 'AGENT_MAIRIE' ? 'Pôle Bureautique & Dispatching' : 'Voirie & Salubrité'),
+              isActive: u.isActive !== false,
             }));
           setCommunalStaff(list);
+        }
+      }
+    } catch {
+      // Ignorer les erreurs réseau silencieuses
+    }
+  };
+
+  // 1b. Alertes terrain (Renfort & Pannes Matériel remontées par les chefs ouvriers)
+  const [fieldAlerts, setFieldAlerts] = useState<any[]>([]);
+  const [showStaffPanel, setShowStaffPanel] = useState(false);
+
+  const fetchFieldAlerts = async () => {
+    try {
+      const res = await fetch('/api/v1/audit/logs?action=EQUIPMENT_BREAKDOWN_REPORTED,FIELD_ISSUE_REPORTED&limit=30', {
+        headers: {
+          'x-user-role': 'AGENT_MAIRIE',
+          'x-user-municipality': municipality,
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.logs)) {
+          const munLower = municipality.toLowerCase();
+          const filtered = data.logs.filter((l: any) => {
+            const logMun = l.after?.municipality;
+            if (!logMun) return true;
+            return logMun.toLowerCase().includes(munLower) || munLower.includes(logMun.toLowerCase());
+          });
+          setFieldAlerts(filtered);
         }
       }
     } catch {
@@ -249,6 +285,7 @@ export const AgentMairieDashboard: React.FC = () => {
   useEffect(() => {
     void fetchStaff();
     void fetchReports();
+    void fetchFieldAlerts();
   }, []);
 
   // Déclencheur d'affectation avec auto-routing intelligent
@@ -258,12 +295,12 @@ export const AgentMairieDashboard: React.FC = () => {
     setSelectedBrigade(routing.brigade);
     setPriority(incident.category === 'DECHETS_DANGEREUX' ? 'URGENTE' : 'HAUTE');
 
-    // Affectation par défaut au premier ouvrier/chef ouvrier disponible de la commune
-    if (communalStaff.length > 0) {
-      const chief = communalStaff.find(s => s.role === 'CHEF_OUVRIER');
-      setSelectedWorker(chief ? chief.fullName : communalStaff[0].fullName);
+    // Affectation par défaut au premier chef ouvrier ACTIF de la commune
+    const activeChiefs = communalStaff.filter(s => s.role === 'CHEF_OUVRIER' && s.isActive);
+    if (activeChiefs.length > 0) {
+      setSelectedWorker(activeChiefs[0].fullName);
     } else {
-      setSelectedWorker('Karim Ben Salem (Chef Brigade)');
+      setSelectedWorker('');
     }
   };
 
@@ -569,8 +606,8 @@ export const AgentMairieDashboard: React.FC = () => {
           {
             id: 'staff',
             label: 'Équipes actives',
-            value: communalStaff.length,
-            subtitle: 'Chefs ouvriers & agents prêts',
+            value: communalStaff.filter(s => s.isActive && s.role === 'CHEF_OUVRIER').length,
+            subtitle: `${communalStaff.filter(s => s.isActive).length} actifs · ${communalStaff.filter(s => !s.isActive).length} inactifs`,
             icon: <UserCheck className="w-5 h-5" />,
             tone: 'rose',
           },
@@ -587,10 +624,126 @@ export const AgentMairieDashboard: React.FC = () => {
         </div>
         <div className="flex items-center gap-2 text-[11px] font-medium text-blue-700 shrink-0">
           <span className="bg-white/80 px-2 py-0.5 rounded border border-blue-200">
-            {communalStaff.length} agents de terrain connectés
+            {communalStaff.filter(s => s.isActive && s.role === 'CHEF_OUVRIER').length} chef(s) actif(s)
           </span>
+          <button
+            type="button"
+            onClick={() => {
+              void fetchStaff();
+              setShowStaffPanel(prev => !prev);
+            }}
+            className="px-3 py-1 rounded-[8px] bg-white border border-[#bfdbfe] text-[#1e3a8a] font-semibold text-xs hover:bg-[#dbeafe] transition"
+          >
+            {showStaffPanel ? 'Masquer les effectifs' : `Voir Agents & Chefs (${communalStaff.length})`}
+          </button>
         </div>
       </div>
+
+      {/* ── 3b. ALERTES TERRAIN (RENFORT & PANNES) ───────── */}
+      {fieldAlerts.length > 0 && (
+        <div className="bg-rose-50/70 border border-rose-200 rounded-[10px] p-4 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-bold text-rose-900">
+              <AlertTriangle className="w-4 h-4 text-rose-600" />
+              <span>Alertes Terrain en Cours : Renfort &amp; Pannes ({fieldAlerts.length})</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => void fetchFieldAlerts()}
+              className="text-xs font-semibold text-rose-700 hover:underline"
+            >
+              Actualiser
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+            {fieldAlerts.slice(0, 4).map((al: any, idx: number) => {
+              const isBreakdown = al.action === 'EQUIPMENT_BREAKDOWN_REPORTED';
+              return (
+                <div key={al.id || idx} className="bg-white border border-rose-200 rounded-[8px] p-3 text-xs space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                      isBreakdown ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-rose-50 text-rose-800 border-rose-200'
+                    }`}>
+                      {isBreakdown ? 'Panne Matériel / Véhicule' : 'Demande de Renfort'}
+                    </span>
+                    <span className="text-[11px] text-[#64748b]">
+                      {al.timestamp ? new Date(al.timestamp).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : ''}
+                    </span>
+                  </div>
+                  <div className="font-semibold text-[#0f172a]">
+                    {al.actorId || 'Chef Ouvrier'} {al.after?.brigade ? `· ${al.after.brigade}` : ''}
+                  </div>
+                  <p className="text-[#475569]">{al.reason || al.after?.issueNote || 'Alerte signalée depuis le terrain'}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── 3c. LISTE DES AGENTS & CHEFS DE BRIGADE (ACTIFS / INACTIFS) ───────── */}
+      {showStaffPanel && (
+        <div className="bg-white border border-[#e2e8f0] rounded-[12px] shadow-sm overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-[#e2e8f0] flex items-center justify-between bg-[#f8fafc]">
+            <div>
+              <h3 className="text-sm font-bold text-[#0f172a]">Agents &amp; Chefs de Brigade ({municipality})</h3>
+              <p className="text-[11px] text-[#64748b]">
+                {communalStaff.filter(s => s.isActive).length} actif(s) · {communalStaff.filter(s => !s.isActive).length} inactif(s)
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => void fetchStaff()}
+              className="text-xs font-semibold text-[#059669] hover:underline"
+            >
+              Actualiser
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-[#f8fafc] text-[#475569] font-semibold border-b border-[#e2e8f0] h-[38px]">
+                  <th className="py-2 px-4">Collaborateur</th>
+                  <th className="py-2 px-4">Rôle</th>
+                  <th className="py-2 px-4">Brigade / Pôle</th>
+                  <th className="py-2 px-4 text-right">Statut</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#e2e8f0]">
+                {communalStaff.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="py-6 px-4 text-center text-[#64748b]">Aucun collaborateur trouvé pour {municipality}.</td>
+                  </tr>
+                ) : (
+                  communalStaff.map(s => (
+                    <tr key={s.id} className="hover:bg-[#f8fafc]">
+                      <td className="py-2.5 px-4">
+                        <div className="font-semibold text-[#0f172a]">{s.fullName}</div>
+                        {s.email && <div className="text-[11px] text-[#64748b]">{s.email}</div>}
+                      </td>
+                      <td className="py-2.5 px-4 text-[#334155]">
+                        {s.role === 'AGENT_MAIRIE' ? 'Agent Bureau' : 'Chef Ouvrier (Brigade)'}
+                      </td>
+                      <td className="py-2.5 px-4 text-[#475569]">{s.brigade || '—'}</td>
+                      <td className="py-2.5 px-4 text-right">
+                        {s.isActive ? (
+                          <span className="inline-flex items-center gap-1 text-[#059669] bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-semibold text-[11px]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#059669]" /> Actif
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded font-semibold text-[11px]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" /> Inactif
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* ── 4. BARRE DE RECHERCHE ET FILTRES MULTI-CRITÈRES ───────────────────── */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -883,12 +1036,14 @@ export const AgentMairieDashboard: React.FC = () => {
                 onChange={e => setSelectedWorker(e.target.value)}
                 className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a] focus:ring-2 focus:ring-[#059669]"
               >
-                {communalStaff.length > 0 ? (
-                  communalStaff.map(s => (
-                    <option key={s.id} value={s.fullName}>
-                      {s.fullName} ({s.role === 'CHEF_OUVRIER' ? 'Chef de Brigade' : 'Ouvrier'})
-                    </option>
-                  ))
+                {communalStaff.filter(s => s.role === 'CHEF_OUVRIER').length > 0 ? (
+                  communalStaff
+                    .filter(s => s.role === 'CHEF_OUVRIER')
+                    .map(s => (
+                      <option key={s.id} value={s.fullName} disabled={!s.isActive}>
+                        {s.fullName} — {s.brigade || 'Brigade'} {!s.isActive ? '(Inactif — indisponible)' : ''}
+                      </option>
+                    ))
                 ) : (
                   <>
                     <option value="Karim Ben Salem (Chef Brigade)">Karim Ben Salem (Chef Brigade Voirie)</option>

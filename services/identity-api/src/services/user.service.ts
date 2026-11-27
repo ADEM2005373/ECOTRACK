@@ -35,6 +35,7 @@ export class UserService {
       fullName: dto.fullName,
       phoneNumber: dto.phoneNumber,
       municipality: dto.municipality,
+      ...((dto as any).brigade ? { brigade: (dto as any).brigade } : {}),
       ...(dto.governorate ? { governorate: dto.governorate } : {}),
       ...(territory ? { territory } : {}),
       role: dto.role || UserRole.CITOYEN,
@@ -189,6 +190,26 @@ export class UserService {
     const user = await UserModel.findByIdAndUpdate(
       userId,
       { role: newRole },
+      { new: true, runValidators: true }
+    );
+    return user ? (user.toJSON() as IUser) : null;
+  }
+
+  /**
+   * Met à jour le statut actif, la brigade ou le rôle d'un utilisateur
+   */
+  async updateUser(
+    userId: string,
+    updates: { isActive?: boolean; brigade?: string; role?: UserRole }
+  ): Promise<IUser | null> {
+    const payload: Record<string, any> = {};
+    if (typeof updates.isActive === 'boolean') payload.isActive = updates.isActive;
+    if (typeof updates.brigade === 'string') payload.brigade = updates.brigade.trim();
+    if (updates.role) payload.role = updates.role;
+
+    const user = await UserModel.findByIdAndUpdate(
+      userId,
+      payload,
       { new: true, runValidators: true }
     );
     return user ? (user.toJSON() as IUser) : null;

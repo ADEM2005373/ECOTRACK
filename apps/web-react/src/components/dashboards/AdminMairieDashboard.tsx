@@ -41,6 +41,12 @@ interface SlaCategory {
   brigade: string;
 }
 
+interface BrigadeType {
+  id: string;
+  name: string;
+  specialty: string;
+}
+
 interface MunicipalReport {
   id: string;
   reference: string;
@@ -110,7 +116,7 @@ export const AdminMairieDashboard: React.FC = () => {
               role: u.role,
               active: u.isActive !== false,
               municipality: u.municipality,
-              brigade: u.role === 'CHEF_OUVRIER' ? 'Voirie & Salubrité' : u.role === 'OUVRIER' ? 'Équipe Technique' : 'Pôle Bureautique & Dispatching',
+              brigade: u.brigade || (u.role === 'CHEF_OUVRIER' ? 'Voirie & Salubrité' : u.role === 'OUVRIER' ? 'Équipe Technique' : 'Pôle Bureautique & Dispatching'),
               assignedCount: u.role === 'CHEF_OUVRIER' ? 3 : 1
             }));
           setAgents(list);
@@ -118,6 +124,37 @@ export const AdminMairieDashboard: React.FC = () => {
       })
       .catch(() => {});
   };
+
+  // 1b. Types de Brigades & Équipes locales (CRUD + persistance localStorage par mairie)
+  const DEFAULT_BRIGADES: BrigadeType[] = [
+    { id: 'voirie', name: 'Voirie & Salubrité', specialty: 'Dépôts sauvages, gravats et salubrité publique' },
+    { id: 'poids_lourd', name: 'Ramassage Poids Lourd', specialty: 'Objets encombrants, mobilier et électroménager' },
+    { id: 'speciale', name: 'Intervention Spéciale', specialty: 'Déchets dangereux, toxiques ou urgences sanitaires' },
+    { id: 'peinture', name: 'Peinture & Nettoyage', specialty: 'Dégradations, graffitis et affichage illégal' },
+    { id: 'collecte', name: 'Collecte Express', specialty: 'Débordement de bacs à ordures et corbeilles' },
+    { id: 'espaces_verts', name: 'Espaces Verts', specialty: 'Déchets végétaux, taille et élagage' },
+  ];
+
+  const [brigades, setBrigades] = useState<BrigadeType[]>(() => {
+    try {
+      const saved = localStorage.getItem(`ecotrack_brigades_${municipality}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {
+      // ignore invalid storage
+    }
+    return DEFAULT_BRIGADES;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(`ecotrack_brigades_${municipality}`, JSON.stringify(brigades));
+    } catch {
+      // ignore quota errors
+    }
+  }, [brigades, municipality]);
 
   // 2. Catégories & Seuils SLA locaux (Figma: WEB_ADM_02_CATEGORIES)
   const DEFAULT_SLA_CATEGORIES: SlaCategory[] = [
@@ -205,10 +242,36 @@ export const AdminMairieDashboard: React.FC = () => {
       .finally(() => setLoadingAudit(false));
   };
 
+  // 4b. Alertes terrain (Demandes de renfort & Pannes matériel remontées par les chefs ouvriers)
+  const [fieldAlerts, setFieldAlerts] = useState<any[]>([]);
+
+  const fetchFieldAlerts = () => {
+    fetch('/api/v1/audit/logs?action=EQUIPMENT_BREAKDOWN_REPORTED,FIELD_ISSUE_REPORTED&limit=30', {
+      headers: {
+        'x-user-role': 'ADMIN_MUNICIPALITE',
+        'x-user-municipality': municipality,
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data.logs)) {
+          const munLower = municipality.toLowerCase();
+          const filtered = data.logs.filter((l: any) => {
+            const logMun = l.after?.municipality;
+            if (!logMun) return true;
+            return logMun.toLowerCase().includes(munLower) || munLower.includes(logMun.toLowerCase());
+          });
+          setFieldAlerts(filtered);
+        }
+      })
+      .catch(() => {});
+  };
+
   useEffect(() => {
     fetchAgents();
     fetchMunicipalReports();
     fetchAuditLogs();
+    fetchFieldAlerts();
   }, [municipality]);
 
   const [reportSearch, setReportSearch] = useState('');
@@ -235,6 +298,10 @@ export const AdminMairieDashboard: React.FC = () => {
   // Modal de création / édition SLA
   const [editingCategory, setEditingCategory] = useState<SlaCategory | null>(null);
   const [isCreatingSla, setIsCreatingSla] = useState(false);
+
+  // Modal de création / édition Type de Brigade & Équipe
+  const [editingBrigade, setEditingBrigade] = useState<BrigadeType | null>(null);
+  const [isCreatingBrigade, setIsCreatingBrigade] = useState(false);
 
   // Modal d'assignation de signalement
   const [assigningReport, setAssigningReport] = useState<MunicipalReport | null>(null);
@@ -294,7 +361,8 @@ export const AdminMairieDashboard: React.FC = () => {
           password: newUserPassword.trim() || 'Agent2026!',
           fullName: newUserName.trim(),
           role: newUserRole,
-          municipality
+          municipality,
+          brigade: newUserRole === 'AGENT_MAIRIE' ? 'Pôle Bureautique & Dispatching' : newUserBrigade
         })
       });
 
@@ -312,6 +380,50 @@ export const AdminMairieDashboard: React.FC = () => {
     } catch (err: any) {
       alert(`Erreur: ${err.message}`);
     }
+  };
+
+  // Activation / Désactivation persistante d'un collaborateur (MongoDB)
+  const handleToggleUserActive = async (agent: StaffUser) => {
+    const nextActive = !agent.active;
+    try {
+      const res = await fetch(`/api/v1/auth/users/${agent.id}`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ isActive: nextActive })
+      });
+      if (!res.ok) throw new Error('Erreur mise à jour statut');
+      setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, active: nextActive } : a));
+      showToast(`${agent.name} est maintenant ${nextActive ? 'Actif' : 'Inactif'}`);
+      fetchAgents();
+    } catch {
+      alert('Impossible de mettre à jour le statut de ce collaborateur.');
+    }
+  };
+
+  // Création ou modification d'un type de brigade / équipe
+  const handleSaveBrigade = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingBrigade) return;
+    const cleanName = editingBrigade.name.trim();
+    const cleanSpecialty = editingBrigade.specialty.trim();
+    if (!cleanName) return;
+
+    if (isCreatingBrigade) {
+      const id = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '_') + '_' + Date.now().toString().slice(-4);
+      setBrigades(prev => [...prev, { id, name: cleanName, specialty: cleanSpecialty || 'Équipe technique municipale' }]);
+      showToast(`Type de brigade « ${cleanName} » ajouté`);
+    } else {
+      setBrigades(prev => prev.map(b => b.id === editingBrigade.id ? { ...editingBrigade, name: cleanName, specialty: cleanSpecialty } : b));
+      showToast(`Type de brigade « ${cleanName} » modifié`);
+    }
+    setEditingBrigade(null);
+    setIsCreatingBrigade(false);
+  };
+
+  const handleDeleteBrigade = (b: BrigadeType) => {
+    if (!window.confirm(`Supprimer le type de brigade « ${b.name} » ?`)) return;
+    setBrigades(prev => prev.filter(item => item.id !== b.id));
+    showToast(`Type de brigade « ${b.name} » supprimé`);
   };
 
   // Suppression d'un collaborateur
@@ -585,9 +697,9 @@ export const AdminMairieDashboard: React.FC = () => {
                 <span>Personnel Communal</span>
                 <Users className="w-4 h-4 text-[#7c3aed]" />
               </div>
-              <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">{agents.length}</div>
+              <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">{agents.filter(a => a.active).length}</div>
               <p className="text-[11px] text-[#475569] mt-1">
-                {agents.length === 0 ? 'Aucun collaborateur enregistré' : `${agents.filter(a => a.role === 'CHEF_OUVRIER').length} chefs de brigade terrain · ${agents.filter(a => a.role === 'AGENT_MAIRIE').length} agents de bureau`}
+                {agents.length === 0 ? 'Aucun collaborateur enregistré' : `${agents.filter(a => a.active).length} actif(s) · ${agents.filter(a => !a.active).length} inactif(s)`}
               </p>
             </div>
 
@@ -597,8 +709,55 @@ export const AdminMairieDashboard: React.FC = () => {
                 <AlertTriangle className="w-4 h-4 text-[#d97706]" />
               </div>
               <div className="text-[28px] font-bold text-[#0f172a] mt-2 font-heading">{inProgressCount}</div>
-              <p className="text-[11px] text-[#059669] font-medium mt-1">{newCount} en attente · 0 retard critique</p>
+              <p className="text-[11px] text-[#059669] font-medium mt-1">{newCount} en attente · {fieldAlerts.length} alerte(s) terrain</p>
             </div>
+          </div>
+
+          {/* Alertes Terrain : Demandes de Renfort & Pannes Matériel */}
+          <div className="bg-white border border-[#e2e8f0] rounded-[12px] shadow-sm p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className={`w-4 h-4 ${fieldAlerts.length > 0 ? 'text-rose-600' : 'text-[#64748b]'}`} />
+                <h3 className="text-sm font-bold text-[#0f172a]">
+                  Alertes Terrain : Renfort &amp; Pannes Matériel ({fieldAlerts.length})
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={fetchFieldAlerts}
+                className="text-xs font-semibold text-[#059669] hover:underline"
+              >
+                Actualiser
+              </button>
+            </div>
+            {fieldAlerts.length === 0 ? (
+              <p className="text-xs text-[#64748b]">Aucune alerte de renfort ou de panne signalée sur le terrain pour le moment.</p>
+            ) : (
+              <div className="divide-y divide-[#e2e8f0] border border-[#e2e8f0] rounded-[8px] overflow-hidden">
+                {fieldAlerts.slice(0, 6).map((al: any, idx: number) => {
+                  const isBreakdown = al.action === 'EQUIPMENT_BREAKDOWN_REPORTED';
+                  return (
+                    <div key={al.id || idx} className="p-3 bg-rose-50/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                            isBreakdown ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-rose-50 text-rose-800 border-rose-200'
+                          }`}>
+                            {isBreakdown ? 'Panne Matériel / Véhicule' : 'Demande de Renfort'}
+                          </span>
+                          <span className="font-semibold text-[#0f172a]">{al.actorId || 'Chef Ouvrier'}</span>
+                          {al.after?.brigade && <span className="text-[#475569]">· {al.after.brigade}</span>}
+                        </div>
+                        <p className="text-[#334155]">{al.reason || al.after?.issueNote || 'Signalement terrain'}</p>
+                      </div>
+                      <span className="text-[11px] text-[#64748b] shrink-0">
+                        {al.timestamp ? new Date(al.timestamp).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : ''}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Synthèse Opérationnelle & Cartographie */}
@@ -877,24 +1036,105 @@ export const AdminMairieDashboard: React.FC = () => {
                         )}
                       </td>
                       <td className="py-2.5 px-4">
-                        <span className="inline-flex items-center gap-1 text-[#059669] font-semibold text-[11px]">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#059669]" /> Actif
-                        </span>
+                        {a.active ? (
+                          <span className="inline-flex items-center gap-1 text-[#059669] bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-semibold text-[11px]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#059669]" /> Actif
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded font-semibold text-[11px]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" /> Inactif
+                          </span>
+                        )}
                       </td>
                       <td className="py-2.5 px-4 text-right">
-                        <button
-                          onClick={() => handleDeleteUser(a.id, a.name)}
-                          className="text-[#dc2626] hover:text-[#b91c1c] font-semibold text-xs inline-flex items-center gap-1"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          <span>Supprimer</span>
-                        </button>
+                        <div className="inline-flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleUserActive(a)}
+                            className={`px-2.5 py-1 rounded-[6px] text-xs font-semibold border transition ${
+                              a.active
+                                ? 'text-amber-800 bg-amber-50 hover:bg-amber-100 border-amber-200'
+                                : 'text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
+                            }`}
+                          >
+                            {a.active ? 'Désactiver' : 'Activer'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteUser(a.id, a.name)}
+                            className="text-[#dc2626] hover:text-[#b91c1c] font-semibold text-xs inline-flex items-center gap-1"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Supprimer</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Section Types de Brigades & Équipes Techniques */}
+          <div className="pt-4 border-t border-[#e2e8f0] space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h4 className="text-sm font-bold text-[#0f172a]">Types de Brigades &amp; Équipes ({brigades.length})</h4>
+                <p className="text-xs text-[#475569]">Ajoutez ou modifiez les types de brigades et d'équipes techniques de {municipality}.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCreatingBrigade(true);
+                  setEditingBrigade({ id: '', name: '', specialty: '' });
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-xs font-semibold bg-[#059669] hover:bg-[#047857] text-white shadow-sm shrink-0"
+              >
+                + Ajouter un type de brigade
+              </button>
+            </div>
+
+            <div className="border border-[#e2e8f0] rounded-[8px] overflow-hidden">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-[#f8fafc] text-[#475569] font-semibold border-b border-[#e2e8f0] h-[38px]">
+                    <th className="py-2 px-4">Nom de la Brigade / Équipe</th>
+                    <th className="py-2 px-4">Spécialité</th>
+                    <th className="py-2 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#e2e8f0]">
+                  {brigades.map(b => (
+                    <tr key={b.id} className="hover:bg-[#f8fafc] h-[46px]">
+                      <td className="py-2 px-4 font-semibold text-[#0f172a]">{b.name}</td>
+                      <td className="py-2 px-4 text-[#475569]">{b.specialty}</td>
+                      <td className="py-2 px-4 text-right">
+                        <div className="inline-flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsCreatingBrigade(false);
+                              setEditingBrigade({ ...b });
+                            }}
+                            className="px-2.5 py-1 text-xs font-semibold text-[#1e3a8a] bg-[#eff6ff] hover:bg-[#dbeafe] rounded-[6px] border border-[#bfdbfe]"
+                          >
+                            Modifier
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteBrigade(b)}
+                            className="px-2.5 py-1 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-[6px] border border-rose-200"
+                          >
+                            Supprimer
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -1185,11 +1425,11 @@ export const AdminMairieDashboard: React.FC = () => {
                       onChange={e => setNewUserBrigade(e.target.value)}
                       className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
                     >
-                      <option value="Voirie & Salubrité">Brigade Voirie &amp; Salubrité</option>
-                      <option value="Ramassage Poids Lourd">Brigade Ramassage Poids Lourd</option>
-                      <option value="Intervention Spéciale">Brigade Intervention Spéciale</option>
-                      <option value="Espaces Verts">Brigade Espaces Verts</option>
-                      <option value="Peinture & Nettoyage">Brigade Peinture &amp; Nettoyage</option>
+                      {brigades.map(b => (
+                        <option key={b.id} value={b.name}>
+                          Brigade {b.name}
+                        </option>
+                      ))}
                     </select>
                   )}
                 </div>
@@ -1332,6 +1572,76 @@ export const AdminMairieDashboard: React.FC = () => {
         </div>
       )}
 
+      {/* Modal 2B: Création / Modification Type de Brigade */}
+      {editingBrigade && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white border border-[#e2e8f0] rounded-[12px] p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-3">
+              <div>
+                <h3 className="text-base font-bold text-[#0f172a]">
+                  {isCreatingBrigade ? 'Nouveau Type de Brigade / Équipe' : 'Modifier le Type de Brigade'}
+                </h3>
+                <p className="text-xs text-[#64748b]">{municipality}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingBrigade(null);
+                  setIsCreatingBrigade(false);
+                }}
+                className="text-[#94a3b8] hover:text-[#0f172a]"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveBrigade} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-[#0f172a] mb-1">Nom de la Brigade / Équipe</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ex : Éclairage Public & Signalisation"
+                  value={editingBrigade.name}
+                  onChange={e => setEditingBrigade({ ...editingBrigade, name: e.target.value })}
+                  className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#0f172a] mb-1">Spécialité / Domaine d'intervention</label>
+                <input
+                  type="text"
+                  placeholder="Ex : Maintenance lampadaires, câbles et feux"
+                  value={editingBrigade.specialty}
+                  onChange={e => setEditingBrigade({ ...editingBrigade, specialty: e.target.value })}
+                  className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#e2e8f0]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingBrigade(null);
+                    setIsCreatingBrigade(false);
+                  }}
+                  className="px-4 py-2 rounded-[8px] text-xs font-semibold text-[#475569] hover:bg-[#f1f5f9]"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-[8px] text-xs font-semibold bg-[#059669] hover:bg-[#047857] text-white shadow-sm"
+                >
+                  {isCreatingBrigade ? 'Ajouter la Brigade' : 'Enregistrer'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Modal 3: Assignation Signalement */}
       {assigningReport && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -1354,8 +1664,8 @@ export const AdminMairieDashboard: React.FC = () => {
                   className="w-full bg-white border border-[#e2e8f0] rounded-[8px] p-2.5 text-xs text-[#0f172a]"
                 >
                   <option value="">-- Choisir un responsable terrain --</option>
-                  {agents.filter(a => a.role === 'CHEF_OUVRIER').length > 0 ? (
-                    agents.filter(a => a.role === 'CHEF_OUVRIER').map(a => (
+                  {agents.filter(a => a.role === 'CHEF_OUVRIER' && a.active).length > 0 ? (
+                    agents.filter(a => a.role === 'CHEF_OUVRIER' && a.active).map(a => (
                       <option key={a.id} value={`${a.name} (${a.brigade})`}>
                         {a.name} — {a.brigade}
                       </option>

@@ -34,7 +34,10 @@ export class AuditService {
     const query: any = {};
 
     if (filters.actorId) query.actorId = filters.actorId;
-    if (filters.action) query.action = filters.action;
+    if (filters.action) {
+      const actions = String(filters.action).split(',').map(a => a.trim()).filter(Boolean);
+      query.action = actions.length > 1 ? { $in: actions } : actions[0];
+    }
     if (filters.entityType) query.entityType = filters.entityType;
     if (filters.entityId) query.entityId = filters.entityId;
 

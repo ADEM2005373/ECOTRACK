@@ -234,7 +234,7 @@ function extractActorInfo(req: Request): {
  */
 const createUserHandler = async (req: Request, res: Response) => {
   try {
-    const { email, password, fullName, phoneNumber, role, municipality, governorate } = req.body;
+    const { email, password, fullName, phoneNumber, role, municipality, governorate, brigade } = req.body;
 
     if (!email || !EMAIL_REGEX.test(email.trim())) {
       return res.status(400).json({
@@ -264,8 +264,9 @@ const createUserHandler = async (req: Request, res: Response) => {
       phoneNumber: phoneNumber ? String(phoneNumber).trim() : undefined,
       role: role || UserRole.CITOYEN,
       municipality: municipality ? String(municipality).trim() : undefined,
-      governorate: governorate ? String(governorate).trim() : undefined
-    });
+      governorate: governorate ? String(governorate).trim() : undefined,
+      ...(brigade ? { brigade: String(brigade).trim() } : {})
+    } as any);
 
     // Trace d'audit pour création d'utilisateur / collectivité
     const clientIp = req.ip || req.socket.remoteAddress || '127.0.0.1';
@@ -341,6 +342,35 @@ router.get('/municipalities', async (_req: Request, res: Response) => {
     return res.status(200).json({ municipalities });
   } catch (err: any) {
     return res.status(500).json({ error: 'INTERNAL_SERVER_ERROR', message: err.message });
+  }
+});
+
+/**
+ * PATCH /auth/users/:id
+ * Met à jour le statut actif (isActive), la brigade ou le rôle d'un utilisateur
+ */
+router.patch('/users/:id', async (req: Request, res: Response) => {
+  try {
+    const { isActive, brigade, role } = req.body;
+    const updated = await userService.updateUser(req.params.id, { isActive, brigade, role });
+    if (!updated) {
+      return res.status(404).json({ error: 'NOT_FOUND', message: 'Utilisateur introuvable.' });
+    }
+    const clientIp = req.ip || req.socket.remoteAddress || '127.0.0.1';
+    const actor = extractActorInfo(req);
+    await recordAudit(
+      actor.actorId,
+      actor.actorRole,
+      isActive === false ? AuditAction.ADMIN_USER_DEACTIVATED : AuditAction.ADMIN_CONFIG_UPDATED,
+      req.params.id,
+      `Mise à jour du compte ${updated.fullName} (${updated.role}) : ${typeof isActive === 'boolean' ? (isActive ? 'Activé' : 'Désactivé') : ''} ${brigade ? `Brigade: ${brigade}` : ''}`.trim(),
+      clientIp,
+      req.headers['user-agent'] as string,
+      { isActive: updated.isActive, brigade: (updated as any).brigade, municipality: updated.municipality }
+    );
+    return res.status(200).json({ user: updated });
+  } catch (err: any) {
+    return res.status(400).json({ error: 'BAD_REQUEST', message: err.message });
   }
 });
 
