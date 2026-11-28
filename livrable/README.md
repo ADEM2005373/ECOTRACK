@@ -12,10 +12,12 @@ Ce dossier regroupe les livrables académiques et liens de démonstration du pro
 - **Console Web déployée (Vercel)** :  
   https://ecotrack-seven-liard.vercel.app
 
-## 3. Vidéos de Démonstration Mobile
-Les vidéos de démonstration mobile sont à placer dans le sous-dossier `livrable/demos/` :
-- `livrable/demos/demo-citoyen.mp4` *(Parcours Citoyen : création de signalement, photo + GPS + suivi)*
-- `livrable/demos/demo-chef-ouvrier.mp4` *(Parcours Chef Ouvrier : prise en charge, alerte renfort/panne, clôture avec preuve photo)*
+## 3. Vidéos de Démonstration
+Les vidéos de démonstration enregistrées sont disponibles dans `livrable/demos/` :
+- [`livrable/demos/mobile_phone_framed.mp4`](./demos/mobile_phone_framed.mp4) *(Démo mobile complète encadrée téléphone — Citoyen & Chef Ouvrier)*
+- [`livrable/demos/web_pc_framed.mp4`](./demos/web_pc_framed.mp4) *(Démo console web complète encadrée PC)*
+- [`livrable/demos/demo_mobile_citoyen.mp4`](./demos/demo_mobile_citoyen.mp4) *(Parcours Citoyen mobile)*
+- [`livrable/demos/demo_mobile_chef_ouvrier.mp4`](./demos/demo_mobile_chef_ouvrier.mp4) *(Parcours Chef Ouvrier mobile)*
 
 ## 4. Démarrage Complet du Serveur par le Professeur (PC local ou Déploiement)
 1. Copier les fichiers d'environnement :
