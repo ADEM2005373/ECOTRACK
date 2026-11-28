@@ -367,6 +367,16 @@ npm run test:e2e
 
 `E2E_A11Y_PATHS` accepte une liste de routes séparées par des virgules pour étendre l'audit d'accessibilité.
 
+## 📱 Application Mobile (APK) & Livrables
+
+- **Télécharger l'APK Android (Build EAS Preview)** :  
+  https://expo.dev/artifacts/eas/vbhVFWECLzqKnyACagN6L_cM8H91sTb0tynBf81pWzk.apk
+- **Dossier `livrable/`** :
+  - [`livrable/project_report_ECOTRACK.pdf`](livrable/project_report_ECOTRACK.pdf) : Rapport final du projet
+  - [`livrable/cahier_de_charge_ecotrack.pdf`](livrable/cahier_de_charge_ecotrack.pdf) : Cahier des charges
+  - [`livrable/README.md`](livrable/README.md) : Guide rapide d'installation et de lancement pour l'évaluateur
+  - `livrable/demos/` : Emplacement des vidéos de démonstration mobile
+
 ## 📚 Documentation
 
 - [`docs/Cahier_Des_Charges_Fonctionnel_ECOTRACK.pdf`](docs/Cahier_Des_Charges_Fonctionnel_ECOTRACK.pdf) : cahier des charges fonctionnel
